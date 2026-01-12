@@ -14,7 +14,7 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
-<div class="flex h-[846px]"  
+<div class="flex h-211.5"  
 x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedProject : 0, selectedProjectName : '', projectDeleteModelShow : false, selectedTaskName : '', taskDeleteModelShow : false ,selectedtesk : 0, taskModelShow : false, taskModelTitle : '', selectedTask : 0, selectedTaskTitle : '', selectedTaskDescription: '', selectedTaskUrgency : 'low', timesheetModelShow : false, selectedTimesheet: 0, selectedTimesheetDate: '', selectedTimesheetDescription: '', selectedTimesheetHours : 0, taskDeleteModelShow : false, timesheetDeleteModelShow: false, selectedTimesheetName: '', selectedBudget : 0, selectedBudgetName : '', budgetDeleteModelShow: false, budgetModelShow: false, budgetModelTitle: '', selectedBudgetQty : 0, selectedBudgetPrice: 0}">
     <!-- Main Section -->
     <div class="w-3/4 h-full" x-data="setSection()" x-init="init()">
@@ -163,7 +163,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                     </div>
                     {% endif %}
                 </div>
-                <div class="overflow-y-auto py-2 px-8 h-[474px] flex-col gap-2 flex w-full">
+                <div class="overflow-y-auto py-2 px-8 h-118.5 flex-col gap-2 flex w-full">
                     <div id="notes-wrapper">
                     {% if project.notes.all %}
                     {% for note in project.notes.all %}
@@ -245,7 +245,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                         </button>
                     </div>
                 </div>
-                <div class="overflow-y-auto h-[474px] flex-col flex w-full">
+                <div class="overflow-y-auto h-118.5 flex-col flex w-full">
                     {% if project.tasks.all %}
                     <div class="table-wrapper mx-4">
                         <table class="w-full relative">
@@ -338,7 +338,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                     <div>
                     </div>
                 </div>
-                <div class="overflow-y-auto h-[474px] flex-col flex w-full">
+                <div class="overflow-y-auto h-118.5 flex-col flex w-full">
                     {% if project.timesheets %}
                     <div class="table-wrapper mx-4">
                         <table class="w-full relative">
@@ -420,7 +420,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                     <div>
                     </div>
                 </div>
-                <div class="overflow-y-auto h-[474px] flex-col flex w-full">
+                <div class="overflow-y-auto h-118.5 flex-col flex w-full">
                     {% if project.budgets %}
                     <div class="table-wrapper mx-4">
                         <table class="w-full relative">
