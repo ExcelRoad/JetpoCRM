@@ -1,0 +1,84 @@
+{% extends 'base/base_layout.html' %}
+{% load static %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'homePage' %}">בית</a>
+    <a href="{% url 'customer-list' %}">לקוחות</a>
+    <p class="flex items-center gap-1">
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 12H21M7 12V14M17 12V14M8 7H7.8C6.11984 7 5.27976 7 4.63803 7.32698C4.07354 7.6146 3.6146 8.07354 3.32698 8.63803C3 9.27976 3 10.1198 3 11.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H16.2C17.8802 21 18.7202 21 19.362 20.673C19.9265 20.3854 20.3854 19.9265 20.673 19.362C21 18.7202 21 17.8802 21 16.2V11.8C21 10.1198 21 9.27976 20.673 8.63803C20.3854 8.07354 19.9265 7.6146 19.362 7.32698C18.7202 7 17.8802 7 16.2 7H16M8 7V6C8 5.06812 8 4.60218 8.15224 4.23463C8.35523 3.74458 8.74458 3.35523 9.23463 3.15224C9.60218 3 10.0681 3 11 3H13C13.9319 3 14.3978 3 14.7654 3.15224C15.2554 3.35523 15.6448 3.74458 15.8478 4.23463C16 4.60218 16 5.06812 16 6V7M8 7H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+       {{ form_header }}
+    </p>
+{% endblock breadcrumbs %}
+
+{% block content %}
+
+<div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200">
+    <div>
+        <h1 class="font-semibold text-3xl mb-1">{{form_header}}</h1>
+        <p class="text-gray-400">לאחר השמירה, פרטי הלקוח ישמרו במערכת</p>
+    </div>
+    <div class="flex items-center justify-end gap-2">
+        <a class="btn-action" @click="history.back()">
+            ביטול
+        </a>
+        <button class="btn-main" type="submit" form="customerForm">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 3.00152C8.06462 3.00146 8.13126 3.00146 8.2 3.00146H13.462C14.0268 3.00146 14.3092 3.00146 14.5699 3.07329C14.7198 3.11459 14.8641 3.17315 15 3.24761M8 3.00152C7.01165 3.00229 6.49359 3.01484 6.09202 3.21945C5.71569 3.4112 5.40973 3.71716 5.21799 4.09348C5 4.52131 5 5.08136 5 6.20146V17.8015C5 18.9216 5 19.4816 5.21799 19.9094C5.40973 20.2858 5.71569 20.5917 6.09202 20.7835C6.51984 21.0015 7.0799 21.0015 8.2 21.0015H15.8C16.9201 21.0015 17.4802 21.0015 17.908 20.7835C18.2843 20.5917 18.5903 20.2858 18.782 19.9094C19 19.4816 19 18.9216 19 17.8015V9.12396C19 8.70793 19 8.49991 18.9592 8.30094C18.9229 8.12442 18.863 7.9536 18.781 7.79312C18.6886 7.61224 18.5587 7.44981 18.2988 7.12494L15.9608 4.20244C15.608 3.76141 15.4315 3.54089 15.2126 3.38216C15.1445 3.33281 15.0735 3.28788 15 3.24761M8 3.00152V7.00002H15V3.24761M15 15C15 16.6569 13.6569 18 12 18C10.3431 18 9 16.6569 9 15C9 13.3432 10.3431 12 12 12C13.6569 12 15 13.3432 15 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p>שמירה</p>
+        </button>
+    </div>
+</div>
+<div x-data="">
+    <div class="p-8">
+        <form method="post" id="customerForm" enctype="multipart/form-data"
+        class="grid grid-cols-4 w-4/7 gap-2">
+            {% csrf_token %}
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">שם לקוח</p>
+                {{form.name}}
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">ח.פ</p>
+                {{form.legal_id}}
+            </div>
+            <div class="field-wrapper col-start-1">
+                <p class="text-gray-500 text-sx">מקור ליד</p>
+                {{ form.lead_source }}
+            </div>
+            <div class="field-wrapper col-start-1">
+                <p class="text-gray-500 text-sx">תיאור</p>
+                {{form.description}}
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">לוגו</p>
+                {{form.logo}}
+            </div>
+            <hr class="text-gray-200 col-span-4 my-2">
+            <h3 class="text-lg font-semibold col-span-4">פרטים נוספים</h3>
+            
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">מזהה תקייה</p>
+                {{form.folder_id}}
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">מזהה SUMIT</p>
+                {{form.sumit_id}}
+            </div>
+            <div class="field-wrapper col-start-1 col-span-2">
+                <p class="text-gray-500 text-sx">אתר</p>
+                {{form.website}}
+            </div>
+            <div class="field-wrapper col-start-1 col-span-2">
+                <p class="text-gray-500 text-sx">לינק לתקייה</p>
+                {{form.folder_link}}
+            </div>
+            
+            
+        </form>
+    </div>
+</div>
+    
+{% endblock content %}

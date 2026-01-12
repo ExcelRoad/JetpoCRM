@@ -1,0 +1,191 @@
+{% extends 'base/base_layout.html' %}
+{% load static %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'homePage' %}">בית</a>
+    <a href="{% url 'lead-list' %}">לידים</a>
+    <p class="flex items-center gap-1">
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 19.2857L15.8 21L20 17M16.5 14.4018C16.2052 14.2315 15.8784 14.1098 15.5303 14.0472C15.4548 14.0337 15.3748 14.024 15.2842 14.0171C15.059 14 14.9464 13.9915 14.7961 14.0027C14.6399 14.0143 14.5527 14.0297 14.4019 14.0723C14.2569 14.1132 13.9957 14.2315 13.4732 14.4682C12.7191 14.8098 11.8817 15 11 15C10.1183 15 9.28093 14.8098 8.52682 14.4682C8.00429 14.2315 7.74302 14.1131 7.59797 14.0722C7.4472 14.0297 7.35983 14.0143 7.20361 14.0026C7.05331 13.9914 6.94079 14 6.71575 14.0172C6.6237 14.0242 6.5425 14.0341 6.46558 14.048C5.23442 14.2709 4.27087 15.2344 4.04798 16.4656C4 16.7306 4 17.0485 4 17.6841V19.4C4 19.9601 4 20.2401 4.10899 20.454C4.20487 20.6422 4.35785 20.7951 4.54601 20.891C4.75992 21 5.03995 21 5.6 21H10.5M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+       {{ form_header }}
+    </p>
+{% endblock breadcrumbs %}
+
+{% block content %}
+
+<div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200">
+    <div>
+        <h1 class="font-semibold text-3xl mb-1">{{form_header}}</h1>
+        <p class="text-gray-400">לאחר השמירה, פרטי הליד ישמרו במערכת</p>
+    </div>
+    <div class="flex items-center justify-end gap-2">
+        <a class="btn-action" @click="history.back()">
+            ביטול
+        </a>
+        <button class="btn-main" type="submit" form="leadForm">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 3.00152C8.06462 3.00146 8.13126 3.00146 8.2 3.00146H13.462C14.0268 3.00146 14.3092 3.00146 14.5699 3.07329C14.7198 3.11459 14.8641 3.17315 15 3.24761M8 3.00152C7.01165 3.00229 6.49359 3.01484 6.09202 3.21945C5.71569 3.4112 5.40973 3.71716 5.21799 4.09348C5 4.52131 5 5.08136 5 6.20146V17.8015C5 18.9216 5 19.4816 5.21799 19.9094C5.40973 20.2858 5.71569 20.5917 6.09202 20.7835C6.51984 21.0015 7.0799 21.0015 8.2 21.0015H15.8C16.9201 21.0015 17.4802 21.0015 17.908 20.7835C18.2843 20.5917 18.5903 20.2858 18.782 19.9094C19 19.4816 19 18.9216 19 17.8015V9.12396C19 8.70793 19 8.49991 18.9592 8.30094C18.9229 8.12442 18.863 7.9536 18.781 7.79312C18.6886 7.61224 18.5587 7.44981 18.2988 7.12494L15.9608 4.20244C15.608 3.76141 15.4315 3.54089 15.2126 3.38216C15.1445 3.33281 15.0735 3.28788 15 3.24761M8 3.00152V7.00002H15V3.24761M15 15C15 16.6569 13.6569 18 12 18C10.3431 18 9 16.6569 9 15C9 13.3432 10.3431 12 12 12C13.6569 12 15 13.3432 15 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p>שמירה</p>
+        </button>
+    </div>
+</div>
+<div x-data="leadFormHandler()">
+    <div class="p-8">
+        <form method="post" id="leadForm"
+        class="grid grid-cols-2 w-2/7 gap-2">
+            {% csrf_token %}
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">שם פרטי</p>
+                {{form.first_name}}
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">שם משפחה</p>
+                {{form.last_name}}
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">אימייל</p>
+                {{form.email}}
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">טלפון</p>
+                {{form.phone}}
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">שם חברה</p>
+                {{form.company_name}}
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">תפקיד</p>
+                {{form.role}}
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">מקור ליד</p>
+                <div class="flex items-center gap-1 w-full">
+                    {{form.lead_source}}
+                    <button
+                        type="button"
+                        @click="openModal"
+                        class="btn-action"
+                    >
+                        +
+                    </button>
+                </div>
+            </div>
+            <div class="field-wrapper">
+                <p class="text-gray-500 text-sx">סטטוס</p>
+                {{form.status}}
+            </div>
+        </form>
+    </div>
+    <div x-show="modalOpen"
+        x-cloak
+        class="fixed top-0 right-0 h-screen w-screen bg-black/30 flex items-start justify-center pt-60" >
+    <!-- Lead Source Form -->
+        <form class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-2 min-w-1/4 min-h-1/5 flex flex-col"
+            @submit.prevent="submitLeadSource">
+            {% csrf_token %}
+            <div class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="closeModal">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold mt-2">הוספת מקור ליד</h3>
+            <div class="my-6 w-full">
+                <input type="text"
+                        id="source_name"
+                        x-model="newLeadSource.name"
+                        required
+                        class="input-field">
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <button class="btn-main" type="submit" :disabled="submitting">
+                    שמירה
+                </button>
+                <div class="btn-action" @click="closeModal">
+                    ביטול
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function leadFormHandler() {
+    return {
+        modalOpen: false,
+        submitting: false,
+        error: '',
+        lead_source_selected: '{{ lead.lead_source.id | default:""}}',
+        lead_source_options: {{ leadSources|safe }}.map(source => ({
+            value: String(source.id),
+            label: source.name,
+            selected: String(source.id) === '{{ lead.lead_source.id | default:""}}'
+        })),
+        newLeadSource: {
+            name: '',
+        },
+
+        openModal() {
+            this.modalOpen = true;
+            this.error = '';
+            this.newLeadSource = { name: ''};
+        },
+
+        closeModal() {
+            this.modalOpen = false;
+            this.error = '';
+        },
+
+        async submitLeadSource() {
+            this.submitting = true;
+            this.error = '';
+
+            const formData = new FormData();
+            formData.append('name', this.newLeadSource.name);
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            try {
+                const response = await fetch('{% url "lead-source-create" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Add new source to the options array
+                    this.lead_source_options.push({
+                        value: String(data.id),
+                        label: data.name,
+                        selected: false
+                    });
+
+                    // Select the newly created source
+                    this.lead_source_selected = String(data.id);
+
+                    // Close modal
+                    this.closeModal();
+                } else {
+                    this.error = data.error || 'Failed to create lead source';
+                    console.log(this.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.error = 'An error occurred. Please try again.';
+            } finally {
+                this.submitting = false;
+            }
+        }
+    }
+}
+</script>
+    
+{% endblock content %}

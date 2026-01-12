@@ -1,0 +1,87 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Jetpo CRM{% endblock title %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo-color-wobg.png' %}">
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@imacrayon/alpine-ajax@0.12.6/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    {% tailwind_css %}
+</head>
+<body class="text-gray-900 text-sm scroll-smooth" x-data>
+    <div class="flex">
+        {% include 'base/sidebar.html' %}
+        <div class="w-full">
+            <div class="h-16 border-b border-gray-200 flex items-center justify-between px-4">
+                <div class="flex items-center gap-2">
+                    <button class="btn-ghost" x-on:click="$store.sidebarOpen.toggle()">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M13 5V19M16 8H18M16 11H18M16 14H18M6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V8.2C21 7.0799 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <span class="h-3 border-l border-gray-200 w-[calc(1px)]"></span>
+                    <div class="breadcrumbs-wrapper">
+                        {% block breadcrumbs %}
+                        {% endblock breadcrumbs %}
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="btn-ghost">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12.9996 3L5.06859 12.6934C4.72703 13.1109 4.55625 13.3196 4.55471 13.4956C4.55336 13.6486 4.62218 13.7939 4.74148 13.8897C4.87867 14 5.14837 14 5.68776 14H11.9996L10.9996 21L18.9305 11.3066C19.2721 10.8891 19.4429 10.6804 19.4444 10.5044C19.4458 10.3514 19.377 10.2061 19.2577 10.1103C19.1205 10 18.8508 10 18.3114 10H11.9996L12.9996 3Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <p>שימוש ותוכנית</p>
+                    </button>
+                    <button class="btn-ghost">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M9.00195 17H5.60636C4.34793 17 3.71872 17 3.58633 16.9023C3.4376 16.7925 3.40126 16.7277 3.38515 16.5436C3.37082 16.3797 3.75646 15.7486 4.52776 14.4866C5.32411 13.1835 6.00031 11.2862 6.00031 8.6C6.00031 7.11479 6.63245 5.69041 7.75766 4.6402C8.88288 3.59 10.409 3 12.0003 3C13.5916 3 15.1177 3.59 16.2429 4.6402C17.3682 5.69041 18.0003 7.11479 18.0003 8.6C18.0003 11.2862 18.6765 13.1835 19.4729 14.4866C20.2441 15.7486 20.6298 16.3797 20.6155 16.5436C20.5994 16.7277 20.563 16.7925 20.4143 16.9023C20.2819 17 19.6527 17 18.3943 17H15.0003M9.00195 17L9.00031 18C9.00031 19.6569 10.3435 21 12.0003 21C13.6572 21 15.0003 19.6569 15.0003 18V17M9.00195 17H15.0003"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <button class="btn-ghost w-50">
+                        <div class="flex gap-2">
+                            <img src="{% if request.user.profile_image %}{{ request.user.profile_image.url }}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Profile picture" class="w-10 h-10 squircle object-cover">
+                            <div class="text-start">
+                                <p class="font-semibold text-gray-700">{{ request.user.get_full_name }}</p>
+                                <p class="text-xs text-gray-400">{{ request.user }}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="m8 10 4 4 4-4" />
+                            </svg>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            <div class="w-full overflow-y-auto h-[830px]">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </div>
+    </div>    
+    
+        
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('sidebarOpen', {
+                on: localStorage.getItem('sidebarOpen') === 'false' ? false : true,
+                toggle() {
+                    this.on = ! this.on
+                    localStorage.setItem('sidebarOpen', this.on)
+                }
+            })
+        })
+    </script>
+</body>
+</html>

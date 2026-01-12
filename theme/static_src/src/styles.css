@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+@import "tailwindcss";
+
+/**
+  * A catch-all path to Django template files, JavaScript, and Python files
+  * that contain Tailwind CSS classes and will be scanned by Tailwind to generate the final CSS file.
+  *
+  * If your final CSS file is not being updated after code changes, you may want to broaden or narrow
+  * the scope of this path.
+  */
+@source "../../../**/*.{html,py,js}";
+
+@theme {
+  --color-main: linear-gradient(16deg, rgba(45, 131, 166, 1) 0%, rgba(49, 137, 163, 1) 0%, rgba(58, 152, 156, 1) 0%, rgba(62, 158, 153, 1) 0%, rgba(71, 172, 146, 1) 0%, rgba(75, 179, 143, 1) 0%, rgba(80, 188, 138, 1) 0%, rgba(87, 199, 133, 1) 0%, rgba(130, 205, 119, 1) 0%, rgba(159, 209, 109, 1) 0%, rgba(0, 183, 255, 1) 0%, rgba(189, 10, 252, 1) 100%);
+}
+
+@layer base {
+  body {
+    @apply transition-all duration-100;
+      font-family: "Rubik", sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 400;
+      font-style: normal;
+    }
+  [x-cloak] { display: none !important; }
+    
+}
+
+
+
+@layer components {
+  .squircle {
+      corner-shape: squircle;
+      border-radius: 50%;
+    }
+  .nav-btn {
+    @apply w-full hover:bg-gray-100 px-3 py-1 rounded flex gap-2 items-center cursor-pointer;
+  }
+  .nav-btn svg {
+    @apply size-5;
+  }
+  .nav-btn.danger {
+    @apply text-rose-600;
+  }
+  .nav-section-header {
+    @apply text-xs text-gray-500 px-2 mt-2;
+  }
+  .input-field {
+    @apply w-full px-2 py-1.5 rounded-md bg-gray-50 border border-gray-200 focus:outline-gray-600
+  }
+  .input-field-search {
+    @apply w-full pr-8 pl-2 py-1.5 rounded-md bg-white border border-gray-200 focus:outline-gray-600 placeholder:italic;
+  }
+  .btn-normal {
+    @apply rounded border border-gray-200 bg-white p-1.5 flex gap-2 cursor-pointer;
+  }
+  .btn-normal:hover {
+    @apply bg-gray-50;
+  }
+  .btn-normal svg {
+    @apply size-4;
+  }
+  .btn-action {
+    @apply px-3 py-2 border border-gray-100 rounded-md cursor-pointer flex items-center gap-2;
+  }
+  .btn-action.disabled {
+    @apply text-gray-400 bg-gray-50 hover:bg-none cursor-not-allowed;
+  }
+  .btn-action:hover {
+    @apply bg-gray-50;
+  }
+  .btn-action svg {
+    @apply size-5;
+  }
+  .btn-action.danger.high {
+    @apply bg-rose-600 text-rose-50;
+  }
+  .btn-action.danger:hover {
+    @apply bg-rose-700 text-rose-50;
+  }
+  .btn-ghost {
+    @apply rounded-lg p-1.5 flex gap-1 items-center justify-between cursor-pointer;
+  }
+  .btn-ghost svg {
+    @apply size-5;
+  }
+  .btn-ghost:hover {
+    @apply bg-gray-100;
+  }
+  .btn-main {
+    @apply rounded-lg px-4 py-2 flex gap-2 items-center justify-between cursor-pointer text-nowrap bg-indigo-600 text-white;
+  }
+  .btn-main:hover {
+    @apply bg-indigo-700;
+  }
+  .btn-main svg {
+    @apply size-4;
+  }
+  .breadcrumbs-wrapper {
+    @apply flex items-center justify-start h-full text-base;
+  }
+  .breadcrumbs-wrapper a {
+    @apply text-gray-500 hover:text-gray-800 text-base cursor-pointer;
+  }
+  .breadcrumbs-wrapper a::after {
+    content: '>';
+    @apply text-gray-600 px-2 font-mono;
+  }
+  .table-wrapper {
+    @apply mt-2 border border-gray-200 rounded-lg table-auto overflow-y-auto h-140;
+  }
+  .input-checkbox {
+    @apply size-4 rounded-lg;
+  }
+  .table-header-item {
+    @apply text-start place-self-center-safe;
+  }
+  .table-body-item {
+    @apply hover:bg-gray-50 border-y border-gray-100;
+  }
+  .table-body-item td {
+    @apply p-3;
+  }
+  .table-body-item td svg {
+    @apply size-4;
+  }
+  .table-header-row {
+    @apply sticky top-0 border-b border-gray-200 bg-white;
+  }
+  .table-header-row th {
+    @apply font-light p-3 text-gray-500;
+  }
+  .status-pill {
+    @apply px-2 py-1 rounded-lg font-semibold bg-gray-100 text-xs;
+  }
+  .status-pill.info {
+    @apply bg-blue-100 text-blue-800;
+  }
+  .status-pill.success {
+    @apply bg-emerald-100 text-emerald-800;
+  }
+  .status-pill.danger {
+    @apply bg-rose-100 text-rose-800;
+  }
+  .status-pill.alert {
+    @apply bg-amber-100 text-amber-800;
+  }
+  .status-pill.proccess {
+    @apply bg-violet-100 text-violet-800;
+  }
+  .text-link {
+    @apply text-indigo-600 hover:text-indigo-800 cursor-pointer hover:underline;
+  }
+  .btn-tab {
+    @apply px-4 py-2 text-gray-600 rounded-t border-b border-gray-50 cursor-pointer;
+  }
+  .btn-tab:hover {
+    @apply bg-gray-100;
+  }
+  .btn-tab.active {
+    @apply text-gray-900 border-b-2 border-indigo-600 font-semibold;
+  }
+  .icon-note {
+    @apply p-2 bg-gray-100 rounded-lg;
+  }
+  .icon-note svg {
+    @apply size-6;
+  }
+  .text-reference {
+    @apply font-semibold px-1 py-0.5 rounded-lg;
+  }
+
+  /* Drag and Drop Kanban Styles */
+  .ghost-grab {
+    @apply !bg-violet-50 !border-2 !border-dashed !border-violet-300 !text-transparent;
+  }
+  .ghost-grab * {
+    @apply !invisible;
+  }
+  .drag-kanban {
+    @apply cursor-grabbing;
+  }
+  /* Progress Bar Styles  */
+  .progress-bar {
+    @apply [&::-webkit-progress-bar]:rounded-md [&::-webkit-progress-value]:rounded-md [&::-webkit-progress-bar]:bg-gray-100;
+  }
+  .progress-bar.info {
+    @apply [&::-webkit-progress-value]:bg-blue-600;
+  }
+  .progress-bar.process {
+    @apply [&::-webkit-progress-value]:bg-violet-600;
+  }
+  .progress-bar.alert {
+    @apply [&::-webkit-progress-value]:bg-amber-600;
+  }
+  .progress-bar.danger {
+    @apply [&::-webkit-progress-value]:bg-rose-600;
+  }
+  .progress-bar.success {
+    @apply [&::-webkit-progress-value]:bg-emerald-600;
+  }
+}

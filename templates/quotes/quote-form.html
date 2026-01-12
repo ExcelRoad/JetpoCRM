@@ -1,0 +1,843 @@
+{% extends 'base/base_layout.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'homePage' %}">בית</a>
+    <a href="{% url 'quote-list' %}">הצעות מחיר</a>
+    <p class="flex items-center gap-1">
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.0799 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.0799 21 8.2 21H13M13 3L19 9M13 3V7.4C13 7.96005 13 8.24008 13.109 8.45399C13.2049 8.64215 13.3578 8.79513 13.546 8.89101C13.7599 9 14.0399 9 14.6 9H19M19 9V10M19.0001 15C17.0027 15 17.0017 15.4862 17.0001 16.3292L17.0001 16.3325C16.9983 17.2328 17.0001 17.5 19.0001 17.5C21.0001 17.5 21.0001 17.7055 21.0001 18.6667C21.0001 19.389 21.0001 20 19.0001 20M19.0001 15L21.0001 15M19.0001 15L19 14M19.0001 20H17.0001M19.0001 20L19 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+       {{ form_header }}
+    </p>
+{% endblock breadcrumbs %}
+
+{% block content %}
+
+<div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200">
+    <div>
+        <h1 class="font-semibold text-3xl mb-1">{{form_header}}</h1>
+        <p class="text-gray-400">לאחר השמירה, פרטי הצעת המחיר ישמרו במערכת</p>
+    </div>
+    <div class="flex items-center justify-end gap-2">
+        <a class="btn-action" @click="history.back()">
+            ביטול
+        </a>
+        <button class="btn-main" type="submit" form="quoteForm">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 3.00152C8.06462 3.00146 8.13126 3.00146 8.2 3.00146H13.462C14.0268 3.00146 14.3092 3.00146 14.5699 3.07329C14.7198 3.11459 14.8641 3.17315 15 3.24761M8 3.00152C7.01165 3.00229 6.49359 3.01484 6.09202 3.21945C5.71569 3.4112 5.40973 3.71716 5.21799 4.09348C5 4.52131 5 5.08136 5 6.20146V17.8015C5 18.9216 5 19.4816 5.21799 19.9094C5.40973 20.2858 5.71569 20.5917 6.09202 20.7835C6.51984 21.0015 7.0799 21.0015 8.2 21.0015H15.8C16.9201 21.0015 17.4802 21.0015 17.908 20.7835C18.2843 20.5917 18.5903 20.2858 18.782 19.9094C19 19.4816 19 18.9216 19 17.8015V9.12396C19 8.70793 19 8.49991 18.9592 8.30094C18.9229 8.12442 18.863 7.9536 18.781 7.79312C18.6886 7.61224 18.5587 7.44981 18.2988 7.12494L15.9608 4.20244C15.608 3.76141 15.4315 3.54089 15.2126 3.38216C15.1445 3.33281 15.0735 3.28788 15 3.24761M8 3.00152V7.00002H15V3.24761M15 15C15 16.6569 13.6569 18 12 18C10.3431 18 9 16.6569 9 15C9 13.3432 10.3431 12 12 12C13.6569 12 15 13.3432 15 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p>שמירה</p>
+        </button>
+    </div>
+</div>
+<div x-data="quoteFormHandler()">
+    <div class="p-8">
+        <h3 class="my-1 text-base font-semibold">עבור ה{{contentType.name}} {{targetObject}}</h3>
+        <div class="p-2 w-2/5 flex items-center gap-4">
+            <div class="border border-gray-200 rounded-lg p-2">
+                <p class="text-xs text-gray-500">סה"כ מחיר</p>
+                <p class="font-semibold" x-text="formatCurrency(totalPrice)">0</p>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-2">
+                <p class="text-xs text-gray-500">סה"כ מע"מ</p>
+                <p class="font-semibold" x-text="formatCurrency(totalVat)">0</p>
+            </div>
+            <div class="border border-gray-200 rounded-lg p-2">
+                <p class="text-xs text-gray-500">סה"כ כולל מע"מ</p>
+                <p class="font-semibold" x-text="formatCurrency(totalPriceWVat)">0</p>
+            </div>
+        </div>
+        <form method="post" id="quoteForm" class="grid grid-cols-4 w-4/7 gap-2">
+            {% csrf_token %}
+            <div class="field-wrapper col-start-1">
+                <p class="text-gray-500 text-sx">שם</p>
+                {{form.name}}
+            </div>
+            <div class="field-wrapper col-start-2">
+                <p class="text-gray-500 text-sx">סטטוס</p>
+                {{form.status}}
+            </div>
+            <div class="field-wrapper col-start-1">
+                <p class="text-gray-500 text-sx">סה"כ (ניתן לעריכה)</p>
+                <input type="number" id="virtual-total" class="input-field" step="0.01" min="0" placeholder="0.00" value="{{quote.total_price|default:0}}">
+            </div>
+
+            <hr class="text-gray-200 mt-6 col-span-4 col-start-1">
+
+            <!-- Service Formset Section -->
+            <div class="col-span-4 col-start-1">
+                <h3 class="my-2 font-semibold text-lg">שירותים</h3>
+                <div class="mt-2 border border-gray-200 rounded-lg table-auto pb-2">
+                    <table class="relative w-full" id="service-formset">
+                        <thead class="">
+                            <tr class="table-header-row">
+                                <th class="table-header-item">#</th>
+                                <th class="table-header-item w-4/12">שירות</th>
+                                <th class="table-header-item">כמות</th>
+                                <th class="table-header-item">מחיר</th>
+                                <th class="table-header-item">סך הכל</th>
+                                <th class="table-header-item"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="service-formset-body" class="w-full">
+                            {{ service_formset.management_form }}
+                            {% for service_form in service_formset %}
+                            <tr class="table-body-item service-form-row w-full" data-row-index="{{ forloop.counter0 }}">
+                                <td style="display: none;">
+                                    {{ service_form.id }}
+                                    {{ service_form.DELETE }}
+                                    {{ service_form.order }}
+                                    {{ service_form.name }}
+                                </td>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="service-select-wrapper" data-row-index="{{ forloop.counter0 }}">
+                                        {{ service_form.service }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="number" name="{{ service_form.qty.html_name }}"
+                                           value="{{ service_form.qty.value|default:'1.00' }}"
+                                           class="input-field service-qty" step="0.01" min="0"
+                                           oninput="calculateServiceRowTotal(this.closest('.service-form-row'))">
+                                </td>
+                                <td>
+                                    <input type="number" name="{{ service_form.price.html_name }}"
+                                           value="{{ service_form.price.value|default:'0.00' }}"
+                                           class="input-field service-price" step="0.01" min="0"
+                                           oninput="calculateServiceRowTotal(this.closest('.service-form-row'))">
+                                </td>
+                                <td class="service-row-total font-semibold">₪0.00</td>
+                                <td>
+                                    <button type="button" class="btn-ghost" onclick="deleteServiceRow(this)">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="px-4 py-2">
+                        <button type="button" class="btn-action" onclick="addServiceRow()">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            הוספת שירות
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2 text-sm text-gray-600">
+                    <span class="font-semibold">סה"כ שירותים:</span>
+                    <span id="services-total-display">₪0.00</span>
+                </div>
+            </div>
+
+            <hr class="text-gray-200 mt-6 col-span-4 col-start-1">
+
+            <!-- Payment Formset Section -->
+            <div class="col-span-4 col-start-1">
+                <h3 class="my-2 font-semibold text-lg">תשלומים</h3>
+                <div class="mt-2 border border-gray-200 rounded-lg table-auto pb-2">
+                    <table class="relative w-full" id="payment-formset">
+                        <thead class="">
+                            <tr class="table-header-row">
+                                <th class="table-header-item">#</th>
+                                <th class="table-header-item w-3/12">שירות</th>
+                                <th class="table-header-item w-3/12">שם</th>
+                                <th class="table-header-item">מחיר</th>
+                                <th class="table-header-item">אחוז</th>
+                                <th class="table-header-item"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="payment-formset-body" class="w-full">
+                            {{ payment_formset.management_form }}
+                            {% for payment_form in payment_formset %}
+                            <tr class="table-body-item payment-form-row w-full">
+                                <td style="display: none;">
+                                    {{ payment_form.id }}
+                                    {{ payment_form.DELETE }}
+                                    {{ payment_form.order }}
+                                </td>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ payment_form.quote_service }}</td>
+                                <td>{{ payment_form.name }}</td>
+                                <td>
+                                    <input type="number" name="{{ payment_form.price.html_name }}"
+                                           value="{{ payment_form.price.value|default:'0.00' }}"
+                                           class="input-field" step="0.01" min="0"
+                                           oninput="calculatePercentFromPrice(this.closest('.payment-form-row'))">
+                                </td>
+                                <td>
+                                    <div class="flex items-center">
+                                        <span class="px-2 py-1.5 rounded-r-md bg-gray-100 border border-gray-200 text-gray-600">%</span>
+                                        <input type="number" name="{{ payment_form.percent.html_name }}"
+                                               value="{{ payment_form.percent.value|default:'0.00' }}"
+                                               class="w-full px-2 py-1.5 rounded-l-md bg-gray-50 border border-gray-200 focus:outline-gray-600"
+                                               step="0.01" min="0" max="100"
+                                               oninput="calculatePriceFromPercent(this.closest('.payment-form-row'))">
+                                        
+                                    </div>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-ghost" onclick="deletePaymentRow(this)">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="px-4 py-2">
+                        <button type="button" class="btn-action" onclick="addPaymentRow()">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            הוספת תשלום
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Per-Service Payment Allocation Display -->
+                <div id="payment-allocation-display" class="mt-4 space-y-2">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    // Alpine.js handler for display boxes
+    function quoteFormHandler() {
+        return {
+            totalPrice: 0,
+            totalVat: 0,
+            totalPriceWVat: 0,
+
+            init() {
+                this.calculateQuoteTotalsFromServices();
+            },
+
+            calculateQuoteTotalsFromServices() {
+                const virtualTotal = parseFloat(document.getElementById('virtual-total')?.value) || 0;
+                this.totalPrice = virtualTotal;
+                this.totalVat = this.totalPrice * 0.18;
+                this.totalPriceWVat = this.totalPrice + this.totalVat;
+            },
+
+            formatCurrency(value) {
+                return '₪' + value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+        }
+    }
+
+    // ===== SERVICE FORMSET FUNCTIONS =====
+
+    // Auto-populate service fields when service is selected
+    async function handleServiceChange(selectElement) {
+        const serviceId = selectElement.value;
+        if (!serviceId) return;
+
+        const row = selectElement.closest('.service-form-row');
+        const qtyInput = row.querySelector('.service-qty');
+        const priceInput = row.querySelector('.service-price');
+        const nameInput = row.querySelector('input[name$="-name"]');
+
+        try {
+            const response = await fetch(`/activities/api/service/getInfo/${serviceId}`);
+            const data = await response.json();
+
+            if (qtyInput) qtyInput.value = data.qty || 1.00;
+            if (priceInput) priceInput.value = data.price || 0.00;
+
+            // Get service name from selected option
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const serviceName = selectedOption ? selectedOption.textContent.trim() : '';
+
+            if (nameInput && serviceName) {
+                nameInput.value = serviceName;
+            }
+
+            calculateServiceRowTotal(row);
+            updatePaymentServiceDropdowns();
+            updatePaymentAllocationDisplay();
+        } catch (error) {
+            console.error('Error fetching service info:', error);
+        }
+    }
+
+    function formatCurrencyNumber(value) {
+        return '₪' + value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function calculateServiceRowTotal(row) {
+        const qtyInput = row.querySelector('input[name$="-qty"]');
+        const priceInput = row.querySelector('input[name$="-price"]');
+        const totalCell = row.querySelector('.service-row-total');
+
+        const qty = parseFloat(qtyInput?.value) || 0;
+        const price = parseFloat(priceInput?.value) || 0;
+        const total = qty * price;
+
+        if (totalCell) {
+            totalCell.textContent = formatCurrencyNumber(total);
+        }
+
+        updateServicesTotal();
+        updateVirtualTotalFromServices();
+        updateQuoteTotalsDisplay();
+    }
+
+    function updateServicesTotal() {
+        let sum = 0;
+        const rows = document.querySelectorAll('.service-form-row:not([style*="display: none"])');
+        rows.forEach(row => {
+            const qtyInput = row.querySelector('input[name$="-qty"]');
+            const priceInput = row.querySelector('input[name$="-price"]');
+            const qty = parseFloat(qtyInput?.value) || 0;
+            const price = parseFloat(priceInput?.value) || 0;
+            sum += qty * price;
+        });
+
+        const displayElement = document.getElementById('services-total-display');
+        if (displayElement) {
+            displayElement.textContent = formatCurrencyNumber(sum);
+        }
+    }
+
+    function updateVirtualTotalFromServices() {
+        let sum = 0;
+        const rows = document.querySelectorAll('.service-form-row:not([style*="display: none"])');
+        rows.forEach(row => {
+            const qtyInput = row.querySelector('input[name$="-qty"]');
+            const priceInput = row.querySelector('input[name$="-price"]');
+            const qty = parseFloat(qtyInput?.value) || 0;
+            const price = parseFloat(priceInput?.value) || 0;
+            sum += qty * price;
+        });
+
+        const virtualTotalInput = document.getElementById('virtual-total');
+        if (virtualTotalInput) {
+            virtualTotalInput.value = sum.toFixed(2);
+        }
+
+        updatePaymentServiceDropdowns();
+    }
+
+    function updateQuoteTotalsDisplay() {
+        const virtualTotal = parseFloat(document.getElementById('virtual-total')?.value) || 0;
+
+        // Trigger Alpine.js update
+        const alpineComponent = document.querySelector('[x-data="quoteFormHandler()"]');
+        if (alpineComponent && alpineComponent._x_dataStack) {
+            const data = alpineComponent._x_dataStack[0];
+            data.totalPrice = virtualTotal;
+            data.totalVat = virtualTotal * 0.18;
+            data.totalPriceWVat = virtualTotal + (virtualTotal * 0.18);
+        }
+    }
+
+    async function addServiceRow() {
+        const formsetBody = document.getElementById('service-formset-body');
+        // Try to find TOTAL_FORMS input
+        let totalFormsInput = formsetBody.querySelector('input[name$="-TOTAL_FORMS"]');
+        if (!totalFormsInput) {
+            totalFormsInput = formsetBody.parentElement.querySelector('input[name$="-TOTAL_FORMS"]');
+        }
+        if (!totalFormsInput) {
+            console.error('Total forms input not found');
+            return;
+        }
+
+        const currentFormCount = parseInt(totalFormsInput.value);
+        const formPrefix = totalFormsInput.name.replace('-TOTAL_FORMS', '');
+
+        try {
+            // Fetch rendered form row from server
+            const response = await fetch(`/quotes/api/get-service-row?form_index=${currentFormCount}&form_prefix=${formPrefix}`);
+            const data = await response.json();
+
+            // Create a temporary container to parse the HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = data.html;
+
+            // Execute any inline scripts
+            const scripts = tempDiv.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                newScript.textContent = script.textContent;
+                document.head.appendChild(newScript);
+                document.head.removeChild(newScript);
+            });
+
+            // Insert the HTML (without scripts, they've been executed)
+            formsetBody.insertAdjacentHTML('beforeend', data.html);
+            totalFormsInput.value = currentFormCount + 1;
+
+            // Get the newly added row
+            const newRow = formsetBody.querySelector(`tr[data-row-index="${currentFormCount}"]`);
+
+            // Wait a bit for Alpine to process, then manually initialize if needed
+            setTimeout(() => {
+                if (newRow && window.Alpine) {
+                    // Try to find and initialize Alpine components
+                    const alpineElements = newRow.querySelectorAll('[x-data]');
+                    alpineElements.forEach(el => {
+                        // Check if Alpine has already initialized this element
+                        if (!el._x_dataStack) {
+                            // Manually trigger Alpine initialization
+                            if (typeof window.Alpine.initTree === 'function') {
+                                window.Alpine.initTree(el);
+                            } else if (typeof window.Alpine.start === 'function') {
+                                // For Alpine v2
+                                const xData = el.getAttribute('x-data');
+                                if (xData) {
+                                    window.Alpine.start();
+                                }
+                            }
+                        }
+                    });
+                }
+            }, 10);
+
+            // Attach change handler to the new service select
+            const newServiceSelect = newRow?.querySelector('select[name$="-service"]');
+            if (newServiceSelect) {
+                newServiceSelect.addEventListener('change', function() {
+                    handleServiceChange(this);
+                });
+            }
+
+            updateServicesTotal();
+            updatePaymentServiceDropdowns();
+
+            console.log('Service row added successfully');
+        } catch (error) {
+            console.error('Error adding service row:', error);
+        }
+    }
+
+    function deleteServiceRow(button) {
+        const row = button.closest('.service-form-row');
+        const deleteCheckbox = row.querySelector('input[name$="-DELETE"]');
+
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = true;
+            row.style.display = 'none';
+        } else {
+            row.remove();
+        }
+
+        updateServicesTotal();
+        updateVirtualTotalFromServices();
+        updateQuoteTotalsDisplay();
+        updatePaymentServiceDropdowns();
+    }
+
+    // ===== PAYMENT FORMSET FUNCTIONS =====
+
+    function getServiceTotalPrice(serviceIndex) {
+        // Find the service row by index
+        const serviceRows = document.querySelectorAll('.service-form-row:not([style*="display: none"])');
+        const serviceRow = Array.from(serviceRows).find(row => {
+            const rowIndex = row.dataset.rowIndex;
+            return rowIndex == serviceIndex;
+        });
+
+        if (!serviceRow) return 0;
+
+        const qtyInput = serviceRow.querySelector('input[name$="-qty"]');
+        const priceInput = serviceRow.querySelector('input[name$="-price"]');
+        const qty = parseFloat(qtyInput?.value) || 0;
+        const price = parseFloat(priceInput?.value) || 0;
+
+        return qty * price;
+    }
+
+    function calculatePriceFromPercent(row) {
+        if (row.dataset.calculating === 'true') return;
+        row.dataset.calculating = 'true';
+
+        const percentInput = row.querySelector('input[name$="-percent"]');
+        const priceInput = row.querySelector('input[name$="-price"]');
+        const serviceSelect = row.querySelector('.payment-service-select');
+
+        const percent = parseFloat(percentInput?.value) || 0;
+        const serviceIndex = serviceSelect?.value;
+
+        if (serviceIndex) {
+            const serviceTotalPrice = getServiceTotalPrice(serviceIndex);
+            if (serviceTotalPrice > 0) {
+                const calculatedPrice = (serviceTotalPrice * percent) / 100;
+                priceInput.value = calculatedPrice.toFixed(2);
+            }
+        }
+
+        updatePaymentAllocationDisplay();
+        row.dataset.calculating = 'false';
+    }
+
+    function calculatePercentFromPrice(row) {
+        if (row.dataset.calculating === 'true') return;
+        row.dataset.calculating = 'true';
+
+        const priceInput = row.querySelector('input[name$="-price"]');
+        const percentInput = row.querySelector('input[name$="-percent"]');
+        const serviceSelect = row.querySelector('.payment-service-select');
+
+        const price = parseFloat(priceInput?.value) || 0;
+        const serviceIndex = serviceSelect?.value;
+
+        if (serviceIndex) {
+            const serviceTotalPrice = getServiceTotalPrice(serviceIndex);
+            if (serviceTotalPrice > 0) {
+                const calculatedPercent = (price / serviceTotalPrice) * 100;
+                percentInput.value = calculatedPercent.toFixed(2);
+            }
+        }
+
+        updatePaymentAllocationDisplay();
+        row.dataset.calculating = 'false';
+    }
+
+    async function addPaymentRow() {
+        const formsetBody = document.getElementById('payment-formset-body');
+        // Try to find TOTAL_FORMS input
+        let totalFormsInput = formsetBody.querySelector('input[name$="-TOTAL_FORMS"]');
+        if (!totalFormsInput) {
+            totalFormsInput = formsetBody.parentElement.querySelector('input[name$="-TOTAL_FORMS"]');
+        }
+        if (!totalFormsInput) {
+            console.error('Total forms input not found');
+            return;
+        }
+
+        const currentFormCount = parseInt(totalFormsInput.value);
+        const formPrefix = totalFormsInput.name.replace('-TOTAL_FORMS', '');
+
+        try {
+            // Fetch rendered form row from server
+            const response = await fetch(`/quotes/api/get-payment-row?form_index=${currentFormCount}&form_prefix=${formPrefix}`);
+            const data = await response.json();
+
+            // Create a temporary container to parse the HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = data.html;
+
+            // Execute any inline scripts
+            const scripts = tempDiv.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                newScript.textContent = script.textContent;
+                document.head.appendChild(newScript);
+                document.head.removeChild(newScript);
+            });
+
+            // Insert the server-rendered HTML
+            formsetBody.insertAdjacentHTML('beforeend', data.html);
+            totalFormsInput.value = currentFormCount + 1;
+
+            // Get the newly added row
+            const allRows = formsetBody.querySelectorAll('.payment-form-row');
+            const newRow = allRows[allRows.length - 1];
+
+            // No additional initialization needed for new payment dropdown
+
+            // Populate the payment service dropdowns
+            updatePaymentServiceDropdowns();
+            updatePaymentAllocationDisplay();
+
+            console.log('Payment row added successfully');
+        } catch (error) {
+            console.error('Error adding payment row:', error);
+        }
+    }
+
+    function deletePaymentRow(button) {
+        const row = button.closest('.payment-form-row');
+        const deleteCheckbox = row.querySelector('input[name$="-DELETE"]');
+
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = true;
+            row.style.display = 'none';
+        } else {
+            row.remove();
+        }
+
+        updatePaymentAllocationDisplay();
+    }
+
+    let isSubmitting = false;
+
+    function updatePaymentServiceDropdowns() {
+        // Don't update during form submission
+        if (isSubmitting) return;
+
+        // Populate payment service dropdowns with current services
+        const serviceRows = document.querySelectorAll('.service-form-row:not([style*="display: none"])');
+        const services = [];
+
+        serviceRows.forEach((row, index) => {
+            const serviceSelect = row.querySelector('select[name$="-service"]');
+            const nameInput = row.querySelector('input[name$="-name"]');
+
+            // Get name from hidden input or selected option
+            let name = nameInput?.value?.trim() || '';
+
+            if (!name && serviceSelect?.value) {
+                const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+                name = selectedOption ? selectedOption.textContent.trim() : '';
+            }
+
+            // Only add service if it has a name (skip empty rows)
+            if (name) {
+                const rowIndex = row.dataset.rowIndex || index;
+                services.push({ value: rowIndex, text: name });
+            }
+        });
+
+        // Update all payment service dropdowns
+        const paymentSelects = document.querySelectorAll('.payment-service-select');
+
+        paymentSelects.forEach((select) => {
+            // Save current value
+            const currentValue = select.value;
+
+            // Clear existing options
+            select.innerHTML = '';
+
+            // Add empty option
+            const emptyOption = document.createElement('option');
+            emptyOption.value = '';
+            emptyOption.textContent = 'בחר שירות';
+            select.appendChild(emptyOption);
+
+            // Add service options
+            services.forEach(service => {
+                const option = document.createElement('option');
+                option.value = service.value;
+                option.textContent = service.text;
+                option.classList.add('px-2','py-1');
+                select.appendChild(option);
+            });
+
+            // Restore value if it still exists
+            if (currentValue && services.some(s => s.value == currentValue)) {
+                select.value = currentValue;
+            }
+        });
+    }
+
+    function updatePaymentAllocationDisplay() {
+        const displayContainer = document.getElementById('payment-allocation-display');
+        if (!displayContainer) return;
+
+        // Get all services
+        const serviceRows = document.querySelectorAll('.service-form-row:not([style*="display: none"])');
+        const serviceData = {};
+
+        serviceRows.forEach((row, index) => {
+            const serviceSelect = row.querySelector('select[name$="-service"]');
+            const nameInput = row.querySelector('input[name$="-name"]');
+
+            // Get the service name from the hidden name input if available
+            let name = nameInput?.value?.trim() || '';
+
+            // If no name in hidden input, try to get from selected option
+            if (!name && serviceSelect?.value) {
+                const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+                name = selectedOption ? selectedOption.textContent.trim() : '';
+            }
+
+            // Fallback to auto-generated name
+            if (!name) {
+                name = `שירות ${index + 1}`;
+            }
+
+            const qtyInput = row.querySelector('input[name$="-qty"]');
+            const priceInput = row.querySelector('input[name$="-price"]');
+            const qty = parseFloat(qtyInput?.value) || 0;
+            const price = parseFloat(priceInput?.value) || 0;
+            const total = qty * price;
+            const rowIndex = row.dataset.rowIndex || index;
+
+            serviceData[rowIndex] = {
+                name: name,
+                total: total,
+                allocated: 0
+            };
+        });
+
+        // Calculate allocated payments per service
+        const paymentRows = document.querySelectorAll('.payment-form-row:not([style*="display: none"])');
+        paymentRows.forEach(row => {
+            const serviceSelect = row.querySelector('.payment-service-select');
+            const priceInput = row.querySelector('input[name$="-price"]');
+
+            const serviceIndex = serviceSelect?.value;
+            const price = parseFloat(priceInput?.value) || 0;
+
+            if (serviceIndex && serviceData[serviceIndex]) {
+                serviceData[serviceIndex].allocated += price;
+            }
+        });
+
+        // Build display HTML
+        let html = '<div class="text-sm"><p class="font-semibold mb-2">הקצאת תשלומים לשירותים:</p>';
+
+        Object.keys(serviceData).forEach(key => {
+            const service = serviceData[key];
+            const isValid = Math.abs(service.total - service.allocated) < 0.01;
+            const statusClass = isValid ? 'text-green-600' : 'text-red-600';
+            const icon = isValid ? '✓' : '✗';
+
+            html += `
+                <div class="flex items-center justify-between p-2 border border-gray-200 rounded-lg mb-2 ${isValid ? 'bg-green-50' : 'bg-red-50'}">
+                    <span>${service.name}</span>
+                    <span class="${statusClass}">
+                        ${icon} ${formatCurrencyNumber(service.allocated)} / ${formatCurrencyNumber(service.total)}
+                    </span>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        displayContainer.innerHTML = html;
+    }
+
+    // Virtual total field listener
+    document.addEventListener('DOMContentLoaded', function() {
+        const virtualTotalInput = document.getElementById('virtual-total');
+        if (virtualTotalInput) {
+            virtualTotalInput.addEventListener('input', function() {
+                updateQuoteTotalsDisplay();
+            });
+        }
+
+        // Attach service change handlers
+        document.querySelectorAll('.service-form-row select[name$="-service"]').forEach(select => {
+            select.addEventListener('change', function() {
+                handleServiceChange(this);
+            });
+        });
+
+        // Initialize all calculations
+        const serviceRows = document.querySelectorAll('.service-form-row');
+        serviceRows.forEach(row => {
+            calculateServiceRowTotal(row);
+        });
+
+        // Initialize payment dropdowns on page load
+        updatePaymentServiceDropdowns();
+        updatePaymentAllocationDisplay();
+
+        // Form validation on submit
+        const quoteForm = document.getElementById('quoteForm');
+        if (quoteForm) {
+            quoteForm.addEventListener('submit', function(e) {
+                console.log('Form submit triggered');
+
+                // Set submitting flag to prevent dropdown updates
+                isSubmitting = true;
+
+                let hasErrors = false;
+
+                // Validate service rows
+                const visibleServiceRows = document.querySelectorAll('.service-form-row:not([style*="display: none"])');
+                console.log('Visible service rows:', visibleServiceRows.length);
+
+                if (visibleServiceRows.length === 0) {
+                    console.error('No service rows found');
+                    e.preventDefault();
+                    isSubmitting = false;
+                    return false;
+                }
+
+                visibleServiceRows.forEach((row, index) => {
+                    const serviceSelect = row.querySelector('select[name$="-service"]');
+                    const qtyInput = row.querySelector('input[name$="-qty"]');
+                    const priceInput = row.querySelector('input[name$="-price"]');
+
+                    // Remove previous error styling
+                    [serviceSelect, qtyInput, priceInput].forEach(input => {
+                        if (input) input.classList.remove('border-red-500');
+                    });
+
+                    // Validate required fields
+                    if (!serviceSelect?.value || serviceSelect.value === '') {
+                        console.error(`Service row ${index}: No service selected`);
+                        hasErrors = true;
+                        if (serviceSelect) serviceSelect.classList.add('border-red-500');
+                    }
+                    if (!qtyInput?.value || parseFloat(qtyInput.value) === 0) {
+                        console.error(`Service row ${index}: Invalid quantity`);
+                        hasErrors = true;
+                        if (qtyInput) qtyInput.classList.add('border-red-500');
+                    }
+                    if (!priceInput?.value || parseFloat(priceInput.value) === 0) {
+                        console.error(`Service row ${index}: Invalid price`);
+                        hasErrors = true;
+                        if (priceInput) priceInput.classList.add('border-red-500');
+                    }
+                });
+
+                // Validate payment rows
+                const visiblePaymentRows = document.querySelectorAll('.payment-form-row:not([style*="display: none"])');
+                console.log('Visible payment rows:', visiblePaymentRows.length);
+
+                visiblePaymentRows.forEach((row, index) => {
+                    const serviceSelect = row.querySelector('.payment-service-select');
+                    const nameInput = row.querySelector('input[name$="-name"]');
+                    const priceInput = row.querySelector('input[name$="-price"]');
+                    const percentInput = row.querySelector('input[name$="-percent"]');
+
+                    console.log(`Payment row ${index}:`, {
+                        service: serviceSelect?.value,
+                        name: nameInput?.value,
+                        price: priceInput?.value
+                    });
+
+                    // Remove previous error styling
+                    [serviceSelect, nameInput, priceInput, percentInput].forEach(input => {
+                        if (input) input.classList.remove('border-red-500');
+                    });
+
+                    // Validate required fields
+                    if (!serviceSelect?.value) {
+                        console.error(`Payment row ${index}: No service selected`);
+                        hasErrors = true;
+                        if (serviceSelect) serviceSelect.classList.add('border-red-500');
+                    }
+                    if (!nameInput?.value || nameInput.value.trim() === '') {
+                        console.error(`Payment row ${index}: No name provided`);
+                        hasErrors = true;
+                        if (nameInput) nameInput.classList.add('border-red-500');
+                    }
+                    if (!priceInput?.value || parseFloat(priceInput.value) === 0) {
+                        console.error(`Payment row ${index}: Invalid price`);
+                        hasErrors = true;
+                        if (priceInput) priceInput.classList.add('border-red-500');
+                    }
+                });
+
+                if (hasErrors) {
+                    console.error('Form validation failed, preventing submission');
+                    e.preventDefault();
+                    isSubmitting = false;
+                    return false;
+                }
+
+                console.log('Form validation passed, submitting...');
+            });
+        }
+    });
+</script>
+
+{% endblock content %}

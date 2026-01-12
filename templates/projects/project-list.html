@@ -1,0 +1,402 @@
+{% extends 'base/base_layout.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'homePage' %}">
+        בית
+    </a>
+    <p class="flex items-center gap-1">
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 14L9 19L20 8M6 8.88889L9.07692 12L16 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+       פרויקטים
+    </p>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    <div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200">
+        <div>
+            <h1 class="font-semibold text-3xl mb-1">פרויקטים</h1>
+            <p class="text-gray-400">זוהי רשימה של כל הפרויקטים שלך. מכן תוכלו לארגן, לנהל ולערוך את הפרויקטים שלכם</p>
+        </div>
+        <div class="">
+        </div>
+    </div>
+    <div x-data="leadKanbanHandler()">
+        <div class="p-8" >
+        <!-- Action Section -->
+         <div class="flex items-center justify-between">
+            <form class="relative" id="projectSearch">
+                <input type="text" class="input-field-search" placeholder="חפש לפי שם, חברה או שירות " x-model="searchQuery">
+                <div class="absolute text-gray-400 w-5 top-1 right-2">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 9.00006H6.2C5.0799 9.00006 4.51984 9.00006 4.09202 9.21805C3.71569 9.40979 3.40973 9.71575 3.21799 10.0921C3 10.5199 3 11.08 3 12.2001V17.8001C3 18.9202 3 19.4802 3.21799 19.908C3.40973 20.2844 3.71569 20.5903 4.09202 20.7821C4.51984 21.0001 5.07989 21.0001 6.2 21.0001H17.787C18.9071 21.0001 19.4671 21.0001 19.895 20.7821C20.2713 20.5903 20.5772 20.2844 20.769 19.908C20.987 19.4802 20.987 18.9202 20.987 17.8001V12.0001M6 15.0001H6.01M10 15H10.01M11.5189 12.8946L12.8337 12.6347C13.5432 12.4945 13.8979 12.4244 14.2287 12.2953C14.5223 12.1807 14.8013 12.0318 15.06 11.8516C15.3514 11.6487 15.607 11.393 16.1184 10.8816L21.2668 5.73321C21.9541 5.04596 21.9541 3.9317 21.2668 3.24444C20.5796 2.55719 19.4653 2.55719 18.7781 3.24445L13.5416 8.48088C13.0625 8.96004 12.8229 9.19963 12.6294 9.47121C12.4576 9.71232 12.3131 9.97174 12.1986 10.2447C12.0696 10.5522 11.9921 10.8821 11.837 11.5417L11.5189 12.8946Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </form>
+            <div class="flex items-center gap-2" x-data="{MoreBtnShow : false}">
+                
+                <div class="btn-action relative " @click="MoreBtnShow = !MoreBtnShow" @click.outside="MoreBtnShow = false" x-show="selectedIds.length > 0">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m8 10 4 4 4-4" />
+                    </svg>
+                   עוד פעולות
+                    <div class="p-2 flex flex-col z-50 absolute top-10 border border-gray-200 shadow rounded-lg right-0 w-54 bg-white" x-show="MoreBtnShow">
+                        <button class="nav-btn">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M11 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40974 4.40973 4.7157 4.21799 5.09202C4 5.51985 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V12.5M15.5 5.5L18.3284 8.32843M10.7627 10.2373L17.411 3.58902C18.192 2.80797 19.4584 2.80797 20.2394 3.58902C21.0205 4.37007 21.0205 5.6364 20.2394 6.41745L13.3774 13.2794C12.6158 14.0411 12.235 14.4219 11.8012 14.7247C11.4162 14.9936 11.0009 15.2162 10.564 15.3882C10.0717 15.582 9.54378 15.6885 8.48793 15.9016L8 16L8.04745 15.6678C8.21536 14.4925 8.29932 13.9048 8.49029 13.3561C8.65975 12.8692 8.89125 12.4063 9.17906 11.9786C9.50341 11.4966 9.92319 11.0768 10.7627 10.2373Z"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            עריכה מרובה
+                        </button>
+                        <button class="nav-btn">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 4L12 12M20 4V8.5M20 4H15.5M19 12.5V16.8C19 17.9201 19 18.4802 18.782 18.908C18.5903 19.2843 18.2843 19.5903 17.908 19.782C17.4802 20 16.9201 20 15.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8V8.2C4 7.0799 4 6.51984 4.21799 6.09202C4.40973 5.71569 4.71569 5.40973 5.09202 5.21799C5.51984 5 6.07989 5 7.2 5H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                           ייצוא
+                        </button>
+                        <hr class="text-gray-200 my-1">
+                        <button class="nav-btn danger" @click="modelBackgroundShow = true, massDeleteModelShow = true">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                          מחיקה
+                        </button>
+                    </div>
+                </div>
+                <button class="btn-action">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M3 4.6C3 4.03995 3 3.75992 3.10899 3.54601C3.20487 3.35785 3.35785 3.20487 3.54601 3.10899C3.75992 3 4.03995 3 4.6 3H19.4C19.9601 3 20.2401 3 20.454 3.10899C20.6422 3.20487 20.7951 3.35785 20.891 3.54601C21 3.75992 21 4.03995 21 4.6V6.33726C21 6.58185 21 6.70414 20.9724 6.81923C20.9479 6.92127 20.9075 7.01881 20.8526 7.10828C20.7908 7.2092 20.7043 7.29568 20.5314 7.46863L14.4686 13.5314C14.2957 13.7043 14.2092 13.7908 14.1474 13.8917C14.0925 13.9812 14.0521 14.0787 14.0276 14.1808C14 14.2959 14 14.4182 14 14.6627V17L10 21V14.6627C10 14.4182 10 14.2959 9.97237 14.1808C9.94787 14.0787 9.90747 13.9812 9.85264 13.8917C9.7908 13.7908 9.70432 13.7043 9.53137 13.5314L3.46863 7.46863C3.29568 7.29568 3.2092 7.2092 3.14736 7.10828C3.09253 7.01881 3.05213 6.92127 3.02763 6.81923C3 6.70414 3 6.58185 3 6.33726V4.6Z"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    סינון
+                </button>
+                <a class="btn-action" href="#">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M9 5V19M15 5V19M6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V8.2C21 7.0799 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19Z"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    עמודות
+                </a>
+            </div>
+         </div>
+        <!-- Projects Table -->
+         {% if projects %}
+         <div class="table-wrapper">
+            
+            <table class="w-full relative">
+                <thead class="h-full">
+                    <tr class="table-header-row">
+                        <th>
+                            <input
+                                type="checkbox"
+                                name="headerCheckbox"
+                                id="headerCheckbox"
+                                class="input-checkbox"
+                                @change="toggleSelectAll()"
+                                :checked="isAllVisibleSelected()"
+                                :indeterminate="isSomeVisibleSelected()"
+                            >
+                        </th>
+                        <th class="table-header-item">שם</th>
+                        <th class="table-header-item">לקוח</th>
+                        <th class="table-header-item">סטטוס</th>
+                        <th class="table-header-item">שירות</th>
+                        <th class="table-header-item">תקציב</th>
+                        <th class="table-header-item">ניצול</th>
+                        <th class="table-header-item"></th>
+                    </tr>
+                </thead>
+                <tbody class="">
+                    {% for project in projects %}
+                    <tr class="table-body-item" :class="selectedIds.includes('{{project.id}}') ? 'bg-gray-100' : '' "
+                        x-show="matchesSearch($el)"
+                        data-quote-id="{{project.id}}" 
+                        data-search-name="{{project.name}}" 
+                        data-search-number="{{project.customer.name}}" 
+                        data-search-related="{{project.service.name}}"
+                    >
+                        <td class="flex items-center justify-center">
+                            <input type="checkbox" name="{{project.id}}" id="{{project.id}}" class="input-checkbox" x-model="selectedIds" :value="{{project.id}}">
+                        </td>
+                        <td>
+                            <a class="font-semibold hover:text-gray-600 cursor-pointer" href="{% url 'project-detail' project.id %}">{{project.name}}</a>
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-1">
+                                <img src="{% if project.customer.logo %}{{project.customer.logo.url}}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="h-6 w-6 squircle">
+                                {{ project.customer.name }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-pill {% if project.status == 'open' %}info{% elif project.status == 'canceled' %}danger{% elif project.status == 'completed' %}success{% elif project.status == 'onHold' %}alert{% endif %}">{{ project.get_status_display }}</span>
+                        </td>
+                        <td>
+                            <span class="items-center gap-1 flex">
+                                {{ project.service.name }}
+                            </span>
+                        </td>
+                        <td>{% if project.service.budget_type == 'fix' %}₪{{ project.budget.amount|floatformat:"0"|intcomma:False }}{% else %}{{ project.budget.hours|floatformat:"0"|intcomma:False }} שעות{% endif %}</td>
+                        <td></td>
+                        
+                        <td x-data="{ modeOptions : false}">
+                            <div class="size-6 p-1 rounded hover:bg-gray-200 cursor-pointer relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <div class="p-2 flex flex-col z-100 absolute top-7 border border-gray-200 shadow rounded-lg -right-36 w-44 bg-white" x-show="modeOptions">
+                                    <a class="nav-btn" href="{% url 'project-detail' project.id %}">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                           <path d="M20 7V8.2C20 9.88016 20 10.7202 19.673 11.362C19.3854 11.9265 18.9265 12.3854 18.362 12.673C17.7202 13 16.8802 13 15.2 13H4M4 13L8 9M4 13L8 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                         צפייה
+                                    </a>
+                                    <a class="nav-btn" href="{% url 'project-edit' project.id 'project-list' %}">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M11 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40974 4.40973 4.7157 4.21799 5.09202C4 5.51985 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V12.5M15.5 5.5L18.3284 8.32843M10.7627 10.2373L17.411 3.58902C18.192 2.80797 19.4584 2.80797 20.2394 3.58902C21.0205 4.37007 21.0205 5.6364 20.2394 6.41745L13.3774 13.2794C12.6158 14.0411 12.235 14.4219 11.8012 14.7247C11.4162 14.9936 11.0009 15.2162 10.564 15.3882C10.0717 15.582 9.54378 15.6885 8.48793 15.9016L8 16L8.04745 15.6678C8.21536 14.4925 8.29932 13.9048 8.49029 13.3561C8.65975 12.8692 8.89125 12.4063 9.17906 11.9786C9.50341 11.4966 9.92319 11.0768 10.7627 10.2373Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                         עריכה
+                                    </a>
+                                    <hr class="text-gray-200 my-1">
+                                    <button class="nav-btn danger" @click="modelBackgroundShow = true, singleDeleteModelShow = true, selectedProject = '{{project.id}}', selectedProjectName = '{{project.name}}'">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                         מחיקה
+                                    </button>
+                                </div>
+                            </div> 
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+         </div>
+         <div class="flex items-center justify-between mt-2 p-2">
+            <div class="text-gray-500 flex items-center gap-2">
+                <span class="flex items-center gap-1">
+                    <p x-text="selectedIds.length"></p>
+                   <p> מתוך {{ projects.count }} פרויקטים נבחרו </p>
+                </span>
+                <a class="text-link"
+                @click="toggleSelectAll()">בחר את כל הפרויקטים ({{projects.count}})</a>
+            </div>
+            <div class="flex items-center justify-center gap-4">
+                <div class="flex items-center gap-1">
+                    <p>שורות לדף</p>
+                    <select name="" id="" class="btn-action">
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-center gap-1">
+                    <p>עמוד</p>
+                    <p>1</p>
+                    <p>מתוך</p>
+                    <p>10</p>
+                </div>
+                <div class="flex items-center justify-center gap-1">
+                    <button class="btn-action disabled">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button class="btn-action">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+         </div>
+         
+        {% else %}
+        <!-- No Content Section -->
+        <div class="border-dashed border-2 border-gray-200 flex flex-col items-center justify-center rounded-xl p-6 gap-4 text-center mt-2">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-gray-400 -mb-2">
+                <path
+                    d="M13.2686 14.2686L15 16M12.0627 6.06274L11.9373 5.93726C11.5914 5.59135 11.4184 5.4184 11.2166 5.29472C11.0376 5.18506 10.8425 5.10425 10.6385 5.05526C10.4083 5 10.1637 5 9.67452 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V10.2C21 9.0799 21 8.51984 20.782 8.09202C20.5903 7.71569 20.2843 7.40973 19.908 7.21799C19.4802 7 18.9201 7 17.8 7H14.3255C13.8363 7 13.5917 7 13.3615 6.94474C13.1575 6.89575 12.9624 6.81494 12.7834 6.70528C12.5816 6.5816 12.4086 6.40865 12.0627 6.06274ZM14 12.5C14 13.8807 12.8807 15 11.5 15C10.1193 15 9 13.8807 9 12.5C9 11.1193 10.1193 10 11.5 10C12.8807 10 14 11.1193 14 12.5Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div class="flex flex-col gap-2">
+                <h3 class="text-xl font-semibold">לא קיימים פרויקטים במערכת עדיין</h3>
+                <p class="text-gray-400">צור פרויקט חדש או ייבא פרויקטים מתוך קובץ <br> ניתן לעלות קבצים מסוג xlsx או csv</p>
+            </div>
+            
+            <a class="btn-main" href="{% url 'project-create' %}">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 12H20M12 4V20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <p>פרויקט חדש</p>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    <div class="fixed top-0 right-0 h-screen w-screen bg-black/30 flex items-start justify-center pt-60" x-show="modelBackgroundShow">
+        <!-- Delete Confirmation Model For Multiple Records-->
+        <div class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-2 min-w-1/4 min-h-1/5 flex flex-col" x-show="massDeleteModelShow">
+            <button class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="modelBackgroundShow = false, massDeleteModelShow = false">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="flex-1">
+                <h1 class="text-xl font-semibold my-3">מחיקת פרויקט</h1>
+                <p class="text-gray-500">
+                    אתה עומד  <strong class="text-gray-900" x-text="'למחוק ' + selectedIds.length"></strong> פרויקטים שנבחרו.
+                </p>
+                <p class="text-gray-500">פעולה זו אינה ניתנת לשחזור</p>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <form method="post" action="{% url 'project-mass-delete' %}">
+                    {% csrf_token %}
+                    <input type="text" name="fallback" value="project-list" class="hidden">
+                    <input type="text" name="projectList" :value="selectedIds" class="hidden">
+                    <button class="btn-action danger high" type="submit">
+                        מחיקה
+                    </button>
+                </form>
+                <button class="btn-action" @click="modelBackgroundShow = false, massDeleteModelShow = false">
+                    ביטול
+                </button>
+            </div>
+        </div>
+        <!-- Delete Confirmation Model For Single Record-->
+        <div class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-4 min-w-1/4 min-h-1/5 flex flex-col" x-show="singleDeleteModelShow">
+            <button class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="modelBackgroundShow = false, singleDeleteModelShow = false">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="flex-1">
+                <h1 class="text-xl font-semibold my-3">מחיקת פרויקט</h1>
+                <span class="flex gap-2 items-center">
+                    <p class="text-gray-500">אתה עומד למחוק את</p>
+                    <p class="text-gray-900 text-semibold" x-text="selectedProjectName"></p>
+                </span>
+                <p class="text-gray-500">פעולה זו אינה ניתנת לשחזור</p>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <form method="post" :action="'{% url 'project-delete' pk=999999 %}'.replace('999999', selectedProject)">
+                    {% csrf_token %}
+                    <input type="text" name="fallback" value="project-list" class="hidden">
+                    <button class="btn-action danger high" type="submit">
+                     מחיקה
+                    </button>
+                </form>
+                
+                <button class="btn-action" @click="modelBackgroundShow = false, singleDeleteModelShow = false">
+                    ביטול
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function leadKanbanHandler() {
+        return {
+            // State properties
+            selectedIds: [],
+            modelBackgroundShow: false,
+            massDeleteModelShow: false,
+            singleDeleteModelShow: false,
+            selectedProject: 0,
+            selectedProjectName: '',
+            searchQuery: '',
+
+            // Check if a card matches the search query
+            matchesSearch(card) {
+                // If no search query, show all cards
+                if (!this.searchQuery || this.searchQuery.trim() === '') {
+                    return true;
+                }
+
+                // Get search data from the card's data attributes
+                const searchName = (card.dataset.searchName || '').toLowerCase();
+                const searchCustomer = (card.dataset.searchCustomer || '').toLowerCase();
+                const searchService = (card.dataset.searchService || '').toLowerCase();
+
+                // Combine all searchable fields
+                const searchableText = `${searchName} ${searchCustomer} ${searchService}`;
+
+                // Check if query matches any field
+                const query = this.searchQuery.toLowerCase().trim();
+                return searchableText.includes(query);
+            },
+
+            // Get count of filtered cards for a specific status
+            getFilteredCount(status) {
+                const column = document.getElementById(status + '-column');
+                if (!column) return 0;
+
+                const cards = column.querySelectorAll('[data-project-id]');
+                let count = 0;
+
+                cards.forEach(card => {
+                    if (this.matchesSearch(card)) {
+                        count++;
+                    }
+                });
+
+                return count;
+            },
+
+            // Get all visible row IDs
+            getVisibleRowIds() {
+                const rows = document.querySelectorAll('tbody tr[data-project-id]');
+                const visibleIds = [];
+
+                rows.forEach(row => {
+                    if (this.matchesSearch(row)) {
+                        const projectId = parseInt(row.dataset.projectId);
+                        visibleIds.push(projectId);
+                    }
+                });
+
+                return visibleIds;
+            },
+
+            // Toggle select all visible rows
+            toggleSelectAll() {
+                const visibleIds = this.getVisibleRowIds();
+
+                // If all visible rows are selected, deselect all
+                // Otherwise, select all visible rows
+                const allSelected = visibleIds.every(id => this.selectedIds.includes(id));
+
+                if (allSelected) {
+                    // Deselect all visible rows
+                    this.selectedIds = this.selectedIds.filter(id => !visibleIds.includes(id));
+                } else {
+                    // Select all visible rows (avoid duplicates)
+                    const newSelectedIds = [...new Set([...this.selectedIds, ...visibleIds])];
+                    this.selectedIds = newSelectedIds;
+                }
+            },
+
+            // Check if all visible rows are selected
+            isAllVisibleSelected() {
+                const visibleIds = this.getVisibleRowIds();
+                if (visibleIds.length === 0) return false;
+                return visibleIds.every(id => this.selectedIds.includes(id));
+            },
+
+            // Check if some (but not all) visible rows are selected
+            isSomeVisibleSelected() {
+                const visibleIds = this.getVisibleRowIds();
+                if (visibleIds.length === 0) return false;
+
+                const selectedCount = visibleIds.filter(id => this.selectedIds.includes(id)).length;
+                return selectedCount > 0 && selectedCount < visibleIds.length;
+            }
+        }
+    }
+</script>
+{% endblock content %}

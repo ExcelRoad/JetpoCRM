@@ -1,0 +1,33 @@
+<tr class="table-body-item payment-form-row w-full">
+    <td style="display: none;">
+        {{ payment_form.id }}
+        {{ payment_form.DELETE }}
+        {{ payment_form.order }}
+    </td>
+    <td>{{ row_number }}</td>
+    <td>{{ payment_form.quote_service }}</td>
+    <td>{{ payment_form.name }}</td>
+    <td>
+        <input type="number" name="{{ payment_form.price.html_name }}"
+               value="0.00"
+               class="input-field" step="0.01" min="0"
+               oninput="calculatePercentFromPrice(this.closest('.payment-form-row'))">
+    </td>
+    <td>
+        <div class="flex items-center">
+            <span class="px-2 py-1.5 rounded-r-md bg-gray-100 border border-gray-200 text-gray-600">%</span>
+            <input type="number" name="{{ payment_form.percent.html_name }}"
+                   value="0.00"
+                   class="w-full px-2 py-1.5 rounded-l-md bg-gray-50 border border-gray-200 focus:outline-gray-600"
+                   step="0.01" min="0" max="100"
+                   oninput="calculatePriceFromPercent(this.closest('.payment-form-row'))">
+        </div>
+    </td>
+    <td>
+        <button type="button" class="btn-ghost" onclick="deletePaymentRow(this)">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </td>
+</tr>
