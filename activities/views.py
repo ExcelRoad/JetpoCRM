@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse
+from urllib.parse import urlencode
 from django.http import JsonResponse
 from .models import Service, Task, Timesheet
 from projects.models import Project, ProjectBudget
@@ -36,7 +38,10 @@ def task_create_update(request, pk):
         task.description = taskDescription
         task.urgency = taskUrgency
         task.save()
-    return redirect('project-detail', project.id)
+    base_url = reverse('project-detail', args=(task.object_id,))
+    query_string = urlencode({'section': 'tasks'})
+    url = f'{base_url}?{query_string}'
+    return redirect(url)
 
 
 def task_complete(request, pk):
@@ -44,13 +49,19 @@ def task_complete(request, pk):
         task = Task.objects.get(pk=pk)
         task.is_completed = True
         task.save()
-        return redirect('project-detail', task.object_id)
+        base_url = reverse('project-detail', args=(task.object_id,))
+        query_string = urlencode({'section': 'tasks'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
 
 def task_delete(request, pk):
     if request.method == 'POST':
         task = Task.objects.get(pk=pk)
         task.delete()
-        return redirect('project-detail', task.object_id)
+        base_url = reverse('project-detail', args=(task.object_id,))
+        query_string = urlencode({'section': 'tasks'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
     
 
 def timesheet_create_update(request, pk):
@@ -76,11 +87,18 @@ def timesheet_create_update(request, pk):
             timesheet.descriptiokn = ts_description
             timesheet.hours = ts_hours
             timesheet.save()
-        return redirect('project-detail', task.object_id )
+        
+        base_url = reverse('project-detail', args=(task.object_id,))
+        query_string = urlencode({'section': 'timesheets'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
     
 def timesheet_delete(request, pk):
     if request.method == 'POST':
         timesheet = Timesheet.objects.get(pk=pk)
         timesheet.delete()
-        return redirect('project-detail', timesheet.task.object_id)
+        base_url = reverse('project-detail', args=(task.object_id,))
+        query_string = urlencode({'section': 'timesheets'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
 

@@ -131,15 +131,22 @@ def project_mass_delete(request):
 
 def project_budget_activate(request, pk):
     budget = ProjectBudget.objects.get(pk=pk)
+    allBudgets = ProjectBudget.objects.filter(project = budget.project).update(is_active = False)
     budget.is_active = True
     budget.save()
-    return redirect('project-detail', budget.project.id)
+    base_url = reverse('project-detail', args=(budget.project.id,))
+    query_string = urlencode({'section': 'budgets'})
+    url = f'{base_url}?{query_string}'
+    return redirect(url)
 
 
 def budget_delete(request, pk):
     budget = ProjectBudget.objects.get(pk=pk)
     budget.delete()
-    return redirect('project-detail', budget.project.id)
+    base_url = reverse('project-detail', args=(budget.project.id,))
+    query_string = urlencode({'section': 'budgets'})
+    url = f'{base_url}?{query_string}'
+    return redirect(url)
 
 
 def budget_create_update(request, pk):
@@ -150,19 +157,26 @@ def budget_create_update(request, pk):
         projectId = request.POST['project']
         project = Project.objects.get(pk=projectId)
         if pk == 0 or pk == '0':
+            # make other budgets be non active
+            otherBudgets = ProjectBudget.objects.filter(project = project).update(is_active = False)
             budget = ProjectBudget.objects.create(
                 name = name,
                 qty = qty,
                 price = price,
-                project = project
+                project = project,
+                is_active = True
             )
+            
         else:
             budget = ProjectBudget.objects.get(pk=pk)
             budget.name = name
             budget.qty = qty
             budget.price = price
             budget.save()
-    return redirect('project-detail', project.id)
+    base_url = reverse('project-detail', args=(budget.project.id,))
+    query_string = urlencode({'section': 'budgets'})
+    url = f'{base_url}?{query_string}'
+    return redirect(url)
 
 
 def budget_add(request, pk):
@@ -172,5 +186,8 @@ def budget_add(request, pk):
         budget = ProjectBudget.objects.get(pk=pk)
         budget.qty += Decimal(qty)
         budget.save()
-        return redirect('project-detail', budget.project.id)
+        base_url = reverse('project-detail', args=(budget.project.id,))
+        query_string = urlencode({'section': 'budgets'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
 

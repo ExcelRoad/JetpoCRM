@@ -61,6 +61,12 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                                 </svg>
                                  יצירת הערה
                             </button>
+                            <button class="nav-btn" @click="budgetModelShow = true, modelBackgroundShow = true, budgetModelTitle = 'יצירת תקציב' ">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18 8.5V8.35417C18 6.50171 16.4983 5 14.6458 5H9.5C7.567 5 6 6.567 6 8.5C6 10.433 7.567 12 9.5 12H14.5C16.433 12 18 13.567 18 15.5C18 17.433 16.433 19 14.5 19H9.42708C7.53436 19 6 17.4656 6 15.5729V15.5M12 3V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                יצירת תקציב
+                            </button>
                             <button class="nav-btn">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M20 4L12 12M20 4V8.5M20 4H15.5M19 12.5V16.8C19 17.9201 19 18.4802 18.782 18.908C18.5903 19.2843 18.2843 19.5903 17.908 19.782C17.4802 20 16.9201 20 15.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8V8.2C4 7.0799 4 6.51984 4.21799 6.09202C4.40973 5.71569 4.71569 5.40973 5.09202 5.21799C5.51984 5 6.07989 5 7.2 5H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -94,27 +100,32 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                 </div>
                 <div class="w-1/2 flex items-center px-4 my-2">
                     {% if project.service.budget_type == 'fix' %}
-                    <div class="border border-gray-200 rounded-lg p-2">
-                        <h3 class="font-semibold">תקציב</h3>
-                        <p>{{ project.budget.amount }}</p>
+                    <div class="rounded-lg p-2">
+                        <p class="text-gray-500">תקציב</p>
+                        <p class="text-2xl font-semibold"><span class="mx-1 text-base font-medium">₪</span>{{ project.budget.amount|floatformat:"2"|intcomma:False }}</p>
                     </div>
                     {% else %}
-                    <div class="rounded-lg p-2 flex flex-col justify-end">
-                        <p class="font-semibold">תקציב</p>
-                        <p class="text-base">{{ project.budget.hours }}<span class="mx-1 text-xs">שעות</span></p>
+                    <div class="flex-1">
+                        <div class="flex items-end">
+                            <div class="rounded-lg p-2">
+                                <p class="text-gray-500">תקציב</p>
+                                <p class="text-2xl font-semibold">{{ project.budget.hours }}<span class="mx-1 text-xs font-medium">שעות</span></p>
+                            </div>
+                            <div class="rounded-lg p-2 align-bottom">
+                                <p class="text-gray-500">ניצול</p>
+                                <p class="text-base">{{ project.usage }}<span class="mx-1 text-xs">שעות</span></p>
+                            </div>
+                            <div class="rounded-lg p-2">
+                                <p class="text-gray-500">שארית</p>
+                                <p class="text-base">{{ project.budget_remaining.amount }}<span class="mx-1 text-xs">שעות</span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center flex gap-1 w-5/8">
+                            <span class="status-pill">{{ project.budget_remaining.percent }}%</span>
+                            <progress class="w-full progress-bar {% if project.budget_remaining.percent < 20 %}danger{% elif project.budget_remaining.percent < 50 %}alert{% elif project.budget_remaining.percent < 80 %}process{% elif project.budget_remaining.percent < 100 %}info{% else %}success{% endif %}" max="100" value="{{ project.budget_remaining.percent }}"></progress>
+                        </div>
                     </div>
-                    <div class="rounded-lg p-2">
-                        <p class="font-semibold">ניצול</p>
-                        <p class="text-base">{{ project.usage }}<span class="mx-1 text-xs">שעות</span></p>
-                    </div>
-                    <div class="rounded-lg p-2">
-                        <p class="font-semibold">שארית</p>
-                        <p class="text-base">{{ project.budget_remaining.amount }}<span class="mx-1 text-xs">שעות</span></p>
-                    </div>
-                    <div class="flex-1 flex items-center flex-col gap-1">
-                        <span class="status-pill">{{ project.budget_remaining.percent }}%</span>
-                        <progress class="w-full progress-bar {% if project.budget_remaining.percent < 20 %}danger{% elif project.budget_remaining.percent < 50 %}alert{% elif project.budget_remaining.percent < 80 %}process{% elif project.budget_remaining.percent < 100 %}info{% else %}success{% endif %}" max="100" value="{{ project.budget_remaining.percent }}"></progress>
-                    </div>
+                    
                     {% endif %}
                 </div>
             </div>
@@ -423,6 +434,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                         <h2 class="text-xl font-semibold my-2">תקציבים</h2>
                     </div>
                     <div>
+                        <button class="btn-main" @click="budgetModelShow = true, modelBackgroundShow = true, budgetModelTitle = 'יצירת תקציב' ">יצירת תקציב</button>
                     </div>
                 </div>
                 <div class="overflow-y-auto h-118.5 flex-col flex w-full">
