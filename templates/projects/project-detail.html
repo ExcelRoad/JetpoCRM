@@ -234,10 +234,15 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                 </div>
             </div>
             <!-- Tasks Tab Content -->
-            <div x-show="selectTab == 'tasks'">
+            <div x-show="selectTab == 'tasks'" x-data="{showStatus : 'open'}">
                 <div class="border-b border-gray-200 flex items-center justify-between px-4 gap-4">
-                    <div class="pb-4 w-2/4">
-                        <h2 class="text-xl font-semibold my-2">משימות</h2>
+                    <div class="w-2/4 flex items-center gap-10">
+                        <h2 class="pb-4 text-xl font-semibold my-2">משימות</h2>
+                        <div class="flex gap-1 items-end">
+                            <button class="btn-tab" @click="showStatus = 'all'" :class="showStatus == 'all' ? 'active' : '' ">כל המשימות</button>
+                            <button class="btn-tab" @click="showStatus = 'open'" :class="showStatus == 'open' ? 'active' : '' ">פתוחות</button>
+                            <button class="btn-tab" @click="showStatus = 'complete'" :class="showStatus == 'complete' ? 'active' : '' ">הושלמו</button>
+                        </div>
                     </div>
                     <div>
                         <button class="btn-main" @click="taskModelShow = true, modelBackgroundShow = true, taskModelTitle='יצירת משימה'">
@@ -263,7 +268,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                             </thead>
                             <tbody class="">
                                 {% for task in project.tasks.all %}
-                                <tr class="table-body-item">
+                                <tr class="table-body-item" x-show="(showStatus == 'open' && '{{task.is_completed}}'.toLowerCase() == 'false') || showStatus == 'all' || (showStatus == 'complete' && '{{task.is_completed}}'.toLowerCase() == 'true')">
                                     <td class="">
                                         <span class="status-pill {% if task.urgency == 'low' %}success{% elif task.urgency == 'medium' %}alert{% elif task.urgency == 'high' %}danger{% elif task.urgency == 'critical' %}proccess{% endif %}">•</span>
                                     </td>
