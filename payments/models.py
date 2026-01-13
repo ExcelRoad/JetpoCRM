@@ -15,7 +15,7 @@ class Payment(models.Model):
     qty = models.DecimalField(max_digits=4, decimal_places=2)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, related_name='payments')
 
     status = models.CharField(max_length=10, choices=STATUSES, default='draft')
     
