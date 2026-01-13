@@ -39,6 +39,9 @@
   .nav-btn svg {
     @apply size-5;
   }
+  .nav-btn.active {
+    @apply font-bold;
+  }
   .nav-btn.danger {
     @apply text-rose-600;
   }

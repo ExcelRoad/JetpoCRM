@@ -80,6 +80,13 @@
                     this.on = ! this.on
                     localStorage.setItem('sidebarOpen', this.on)
                 }
+            });
+            Alpine.store('selectedMainTab', {
+                tab : localStorage.getItem('selectedMainTab') || 'home',
+                change(name) {
+                    this.tab = name
+                    localStorage.setItem('selectedMainTab', this.tab)
+                }
             })
         })
     </script>
