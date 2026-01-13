@@ -1,5 +1,6 @@
 from django.db import models
 from customers.models import Customer
+from django.db.models import Sum
 from django.contrib.contenttypes.fields import GenericRelation
 from activities.models import Note, Task, Service
 
@@ -79,11 +80,34 @@ class Project(models.Model):
         from activities.models import Timesheet
         return Timesheet.objects.filter(task__in=self.tasks.all())
 
+    @property
+    def reported_hours(self):
+        hours = self.timesheets.all().aggregate(Sum('hours'))['hours__sum']
+        return hours
 
     @property
     def get_drive_folder_link(self):
         url = f"https://workdrive.zoho.com/p42gl95b95c05518441b2b0f6ae441bb17051/teams/p42gl95b95c05518441b2b0f6ae441bb17051/ws/{self.customer.drive_folder_id}/folders/{self.folder_id}"
         return url
+    
+    @property
+    def total_income(self):
+        payments = 0
+        for p in self.payments.filter(status = 'paid'):
+            payments = payments + p.total_price
+        return payments
+    
+    @property
+    def open_payments(self):
+        count = 0
+        amount = 0
+        for p in self.payments.filter(status__in = ['draft', 'billed']):
+            count = count + 1
+            amount = amount + p.total_price
+        return {
+            'count': count,
+            'amount': amount
+        }
 
 
 

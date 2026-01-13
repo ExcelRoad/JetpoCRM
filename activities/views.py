@@ -97,7 +97,7 @@ def timesheet_delete(request, pk):
     if request.method == 'POST':
         timesheet = Timesheet.objects.get(pk=pk)
         timesheet.delete()
-        base_url = reverse('project-detail', args=(task.object_id,))
+        base_url = reverse('project-detail', args=(timesheet.task.object_id,))
         query_string = urlencode({'section': 'timesheets'})
         url = f'{base_url}?{query_string}'
         return redirect(url)

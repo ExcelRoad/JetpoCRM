@@ -14,7 +14,7 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
-<div class="flex h-[846px]"  
+<div class="flex h-207.5"  
 x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCustomer : 0, selectedCustomerName : '', quoteDeleteModelShow : false, selectedQuoteName : '', contactDeleteModelShow : false ,selectedQuote : 0, selectedContact : 0, selectedContactName : '', selectProject : 0, projectDeleteModelShow: false, selectedProjectName: ''}">
     <!-- Main Section -->
     <div class="w-3/4 h-full" x-data="setSection()" x-init="init()">
@@ -154,7 +154,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                     </div>
                     {% endif %}
                 </div>
-                <div class="overflow-y-auto py-2 px-8 h-[474px] flex-col gap-2 flex w-full">
+                <div class="overflow-y-auto py-2 px-8 h-110 flex-col gap-2 flex w-full">
                     <div id="notes-wrapper">
                     {% if customer.notes.all %}
                     {% for note in customer.notes.all %}
@@ -284,7 +284,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                         <a class="btn-main" href="{% url 'quote-create' 'customer' customer.id %}">צור הצעת מחיר</a>
                     </div>
                 </div>
-                <div class="overflow-y-auto py-2 px-8 h-[474px] gap-2 w-full">
+                <div class="overflow-y-auto py-2 px-8 h-118.5 gap-2 w-full">
                     {% if customer.quotes.all %}
                     <div class="grid grid-cols-3 w-full gap-2">
                     {% for quote in customer.quotes.all %}
@@ -407,7 +407,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                         <a class="btn-main" href="{% url 'project-create' customer.id %}">צור פרויקט</a>
                     </div>
                 </div>
-                <div class="overflow-y-auto py-2 px-8 h-[474px] gap-2 w-full">
+                <div class="overflow-y-auto py-2 px-8 h-118.5 gap-2 w-full">
                     {% if customer.projects.all %}
                     <div class="grid grid-cols-3 w-full gap-2">
                     {% for project in customer.projects.all %}
@@ -479,7 +479,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                         <a class="btn-main" href="{% url 'contact-create' customer.id %}">צור איש קשר</a>
                     </div>
                 </div>
-                <div class="overflow-y-auto py-2 px-8 h-[474px] gap-2 w-full">
+                <div class="overflow-y-auto py-2 px-8 h-118.5 gap-2 w-full">
                     {% if customer.contacts.all %}
                     <div class="grid grid-cols-4 w-full gap-2">
                     {% for contact in customer.contacts.all %}

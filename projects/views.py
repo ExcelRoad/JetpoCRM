@@ -5,6 +5,7 @@ from activities.models import Note, Task
 from .models import Project, ProjectBudget
 from customers.models import Customer
 from .forms import ProjectForm
+from payments.models import Payment
 
 
 def project_create(request, customerId = None):
@@ -186,6 +187,15 @@ def budget_add(request, pk):
         budget = ProjectBudget.objects.get(pk=pk)
         budget.qty += Decimal(qty)
         budget.save()
+        # Create payment for the additional budget
+        payment = Payment.objects.create(
+            name = f'תוספת תקציב ל{budget.name}',
+            service = budget.project.service,
+            qty = qty,
+            price = budget.price,
+            project = budget.project,
+            status = 'draft'
+        )
         base_url = reverse('project-detail', args=(budget.project.id,))
         query_string = urlencode({'section': 'budgets'})
         url = f'{base_url}?{query_string}'
