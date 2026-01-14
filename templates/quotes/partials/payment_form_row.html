@@ -5,11 +5,13 @@
         {{ payment_form.order }}
     </td>
     <td>{{ row_number }}</td>
-    <td>{{ payment_form.quote_service }}</td>
+    <td>
+        {{ payment_form.quote_service }}
+    </td>
     <td>{{ payment_form.name }}</td>
     <td>
         <input type="number" name="{{ payment_form.price.html_name }}"
-               value="0.00"
+               value="{{ payment_form.price.value|default:0 }}"
                class="input-field" step="0.01" min="0"
                oninput="calculatePercentFromPrice(this.closest('.payment-form-row'))">
     </td>

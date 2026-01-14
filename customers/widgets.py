@@ -349,6 +349,10 @@ class DynamicCustomSelect(forms.Select):
         widget_id = f"dcs_{name.replace('-', '_')}"
 
         # Escape value for JavaScript
+        # If value is a Model instance (Service/Quote_Service), get its PK
+        if hasattr(value, 'pk'):
+             value = value.pk
+             
         js_value = str(value).replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"') if value else ''
 
         html = f'''

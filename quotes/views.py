@@ -29,10 +29,52 @@ def quote_create(request, object_id, content_type):
             quote = form.save(commit=False)
             quote.content_object = targetObject
             quote.save()
-            service_formset.instance = quote
-            service_formset.save()
-            payment_formset.instance = quote
-            payment_formset.save()
+            
+            # Save services first
+            services = service_formset.save(commit=False)
+            
+            # Create a map of index -> service instance
+            service_map_by_index = {}
+            
+            # Manually save services with order and build map
+            for i, s_form in enumerate(service_formset.forms):
+                if s_form in service_formset.deleted_forms or (s_form.cleaned_data and s_form.cleaned_data.get('DELETE')):
+                    if s_form.instance.pk:
+                        s_form.instance.delete()
+                    continue
+                
+                # Check if form has data (is valid/bound)
+                if not s_form.is_valid() or not s_form.cleaned_data:
+                    continue
+
+                service = s_form.save(commit=False)
+                service.quote = quote
+                service.order = i  # Assign order based on formset position
+                service.save()
+                service_map_by_index[i] = service
+
+            # Save and link payments
+            for i, payment_form in enumerate(payment_formset.forms):
+                if payment_form in payment_formset.deleted_forms or (payment_form.cleaned_data and payment_form.cleaned_data.get('DELETE')):
+                    if payment_form.instance.pk:
+                         payment_form.instance.delete()
+                    continue
+                
+                if not payment_form.is_valid() or not payment_form.cleaned_data:
+                     continue
+
+                payment = payment_form.save(commit=False)
+                payment.quote = quote
+                payment.order = i
+                
+                service_identifier = payment_form.cleaned_data.get('quote_service')
+                if service_identifier and str(service_identifier).isdigit():
+                    service_idx = int(service_identifier)
+                    if service_idx in service_map_by_index:
+                        payment.quote_service = service_map_by_index[service_idx]
+                
+                payment.save()
+                
             return redirect('quote-detail', quote.id)
     context = {
         'form': form,
@@ -50,6 +92,12 @@ def quote_edit(request, pk, fallback):
     form = QuoteForm(instance=quote)
     service_formset = ServiceFormSet(instance=quote)
     payment_formset = PaymentFormSet(instance=quote)
+    
+    # Pre-process payment forms to handle the service choices logic
+    # We want to give the frontend an index or an ID it can understand
+    # Ideally, we should pass the service order/index to the frontend
+    # But for now, we'll let the frontend View handle the population logic via JS
+    
     if request.method == 'POST':
         form = QuoteForm(request.POST, instance=quote)
         service_formset = ServiceFormSet(request.POST, instance=quote)
@@ -57,8 +105,62 @@ def quote_edit(request, pk, fallback):
 
         if form.is_valid() and service_formset.is_valid() and payment_formset.is_valid():
             form.save()
-            service_formset.save()
-            payment_formset.save()
+             # Create a map of {index: service_instance} based on forms position
+            service_map_by_index = {}
+            service_map_by_id = {}
+            
+            # Save services manually to ensure order is saved and map is built correctly
+            for i, s_form in enumerate(service_formset.forms):
+                if s_form in service_formset.deleted_forms or (s_form.cleaned_data and s_form.cleaned_data.get('DELETE')):
+                    if s_form.instance.pk:
+                        s_form.instance.delete()
+                    continue
+
+                if not s_form.is_valid() or not s_form.cleaned_data:
+                    continue
+
+                service = s_form.save(commit=False)
+                service.quote = quote
+                service.order = i
+                service.save()
+                
+                service_map_by_index[i] = service
+                service_map_by_id[str(service.pk)] = service
+            
+            
+            for i, payment_form in enumerate(payment_formset.forms):
+                 if payment_form in payment_formset.deleted_forms or (payment_form.cleaned_data and payment_form.cleaned_data.get('DELETE')):
+                      if payment_form.instance.pk:
+                          payment_form.instance.delete()
+                      continue
+                 
+                 # Skip empty forms
+                 if not payment_form.is_valid() or not payment_form.cleaned_data:
+                      continue
+                 
+                 # Create/Update payment
+                 payment = payment_form.save(commit=False)
+                 payment.quote = quote # Ensure link
+                 payment.order = i
+                 
+                 service_identifier = payment_form.cleaned_data.get('quote_service')
+                 
+                 if service_identifier:
+                     service_identifier = str(service_identifier)
+                     
+                     # Case 1: Identifier acts as an ID (Existing service)
+                     if service_identifier in service_map_by_id:
+                         payment.quote_service = service_map_by_id[service_identifier]
+                     
+                     # Case 2: Identifier acts as an Index (New service or just indexed)
+                     # ONLY if not found in by_id map (to avoid ID/Index collision if ID is small integer)
+                     elif service_identifier.isdigit():
+                         idx = int(service_identifier)
+                         if idx in service_map_by_index:
+                             payment.quote_service = service_map_by_index[idx]
+                     
+                 payment.save()
+
             if fallback == "lead-detail":
                 return redirect('lead-detail', quote.content_object.id)
             if fallback == "customer-detail":

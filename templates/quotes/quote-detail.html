@@ -25,9 +25,9 @@
                         <span class="status-pill {% if quote.status == 'draft' %}info{% elif quote.status == 'lost' %}danger{% elif quote.status == 'won' %}success{% elif quote.status == 'sent' %}proccess{% endif %}">{{quote.get_status_display}}</span>
                     </div>
                     <a class="btn-ghost w-fit" href="{% url related_to_url quote.object_id %}">
-                        {% if quote.content_object.logo %}
-                        <img src="{{quote.content_object.logo.url}}" alt="Customer Logo" class="h-6 w-6 squircle">
-                        {% endif %}
+                        
+                        <img src="{% if quote.content_object.logo %}{{quote.content_object.logo.url}}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="h-6 w-6 squircle">
+                        
                         {{ quote.related_to }}
                     </a>
                 </div>
@@ -327,9 +327,7 @@
         <div class="grid grid-cols-3 px-2 gap-2 items-center" x-show="showContact" x-collapse.duration.500ms>
             <p class="text-gray-500">מקושר ל</p>
             <a class="col-span-2 btn-ghost w-fit" href="{% url related_to_url quote.object_id %}">
-                {% if quote.content_object.logo %}
-                <img src="{{quote.content_object.logo.url}}" alt="Customer Logo" class="squircle w-6 h-6">
-                {% endif %}
+                <img src="{% if quote.content_object.logo %}{{quote.content_object.logo.url}}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="squircle w-6 h-6">
                 {{quote.related_to}}
             </a>
             <p class="text-gray-500">טלפון</p>
