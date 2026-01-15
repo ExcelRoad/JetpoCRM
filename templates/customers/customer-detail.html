@@ -15,7 +15,7 @@
 
 {% block content %}
 <div class="flex h-207.5"  
-x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCustomer : 0, selectedCustomerName : '', quoteDeleteModelShow : false, selectedQuoteName : '', contactDeleteModelShow : false ,selectedQuote : 0, selectedContact : 0, selectedContactName : '', selectProject : 0, projectDeleteModelShow: false, selectedProjectName: ''}">
+x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCustomer : 0, selectedCustomerName : '', quoteDeleteModelShow : false, selectedQuoteName : '', contactDeleteModelShow : false ,selectedQuote : 0, selectedContact : 0, selectedContactName : '', selectedProject : 0, projectDeleteModelShow: false, selectedProjectName: '', paymentDeleteModelShow : false, selectedPayment : 0, selectedPaymentName : '', selectedPaymentQty : 0, selectedPaymentPrice : 0, paymentModelShow : false, paymentModelTitle : ''}">
     <!-- Main Section -->
     <div class="w-3/4 h-full" x-data="setSection()" x-init="init()">
         <div class="border-b border-gray-200">
@@ -116,6 +116,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                 <button :class="selectTab=='quotes' ? 'btn-tab active' : 'btn-tab' " @click="selectTab='quotes'">הצעות מחיר</button>
                 <button :class="selectTab=='meetings' ? 'btn-tab active' : 'btn-tab' " @click="selectTab='meetings'">פגישות</button>
                 <button :class="selectTab=='projects' ? 'btn-tab active' : 'btn-tab' " @click="selectTab='projects'">פרויקטים</button>
+                <button :class="selectTab=='payments' ? 'btn-tab active' : 'btn-tab' " @click="selectTab='payments'">תשלומים</button>
             </div>
         </div>
         <!-- Tab Content Section -->
@@ -580,6 +581,149 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                     {% endif %}
                 </div>
             </div>
+            <!-- Payments Tab Content -->
+            <div x-show="selectTab == 'payments'">
+                <div class="border-b border-gray-200 flex items-center px-4 gap-4">
+                    <div class="pb-4 w-1/6">
+                        <h2 class="text-xl font-semibold my-2">תשלומים</h2>
+                    </div>
+                    <div class="w-4/6 flex items-center gap-2 justify-start">
+                        <div class="p-2 border-r-2 border-gray-100 flex gap-2">
+                            <div class="px-2 py-2 rounded-lg bg-gray-100 flex items-center">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-5 text-gray-400">
+                                    <path d="M18 8.5V8.35417C18 6.50171 16.4983 5 14.6458 5H9.5C7.567 5 6 6.567 6 8.5C6 10.433 7.567 12 9.5 12H14.5C16.433 12 18 13.567 18 15.5C18 17.433 16.433 19 14.5 19H9.42708C7.53436 19 6 17.4656 6 15.5729V15.5M12 3V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-gray-500 text-xs">סך תשלומים</h4>
+                                <span class="text-base font-semibold">{{ paymentInfo.total_price|floatformat:"0"|intcomma:False }} ₪</span>
+                                <span class="rounded-full bg-violet-200 text-violet-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.total_count|floatformat:"0"|intcomma:False }}</span>
+                            </div>
+                        </div>
+                        <div class="p-2 border-r-2 border-gray-100 flex gap-2">
+                            <div class="px-2 py-2 rounded-lg bg-gray-100 flex items-center">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-5 text-gray-400">
+                                    <path d="M13 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.0799 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.0799 21 8.2 21H13M13 3L19 9M13 3V7.4C13 7.96005 13 8.24008 13.109 8.45399C13.2049 8.64215 13.3578 8.79513 13.546 8.89101C13.7599 9 14.0399 9 14.6 9H19M19 9V10M19.0001 15C17.0027 15 17.0017 15.4862 17.0001 16.3292L17.0001 16.3325C16.9983 17.2328 17.0001 17.5 19.0001 17.5C21.0001 17.5 21.0001 17.7055 21.0001 18.6667C21.0001 19.389 21.0001 20 19.0001 20M19.0001 15L21.0001 15M19.0001 15L19 14M19.0001 20H17.0001M19.0001 20L19 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-gray-500 text-xs">טיוטה</h4>
+                                <span class="text-base font-semibold">{{ paymentInfo.draft_price|floatformat:"0"|intcomma:False }} ₪</span>
+                                <span class="rounded-full bg-violet-200 text-violet-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.draft_count|floatformat:"0"|intcomma:False }}</span>
+                            </div>
+                        </div>
+                        <div class="p-2 border-r-2 border-gray-100 flex gap-2">
+                            <div class="px-2 py-2 rounded-lg bg-gray-100 flex items-center">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-5 text-gray-400">
+                                    <path d="M17 13H21V19C21 20.1046 20.1046 21 19 21M17 13V19C17 20.1046 17.8954 21 19 21M17 13V5.75707C17 4.85168 17 4.39898 16.8098 4.13646C16.6439 3.90746 16.3888 3.75941 16.1076 3.72897C15.7853 3.69408 15.3923 3.91868 14.6062 4.36788L14.2938 4.54637C14.0045 4.7117 13.8598 4.79438 13.7062 4.82675C13.5702 4.85539 13.4298 4.85539 13.2938 4.82675C13.1402 4.79438 12.9955 4.7117 12.7062 4.54637L10.7938 3.45359C10.5045 3.28826 10.3598 3.20559 10.2062 3.17322C10.0702 3.14457 9.92978 3.14457 9.79383 3.17322C9.64019 3.20559 9.49552 3.28826 9.20618 3.4536L7.29382 4.54637C7.00448 4.71171 6.85981 4.79438 6.70617 4.82675C6.57022 4.85539 6.42978 4.85539 6.29383 4.82675C6.14019 4.79438 5.99552 4.71171 5.70618 4.54637L5.39382 4.36788C4.60772 3.91868 4.21467 3.69408 3.89237 3.72897C3.61123 3.75941 3.35611 3.90746 3.1902 4.13646C3 4.39898 3 4.85168 3 5.75707V16.2C3 17.8801 3 18.7202 3.32698 19.362C3.6146 19.9264 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H19M12 10.5C11.5 10.376 10.6851 10.3714 10 10.376C9.77091 10.3775 9.90941 10.3678 9.6 10.376C8.79258 10.4012 8.00165 10.7368 8 11.6875C7.99825 12.7003 9 13 10 13C11 13 12 13.2312 12 14.3125C12 15.1251 11.1925 15.4812 10.1861 15.5991C9.3861 15.5991 9 15.625 8 15.5M10 16V17M10 8.99998V9.99998" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-gray-500 text-xs">חוייבו</h4>
+                                <span class="text-base font-semibold">{{ paymentInfo.billed_price|floatformat:"0"|intcomma:False }} ₪</span>
+                                <span class="rounded-full bg-blue-200 text-blue-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.billed_count|floatformat:"0"|intcomma:False }}</span>
+                            </div>
+                        </div>
+                        <div class="p-2 border-r-2 border-gray-100 flex gap-2">
+                            <div class="px-2 py-2 rounded-lg bg-gray-100 flex items-center">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-5 text-gray-400">
+                                    <path d="M8 12.3333L10.4615 15L16 9M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-gray-500 text-xs">שולמו</h4>
+                                <span class="text-base font-semibold">{{ paymentInfo.paid_price|floatformat:"0"|intcomma:False }} ₪</span>
+                                <span class="rounded-full bg-emerald-200 text-emerald-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.paid_count|floatformat:"0"|intcomma:False }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-1/6 flex items-center justify-end">
+                        <a class="btn-main" href="{% url 'project-create' customer.id %}">צור פרויקט</a>
+                    </div>
+                </div>
+                <div class="overflow-y-auto h-116 flex-col flex w-full">
+                    {% if customer.payments %}
+                    <div class="table-wrapper mx-4">
+                        <table class="w-full relative">
+                            <thead class="h-full">
+                                <tr class="table-header-row">
+                                    <th class="table-header-item">#</th>
+                                    <th class="table-header-item">שם</th>
+                                    <th class="table-header-item">פרויקט</th>
+                                    <th class="table-header-item">סטטוס</th>
+                                    <th class="table-header-item">כמות</th>
+                                    <th class="table-header-item">מחיר</th>
+                                    <th class="table-header-item">סך מחיר</th>
+                                    <th class="table-header-item">מחיר כולל מע"מ</th>
+                                    <th class="table-header-item">מספר חשבונית</th>
+                                </tr>
+                            </thead>
+                            <tbody class="">
+                                {% for payment in customer.payments %}
+                                <tr class="table-body-item">
+                                    <td><p class="font-semibold">{{ payment.payment_number }}</p></td>
+                                    <td>{{ payment.name }}</td>
+                                    <td>{{ payment.project.name}}
+                                    <td><span class="status-pill {% if payment.status == 'paid' %}success{% elif payment.status == 'billed' %}proccess{% endif %}">{{ payment.get_status_display }}</span></td>
+                                    <td>{{ payment.qty|floatformat:"2"|intcomma:False }}</td>
+                                    <td>₪{{ payment.price|floatformat:"0"|intcomma:False }}</td>
+                                    <td>₪{{ payment.total_price|floatformat:"0"|intcomma:False }}</td>
+                                    <td>₪{{ payment.total_wvat_price|floatformat:"0"|intcomma:False }}</td>
+                                    <td>{% if payment.sumit_invoice_number %}{{ payment.sumit_invoice_number }}{% else %}-{% endif %}</td>
+                                    <td x-data="{ modeOptions : false}">
+                                        <div class="size-6 p-1 rounded hover:bg-gray-200 cursor-pointer relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
+                                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            <div class="p-2 flex flex-col z-100 absolute top-7 border border-gray-200 shadow rounded-lg -right-36 w-44 bg-white" x-show="modeOptions">
+                                                <button class="nav-btn" @click="modelBackgroundShow = true, paymentModelShow = true, selectedPayment = '{{payment.id}}', selectedPaymentPrice = '{{payment.price}}', selectedPaymentQty = '{{payment.qty}}', paymentModelTitle = 'עריכת תשלום', selectedPaymentName = '{{payment.name}}'">
+                                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M11 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40974 4.40973 4.7157 4.21799 5.09202C4 5.51985 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V12.5M15.5 5.5L18.3284 8.32843M10.7627 10.2373L17.411 3.58902C18.192 2.80797 19.4584 2.80797 20.2394 3.58902C21.0205 4.37007 21.0205 5.6364 20.2394 6.41745L13.3774 13.2794C12.6158 14.0411 12.235 14.4219 11.8012 14.7247C11.4162 14.9936 11.0009 15.2162 10.564 15.3882C10.0717 15.582 9.54378 15.6885 8.48793 15.9016L8 16L8.04745 15.6678C8.21536 14.4925 8.29932 13.9048 8.49029 13.3561C8.65975 12.8692 8.89125 12.4063 9.17906 11.9786C9.50341 11.4966 9.92319 11.0768 10.7627 10.2373Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                   עריכה
+                                                </button>
+                                                {% if payment.status == 'draft' %}
+                                                <button class="nav-btn" @click="">
+                                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M17 13H21V19C21 20.1046 20.1046 21 19 21M17 13V19C17 20.1046 17.8954 21 19 21M17 13V5.75707C17 4.85168 17 4.39898 16.8098 4.13646C16.6439 3.90746 16.3888 3.75941 16.1076 3.72897C15.7853 3.69408 15.3923 3.91868 14.6062 4.36788L14.2938 4.54637C14.0045 4.7117 13.8598 4.79438 13.7062 4.82675C13.5702 4.85539 13.4298 4.85539 13.2938 4.82675C13.1402 4.79438 12.9955 4.7117 12.7062 4.54637L10.7938 3.45359C10.5045 3.28826 10.3598 3.20559 10.2062 3.17322C10.0702 3.14457 9.92978 3.14457 9.79383 3.17322C9.64019 3.20559 9.49552 3.28826 9.20618 3.4536L7.29382 4.54637C7.00448 4.71171 6.85981 4.79438 6.70617 4.82675C6.57022 4.85539 6.42978 4.85539 6.29383 4.82675C6.14019 4.79438 5.99552 4.71171 5.70618 4.54637L5.39382 4.36788C4.60772 3.91868 4.21467 3.69408 3.89237 3.72897C3.61123 3.75941 3.35611 3.90746 3.1902 4.13646C3 4.39898 3 4.85168 3 5.75707V16.2C3 17.8801 3 18.7202 3.32698 19.362C3.6146 19.9264 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H19M12 10.5C11.5 10.376 10.6851 10.3714 10 10.376C9.77091 10.3775 9.90941 10.3678 9.6 10.376C8.79258 10.4012 8.00165 10.7368 8 11.6875C7.99825 12.7003 9 13 10 13C11 13 12 13.2312 12 14.3125C12 15.1251 11.1925 15.4812 10.1861 15.5991C9.3861 15.5991 9 15.625 8 15.5M10 16V17M10 8.99998V9.99998" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                   שליחת חשבונית
+                                                </button>
+                                                {% elif payment.status == 'billed' %}
+                                                <button class="nav-btn" @click="">
+                                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M17 13H21V19C21 20.1046 20.1046 21 19 21M17 13V19C17 20.1046 17.8954 21 19 21M17 13V5.75707C17 4.85168 17 4.39898 16.8098 4.13646C16.6439 3.90746 16.3888 3.75941 16.1076 3.72897C15.7853 3.69408 15.3923 3.91868 14.6062 4.36788L14.2938 4.54637C14.0045 4.7117 13.8598 4.79438 13.7062 4.82675C13.5702 4.85539 13.4298 4.85539 13.2938 4.82675C13.1402 4.79438 12.9955 4.7117 12.7062 4.54637L10.7938 3.45359C10.5045 3.28826 10.3598 3.20559 10.2062 3.17322C10.0702 3.14457 9.92978 3.14457 9.79383 3.17322C9.64019 3.20559 9.49552 3.28826 9.20618 3.4536L7.29382 4.54637C7.00448 4.71171 6.85981 4.79438 6.70617 4.82675C6.57022 4.85539 6.42978 4.85539 6.29383 4.82675C6.14019 4.79438 5.99552 4.71171 5.70618 4.54637L5.39382 4.36788C4.60772 3.91868 4.21467 3.69408 3.89237 3.72897C3.61123 3.75941 3.35611 3.90746 3.1902 4.13646C3 4.39898 3 4.85168 3 5.75707V16.2C3 17.8801 3 18.7202 3.32698 19.362C3.6146 19.9264 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H19M12 10.5C11.5 10.376 10.6851 10.3714 10 10.376C9.77091 10.3775 9.90941 10.3678 9.6 10.376C8.79258 10.4012 8.00165 10.7368 8 11.6875C7.99825 12.7003 9 13 10 13C11 13 12 13.2312 12 14.3125C12 15.1251 11.1925 15.4812 10.1861 15.5991C9.3861 15.5991 9 15.625 8 15.5M10 16V17M10 8.99998V9.99998" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                   שליחת קבלה
+                                                </button>
+                                                {% endif %}
+                                                <hr class="text-gray-200 my-1">
+                                                <button class="nav-btn danger" @click="modelBackgroundShow = true, paymentDeleteModelShow = true, selectedPayment = '{{payment.id}}', selectedPaymentName = '{{ payment.name }}'">
+                                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    מחיקה
+                                                </button>
+                                            </div>
+                                        </div> 
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="border-dashed border-2 border-gray-200 flex flex-col items-center justify-center rounded-xl p-6 gap-4 text-center mt-2 mx-4">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-400 size-24">
+                                    <path d="M21 20L20.5528 20.8944C20.8628 21.0494 21.2309 21.0329 21.5257 20.8507C21.8205 20.6684 22 20.3466 22 20H21ZM16.8052 18.0193L16.9438 17.029L16.8052 18.0193ZM17.6757 18.3378L17.2285 19.2323L17.6757 18.3378ZM17.1656 18.1044L16.8467 19.0522L17.1656 18.1044ZM3.21799 16.908L4.10899 16.454L3.21799 16.908ZM4.09202 17.782L4.54601 16.891L4.09202 17.782ZM19.908 4.21799L19.454 5.10899L19.908 4.21799ZM20.782 5.09202L19.891 5.54601L20.782 5.09202ZM4.09202 4.21799L4.54601 5.10899L4.09202 4.21799ZM3.21799 5.09202L4.10899 5.54601L3.21799 5.09202ZM11.2602 11.0429C10.8697 11.4334 10.8697 12.0666 11.2602 12.4571C11.6507 12.8476 12.2839 12.8476 12.6744 12.4571L11.2602 11.0429ZM9.06184 8.50074C8.92417 9.03559 9.24616 9.58078 9.78101 9.71844C10.3159 9.8561 10.861 9.53411 10.9987 8.99926L9.06184 8.50074ZM11.9668 13.75C11.4145 13.75 10.9668 14.1977 10.9668 14.75C10.9668 15.3023 11.4145 15.75 11.9668 15.75V13.75ZM11.9768 15.75C12.5291 15.75 12.9768 15.3023 12.9768 14.75C12.9768 14.1977 12.5291 13.75 11.9768 13.75V15.75ZM6.2 5H17.8V3H6.2V5ZM4 14.8V7.2H2V14.8H4ZM16.2446 17H6.2V19H16.2446V17ZM21.4472 19.1056L18.1229 17.4434L17.2285 19.2323L20.5528 20.8944L21.4472 19.1056ZM16.2446 19C16.553 19 16.6133 19.0022 16.6665 19.0097L16.9438 17.029C16.7211 16.9978 16.4996 17 16.2446 17V19ZM18.1229 17.4434C17.8948 17.3294 17.6977 17.2283 17.4845 17.1566L16.8467 19.0522C16.8977 19.0693 16.9526 19.0943 17.2285 19.2323L18.1229 17.4434ZM16.6665 19.0097C16.7278 19.0182 16.7881 19.0325 16.8467 19.0522L17.4845 17.1566C17.3086 17.0974 17.1276 17.0547 16.9438 17.029L16.6665 19.0097ZM2 14.8C2 15.3436 1.99922 15.8114 2.03057 16.195C2.06287 16.5904 2.13419 16.9836 2.32698 17.362L4.10899 16.454C4.0838 16.4045 4.04612 16.3038 4.02393 16.0322C4.00078 15.7488 4 15.3766 4 14.8H2ZM6.2 17C5.62345 17 5.25117 16.9992 4.96784 16.9761C4.69617 16.9539 4.59545 16.9162 4.54601 16.891L3.63803 18.673C4.01641 18.8658 4.40963 18.9371 4.80497 18.9694C5.18864 19.0008 5.65645 19 6.2 19V17ZM2.32698 17.362C2.6146 17.9265 3.07354 18.3854 3.63803 18.673L4.54601 16.891C4.35785 16.7951 4.20487 16.6422 4.10899 16.454L2.32698 17.362ZM17.8 5C18.3766 5 18.7488 5.00078 19.0322 5.02393C19.3038 5.04612 19.4045 5.0838 19.454 5.10899L20.362 3.32698C19.9836 3.13419 19.5904 3.06287 19.195 3.03057C18.8114 2.99922 18.3436 3 17.8 3V5ZM22 7.2C22 6.65645 22.0008 6.18864 21.9694 5.80497C21.9371 5.40963 21.8658 5.01641 21.673 4.63803L19.891 5.54601C19.9162 5.59545 19.9539 5.69617 19.9761 5.96784C19.9992 6.25117 20 6.62345 20 7.2H22ZM19.454 5.10899C19.6422 5.20487 19.7951 5.35785 19.891 5.54601L21.673 4.63803C21.3854 4.07354 20.9265 3.6146 20.362 3.32698L19.454 5.10899ZM6.2 3C5.65645 3 5.18864 2.99922 4.80497 3.03057C4.40963 3.06287 4.01641 3.13419 3.63803 3.32698L4.54601 5.10899C4.59545 5.0838 4.69617 5.04612 4.96784 5.02393C5.25117 5.00078 5.62345 5 6.2 5V3ZM4 7.2C4 6.62345 4.00078 6.25117 4.02393 5.96784C4.04612 5.69617 4.0838 5.59545 4.10899 5.54601L2.32698 4.63803C2.13419 5.01641 2.06287 5.40963 2.03057 5.80497C1.99922 6.18864 2 6.65645 2 7.2H4ZM3.63803 3.32698C3.07354 3.6146 2.6146 4.07354 2.32698 4.63803L4.10899 5.54601C4.20487 5.35785 4.35785 5.20487 4.54601 5.10899L3.63803 3.32698ZM12.9673 9.25C12.9673 9.42317 12.9218 9.55527 12.6478 9.81968C12.4941 9.96803 12.3131 10.1153 12.0622 10.324C11.8238 10.5223 11.5443 10.7587 11.2602 11.0429L12.6744 12.4571C12.8902 12.2413 13.1107 12.0533 13.3412 11.8616C13.5589 11.6805 13.8154 11.4723 14.0367 11.2587C14.5128 10.7993 14.9673 10.1814 14.9673 9.25H12.9673ZM11.9673 8.25C12.5195 8.25 12.9673 8.69772 12.9673 9.25H14.9673C14.9673 7.59315 13.6241 6.25 11.9673 6.25V8.25ZM10.9987 8.99926C11.1098 8.56774 11.5027 8.25 11.9673 8.25V6.25C10.568 6.25 9.39481 7.20704 9.06184 8.50074L10.9987 8.99926ZM11.9668 15.75H11.9768V13.75H11.9668V15.75ZM20 7.2V20H22V7.2H20Z" fill="currentColor"/>
+                                </svg>
+                                <div class="flex flex-col gap-2">
+                                    <h3 class="text-xl font-semibold">לא קיימים תשלומים עבור הפרויקט הזה עדיין</h3>
+                                </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
     
@@ -775,6 +919,69 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                 <button class="btn-action" @click="modelBackgroundShow = false, projectDeleteModelShow = false">
                     ביטול
                 </button>
+            </div>
+        </div>
+        <!-- Delete Confirmation Model For Single Payment-->
+        <div class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-4 min-w-1/4 min-h-1/5 flex flex-col" x-show="paymentDeleteModelShow" x-cloak>
+            <button class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="modelBackgroundShow = false, paymentDeleteModelShow = false">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="flex-1">
+                <h1 class="text-xl font-semibold my-3">מחיקת תשלום</h1>
+                <span class="flex gap-2 items-center">
+                    <p class="text-gray-500">אתה עומד למחוק</p>
+                    <p class="text-gray-900 text-semibold" x-text="selectedPaymentName"></p>
+                </span>
+                <p class="text-gray-500">פעולה זו אינה ניתנת לשחזור</p>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <form method="post" :action="'{% url 'payment-delete' pk=999999 %}'.replace('999999', selectedPayment)">
+                    {% csrf_token %}
+                    <input type="text" name="fallback" value="project-list" class="hidden">
+                    <button class="btn-action danger high" type="submit">
+                     מחיקה
+                    </button>
+                </form>
+                
+                <button class="btn-action" @click="modelBackgroundShow = false, paymentDeleteModelShow = false">
+                    ביטול
+                </button>
+            </div>
+        </div>
+        <!-- Payment Form Model -->
+        <div class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-4 min-w-1/4 min-h-1/5 flex flex-col" x-show="paymentModelShow" x-cloak>
+            <button class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="modelBackgroundShow = false, paymentModelShow = false">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="flex-1">
+                <h1 class="text-xl font-semibold my-3" x-text="paymentModelTitle"></h1>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <form method="post" :action="'{% url 'payment-edit' pk=999999 %}'.replace('999999', selectedPayment)" class="w-full">
+                    {% csrf_token %}
+                    <input type="text" name="fallback" value="project-detail" class="hidden">
+                    <input type="text" name="project" value="{{project.id}}" class="hidden">
+                    <div class="flex flex-col gap-1">
+                        <label for="paymentName" class="text-gray-600" >שם תשלום</label>
+                        <input type="text" id="paymentName" name="paymentName" :value="selectedPaymentName" class="input-field">
+                        <label for="paymentQty" class="text-gray-600">כמות</label>
+                        <input type="decimal" id="paymentQty" name="paymentQty" :value="selectedPaymentQty" class="input-field">
+                        <label for="paymentPrice" class="text-gray-600">מחיר</label>
+                        <input type="decimal" id="paymentPrice" name="paymentPrice" :value="selectedPaymentPrice" class="input-field">
+                    </div>
+                    <div class="flex items-center gap-2 justify-end mt-2">
+                        <button class="btn-main" type="submit">
+                             שמירה
+                        </button>
+                        <a class="btn-action" @click="modelBackgroundShow = false, paymentModelShow = false">
+                             ביטול
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

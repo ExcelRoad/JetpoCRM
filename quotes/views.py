@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 from .models import Quote
 from customers.models import Customer
 from contacts.models import Contact
-from projects.models import Project
+from projects.models import Project, ProjectBudget
 from payments.models import Payment
 from .forms import QuoteForm, ServiceFormSet, PaymentFormSet, QuoteServiceForm, QuotePaymentForm
 from django.contrib.contenttypes.models import ContentType
@@ -368,6 +368,14 @@ def quote_confirm(request, pk):
             status = 'open',
             customer = customer
         )
+        # Create budget for each project
+        ProjectBudget.objects.create(
+            project = project,
+            qty = quote_service.qty,
+            price = quote_service.price,
+            is_active = True,
+            name = quote_service.name
+        )
 
         # Create payments linked to this service's project
         for payment in quote_service.payments.all():
@@ -383,8 +391,8 @@ def quote_confirm(request, pk):
     # update the quote to won
     quote.status = 'won'
     quote.save()
-    # go to the project page
-    return redirect('quote-detail', quote.id)
+    # go to the customer page
+    return redirect('customer-detail', customer.id)
 
 
 def get_service_form_row(request):

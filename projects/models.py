@@ -78,11 +78,14 @@ class Project(models.Model):
     @property
     def timesheets(self):
         from activities.models import Timesheet
-        return Timesheet.objects.filter(task__in=self.tasks.all())
+        budget = ProjectBudget.objects.get(project=self, is_active=True)
+        return Timesheet.objects.filter(budget=budget)
 
     @property
     def reported_hours(self):
         hours = self.timesheets.all().aggregate(Sum('hours'))['hours__sum']
+        if not hours:
+            return 0.00
         return hours
 
     @property
@@ -137,5 +140,7 @@ class ProjectBudget(models.Model):
     @property
     def reported_hours(self):
         timesheets = self.timesheets.all()
+        if not timesheets:
+            return 0.00
         amount = sum([x.hours for x in timesheets])
         return amount

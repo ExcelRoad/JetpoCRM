@@ -78,6 +78,15 @@ def customer_detail(request, pk):
     project_process_price = 0
     project_canceled_count = 0
     project_canceled_price = 0
+    payment_total_count = 0
+    payment_total_price = 0
+    payment_draft_count = 0
+    payment_draft_price = 0
+    payment_billed_count = 0
+    payment_billed_price = 0
+    payment_paid_count = 0
+    payment_paid_price = 0
+
 
     for p in customer.projects.all():
         project_total_price += p.budget['amount']
@@ -91,6 +100,18 @@ def customer_detail(request, pk):
         if p.status == 'canceled':
             project_canceled_count += 1
             project_canceled_price += p.budget['amount']
+        for payment in p.payments.all():
+            payment_total_count += 1
+            payment_total_price += payment.total_price
+            if payment.status == 'draft':
+                payment_draft_count += 1
+                payment_draft_price += payment.total_price
+            if payment.status == 'billed':
+                payment_billed_count += 1
+                payment_billed_price += payment.total_price
+            if payment.status == 'paid':
+                payment_paid_count += 1
+                payment_paid_price += payment.total_price
 
     projectInfo = {
         'total_price': project_total_price,
@@ -101,6 +122,17 @@ def customer_detail(request, pk):
         'complete_price': project_complete_price,
         'canceled_price': project_canceled_price,
         'canceled_count': project_canceled_count
+    }
+
+    paymentInfo = {
+        'total_count': payment_total_count,
+        'total_price': payment_total_price,
+        'draft_count': payment_draft_count,
+        'draft_price': payment_draft_price,
+        'billed_count': payment_billed_count,
+        'billed_price': payment_billed_price,
+        'paid_count': payment_paid_count,
+        'paid_price': payment_paid_price,
     }
 
     for q in customer.quotes.all():
@@ -133,6 +165,7 @@ def customer_detail(request, pk):
         'tagged_note': tagged_note,
         'quoteInfo': quoteInfo,
         'projectInfo': projectInfo,
+        'paymentInfo': paymentInfo,
     }
     return render(request, 'customers/customer-detail.html', context)
 

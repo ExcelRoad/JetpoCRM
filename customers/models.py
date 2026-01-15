@@ -1,8 +1,10 @@
 from django.db import models
+from django.db.models import Sum
 from leads.models import LeadSource
 from django.contrib.contenttypes.fields import GenericRelation
 from activities.models import Note
 from quotes.models import Quote
+
 
 class Customer(models.Model):
 
@@ -30,10 +32,7 @@ class Customer(models.Model):
         verbose_name = "לקוח"
         verbose_name_plural = "לקוחות"
 
-    @property
-    def total_income(self):
-        return 100
-    
+
     @property
     def open_quotes(self):
         quotes = self.quotes.all().filter(status__in=['draft', 'sent'])
@@ -62,3 +61,18 @@ class Customer(models.Model):
             'count': count,
         }
         return open_project_map
+
+    @property
+    def payments(self):
+        from payments.models import Payment
+        payments = Payment.objects.filter(project__customer = self)
+        return payments
+    
+    @property
+    def total_income(self):
+        total = 0
+        for p in self.payments:
+            if p.status == 'paid':
+                total += p.total_price
+        return total
+
