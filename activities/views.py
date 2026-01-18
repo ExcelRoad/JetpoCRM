@@ -52,7 +52,7 @@ def task_complete(request, pk, main=False):
         task = Task.objects.get(pk=pk)
         task.is_completed = True
         task.save()
-        if not main:
+        if main == "False":
             base_url = reverse('project-detail', args=(task.object_id,))
             query_string = urlencode({'section': 'tasks'})
             url = f'{base_url}?{query_string}'
@@ -62,8 +62,11 @@ def task_complete(request, pk, main=False):
 
 def task_delete(request, pk):
     if request.method == 'POST':
+        fallback = request.POST['fallback']
         task = Task.objects.get(pk=pk)
         task.delete()
+        if fallback == "task-list":
+            return redirect('task-list')
         base_url = reverse('project-detail', args=(task.object_id,))
         query_string = urlencode({'section': 'tasks'})
         url = f'{base_url}?{query_string}'
@@ -125,3 +128,16 @@ def task_mass_complete(request):
             task.is_completed = True
             task.save()
         return redirect('task-list')
+
+def task_uncomplete(request, pk):
+    if request.method == 'POST':
+        fallback = request.POST['fallback']
+        task = Task.objects.get(pk=pk)
+        task.is_completed = False
+        task.save()
+        if fallback == "task-list":
+            return redirect('task-list')
+        base_url = reverse('project-detail', args=(task.object_id,))
+        query_string = urlencode({'section': 'tasks'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
