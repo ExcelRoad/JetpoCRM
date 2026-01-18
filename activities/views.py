@@ -23,8 +23,8 @@ def task_create_update(request, pk):
     taskDescription = request.POST['taskDescription']
     projectId = request.POST['project']
     taskUrgency = request.POST['taskUrgency']
-    project = Project.objects.get(pk=projectId)
-    if pk==0 or pk=="0":
+    if pk==0 or pk=="0" and projectId != "":
+        project = Project.objects.get(pk=projectId)
         task = Task.objects.create(
             title = taskTitle,
             description = taskDescription,
@@ -38,21 +38,27 @@ def task_create_update(request, pk):
         task.description = taskDescription
         task.urgency = taskUrgency
         task.save()
-    base_url = reverse('project-detail', args=(task.object_id,))
-    query_string = urlencode({'section': 'tasks'})
-    url = f'{base_url}?{query_string}'
-    return redirect(url)
-
-
-def task_complete(request, pk):
-    if request.method == 'POST':
-        task = Task.objects.get(pk=pk)
-        task.is_completed = True
-        task.save()
+    if projectId != "":
         base_url = reverse('project-detail', args=(task.object_id,))
         query_string = urlencode({'section': 'tasks'})
         url = f'{base_url}?{query_string}'
         return redirect(url)
+    else:
+        return redirect('task-list')
+
+
+def task_complete(request, pk, main=False):
+    if request.method == 'POST':
+        task = Task.objects.get(pk=pk)
+        task.is_completed = True
+        task.save()
+        if not main:
+            base_url = reverse('project-detail', args=(task.object_id,))
+            query_string = urlencode({'section': 'tasks'})
+            url = f'{base_url}?{query_string}'
+            return redirect(url)
+        else:
+            return redirect('task-list')
 
 def task_delete(request, pk):
     if request.method == 'POST':
@@ -102,3 +108,20 @@ def timesheet_delete(request, pk):
         url = f'{base_url}?{query_string}'
         return redirect(url)
 
+
+def task_list(request):
+    tasks = Task.objects.all()
+    context = {
+        'tasks': tasks,
+    }
+    return render(request, 'projects/task-list.html', context)
+
+
+def task_mass_complete(request):
+    if request.method == 'POST':
+        tasks = request.POST['tasks'].split(',')
+        for task in tasks:
+            task = Task.objects.get(pk=task)
+            task.is_completed = True
+            task.save()
+        return redirect('task-list')

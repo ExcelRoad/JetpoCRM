@@ -169,7 +169,6 @@ def customer_detail(request, pk):
     }
     return render(request, 'customers/customer-detail.html', context)
 
-
 def customer_submit_note(request, pk):
     customer = Customer.objects.get(pk = pk)
     note = Note.objects.create(
@@ -190,7 +189,6 @@ def customer_delete_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
-
 def customer_tag_note(request, noteid):
     # remove tag from all Notes for this Lead
     note = Note.objects.get(pk=noteid)
@@ -204,7 +202,6 @@ def customer_tag_note(request, noteid):
     query_string = urlencode({'section': 'notes'})
     url = f'{base_url}?{query_string}'
     return redirect(url)
-
 
 def customer_mass_delete(request):
     if request.method == "POST":

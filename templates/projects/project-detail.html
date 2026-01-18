@@ -14,7 +14,7 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
-<div class="flex h-207.5"  
+<div class="flex h-207.5" x-init="$store.selectedMainTab.change('projects')"
 x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedProject : 0, selectedProjectName : '', projectDeleteModelShow : false, selectedTaskName : '', taskDeleteModelShow : false ,selectedtesk : 0, taskModelShow : false, taskModelTitle : '', selectedTask : 0, selectedTaskTitle : '', selectedTaskDescription: '', selectedTaskUrgency : 'low', timesheetModelShow : false, selectedTimesheet: 0, selectedTimesheetDate: '', selectedTimesheetDescription: '', selectedTimesheetHours : 0, taskDeleteModelShow : false, timesheetDeleteModelShow: false, selectedTimesheetName: '', selectedBudget : 0, selectedBudgetName : '', budgetDeleteModelShow: false, budgetModelShow: false, budgetModelTitle: '', selectedBudgetQty : 0, selectedBudgetPrice: 0,selectedPayment : 0, selectedPaymentName : '', paymentDeleteModelShow: false, paymentModelShow: false, paymentModelTitle: '', selectedPaymentQty : 0, selectedPaymentPrice: 0}">
     <!-- Main Section -->
     <div class="w-3/4 h-full" x-data="setSection()" x-init="init()">
@@ -297,7 +297,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                                     </td>
                                     <td>
                                         {% if not task.is_completed %}
-                                        <form method="post" action="{% url 'task-complete' task.id %}">
+                                        <form method="post" action="{% url 'task-complete' task.id False %}">
                                             {% csrf_token %}
                                             <button type="submit" class="w-fit text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded-lg hover:bg-emerald-100 cursor-pointer">✓</button>
                                         </form>
