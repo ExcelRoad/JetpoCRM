@@ -140,3 +140,28 @@ def contact_mass_delete(request):
             contact.delete()
         return redirect(fallback)
 
+
+def contact_toggle_alerts(request, pk):
+    contact = Contact.objects.get(pk = pk)
+    contact.is_alerts = not contact.is_alerts
+    fallback = request.POST['fallback']
+    contact.save()
+    if fallback == 'customer-detail':
+        base_url = reverse('customer-detail', args=(contact.customer.id,))
+        query_string = urlencode({'section': 'contacts'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+    elif fallback == 'contact-detail':
+        base_url = reverse('contact-detail', args=(contact.id,))
+        query_string = urlencode({'section': 'notes'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+    else:
+        return redirect('contact-list')
+
+        
+    base_url = reverse('contact-detail', args=(pk,))
+    query_string = urlencode({'section': 'notes'})
+    url = f'{base_url}?{query_string}'
+    return redirect(url)
+

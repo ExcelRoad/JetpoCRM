@@ -13,4 +13,5 @@ urlpatterns = [
     path('api/note/<noteid>/delete', views.contact_delete_note, name='contact-delete-note'),
     path('api/note/<noteid>/tagging', views.contact_tag_note, name='contact-tag-note'),
     path('api/set_main/<pk>', views.contact_set_main, name='contact-set-main'),
+    path('api/toggle_alerts/<pk>', views.contact_toggle_alerts, name='contact-toggle-alerts'),
 ]
