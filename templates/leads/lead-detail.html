@@ -403,7 +403,7 @@
         </div>
         <div class="grid grid-cols-3 px-4 gap-2" x-show="showAdditional" x-collapse.duration.500ms>
             <p class="text-gray-500">מקור ליד</p>
-            <span class="col-span-2 rounded-lg text-xs bg-gray-200 px-2 py-1 w-fit">{% if lead.lead_source %}{{lead.lead_source.name}}{% endif %}</span>
+            <p class="col-span-2">{% if lead.lead_source %}<span class="rounded-lg text-xs bg-gray-200 px-2 py-1 w-fit">{{lead.lead_source.name}}</span>{% endif %}</p>
             <p class="text-gray-500">תאריך יצירה</p>
             <p class="col-span-2">{{lead.created_at}}</p>
             <p class="text-gray-500">תאריך עדכון אחרון</p>

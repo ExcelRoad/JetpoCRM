@@ -10,4 +10,6 @@ urlpatterns = [
     path('api/timesheets/delete/<pk>', views.timesheet_delete, name= 'timesheet-delete'),
     path('api/tasks/masscomplete/', views.task_mass_complete, name='task-mass-complete'),
     path('api/tasks/uncomplete/<pk>/', views.task_uncomplete, name='task-uncomplete'),
+    path('api/leadsource/save', views.leadsource_save, name='leadsource-save'),
+    path('api/leadsource/<pk>/delete', views.leadsource_delete, name='leadsource-delete'),
 ]

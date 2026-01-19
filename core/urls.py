@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from activities.views import task_list
+from activities.views import task_list, settings_page
 
 urlpatterns = [
     path('', include('users.urls')),
@@ -15,6 +15,7 @@ urlpatterns = [
     path('projects/', include('projects.urls')),
     path('payments/', include('payments.urls')),
     path('tasks/', task_list, name='task-list'),
+    path('settings/', settings_page, name='settings'),
     path("admin/", admin.site.urls)
 ]
 

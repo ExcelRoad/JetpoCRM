@@ -133,10 +133,10 @@
                             </div>
                         </td>
                         <td>{% if contact.customer %}
-                            <div class="flex items-center gap-1">
+                            <a class="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 w-fit rounded-lg" href="{% url 'customer-detail' contact.customer.id %}">
                                 <img src="{% if contact.customer.logo %}{{ contact.customer.logo.url }}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="w-6 h-6 squircle">
                                 {{ contact.customer.name }}
-                            </div>
+                            </a>
                             
                             {% else %} - {% endif %}</td>
                         <td>

@@ -135,12 +135,10 @@
                             </div>
                         </td>
                         <td>
-                            <div class="flex items-center gap-1 gap-1">
-                                {% if quote.content_object.logo %}
-                                <img src="{{quote.content_object.logo.url}}" alt="Customer Logo" class="h-8 w-8 squircle">
-                                {% endif %}
+                            <a class="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 w-fit rounded-lg" href="{% url 'customer-detail' quote.content_object.id %}">
+                                <img src="{% if quote.content_object.logo %}{{ quote.content_object.logo.url }}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="w-6 h-6 squircle">
                                 {{ quote.related_to }}
-                            </div>
+                            </a>
                         </td>
                         <td>
                             <span class="status-pill {% if quote.status == 'draft' %}info{% elif quote.status == 'lost' %}danger{% elif quote.status == 'won' %}success{% elif quote.status == 'sent' %}proccess{% endif %}">{{ quote.get_status_display }}</span>

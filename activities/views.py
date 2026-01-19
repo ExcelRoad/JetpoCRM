@@ -4,6 +4,17 @@ from urllib.parse import urlencode
 from django.http import JsonResponse
 from .models import Service, Task, Timesheet
 from projects.models import Project, ProjectBudget
+from leads.models import LeadSource
+
+
+
+def settings_page(request):
+    lead_sources = LeadSource.objects.all()
+    context = {
+        'lead_sources': lead_sources,
+    }
+    return render(request, 'base/settings-page.html', context)
+
 
 
 def get_service_info(request, pk):
@@ -139,5 +150,31 @@ def task_uncomplete(request, pk):
             return redirect('task-list')
         base_url = reverse('project-detail', args=(task.object_id,))
         query_string = urlencode({'section': 'tasks'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+
+def leadsource_save(request):
+    if request.method == 'POST':
+        leadsourceId = request.POST['leadsource']
+        leadsourceName = request.POST['leadsourceName']
+        if leadsourceId == '0' or leadsourceId == 0:
+            leadsource = LeadSource.objects.create(
+                name = leadsourceName
+            )
+        else:
+            leadsource = LeadSource.objects.get(pk=leadsourceId)
+            leadsource.name = leadsourceName
+            leadsource.save()
+        base_url = reverse('settings')
+        query_string = urlencode({'section': 'leads', 'subsection': '1'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+
+def leadsource_delete(request, pk):
+    if request.method == 'POST':
+        leadsource = LeadSource.objects.get(pk=pk)
+        leadsource.delete()
+        base_url = reverse('settings')
+        query_string = urlencode({'section': 'leads', 'subsection': '1'})
         url = f'{base_url}?{query_string}'
         return redirect(url)

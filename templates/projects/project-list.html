@@ -127,10 +127,10 @@
                             <a class="font-semibold hover:text-gray-600 cursor-pointer" href="{% url 'project-detail' project.id %}">{{project.name}}</a>
                         </td>
                         <td>
-                            <div class="flex items-center gap-1">
+                            <a class="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 rounded-lg w-fit" href="{% url 'customer-detail' project.customer.id %}">
                                 <img src="{% if project.customer.logo %}{{project.customer.logo.url}}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="h-6 w-6 squircle">
                                 {{ project.customer.name }}
-                            </div>
+                            </a>
                         </td>
                         <td>
                             <span class="status-pill {% if project.status == 'open' %}info{% elif project.status == 'canceled' %}danger{% elif project.status == 'completed' %}success{% elif project.status == 'onHold' %}alert{% endif %}">{{ project.get_status_display }}</span>

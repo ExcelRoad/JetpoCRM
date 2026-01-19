@@ -152,12 +152,10 @@
                                 </div>
                                 <div class="flex flex-col gap-1 my-1">
                                     <a class="font-semibold hover:text-gray-600 w-fit" href="{% url 'quote-detail' quote.id %}">{{ quote.name }}</a>
-                                    <span class="rounded-lg border border-gray-200 px-1 py-0.5 text-xs w-fit text-gray-500 flex gap-1 items-center">
-                                        {% if quote.content_object.logo %}
-                                            <img src="{{quote.content_object.logo.url}}" alt="Customer Logo" class="h-6 w-6 squircle">
-                                        {% endif %}
+                                    <a class="rounded-lg px-2 py-1 text-xs w-fit text-gray-500 flex gap-1 items-center hover:bg-gray-100" href="{% url 'customer-detail' quote.content_object.id %}">
+                                        <img src="{% if quote.content_object.logo %}{{ quote.content_object.logo.url }}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="w-6 h-6 squircle">
                                         {{ quote.related_to }}
-                                    </span>
+                                    </a>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     {% if quote.service %}
@@ -170,9 +168,6 @@
                                 {% endif %}
                                 {% if quote.total_price %}
                                 <div class="flex gap-1 items-center">
-                                    <svg class="size-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M18 8.5V8.35417C18 6.50171 16.4983 5 14.6458 5H9.5C7.567 5 6 6.567 6 8.5C6 10.433 7.567 12 9.5 12H14.5C16.433 12 18 13.567 18 15.5C18 17.433 16.433 19 14.5 19H9.42708C7.53436 19 6 17.4656 6 15.5729V15.5M12 3V21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
                                     <p class="">₪{{ quote.total_price|floatformat:"0"|intcomma:False }}</p>
                                 </div>
                                 {% endif %}
