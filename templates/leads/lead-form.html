@@ -14,7 +14,7 @@
 
 {% block content %}
 
-<div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200" x-init="$store.selectMainTab.change('leads')">
+<div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200" x-init="$store.selectedMainTab.change('leads')">
     <div>
         <h1 class="font-semibold text-3xl mb-1">{{form_header}}</h1>
         <p class="text-gray-400">לאחר השמירה, פרטי הליד ישמרו במערכת</p>
@@ -44,7 +44,11 @@
                 <p class="text-gray-500 text-sx">שם משפחה</p>
                 {{form.last_name}}
             </div>
-            <div class="field-wrapper">
+            <div class="field-wrapper col-start-1 col-span-2">
+                <p class="text-gray-500 text-sx">שם חברה</p>
+                {{form.company_name}}
+            </div>
+            <div class="field-wrapper col-start-1 col-span-2">
                 <p class="text-gray-500 text-sx">אימייל</p>
                 {{form.email}}
             </div>
@@ -52,15 +56,12 @@
                 <p class="text-gray-500 text-sx">טלפון</p>
                 {{form.phone}}
             </div>
-            <div class="field-wrapper">
-                <p class="text-gray-500 text-sx">שם חברה</p>
-                {{form.company_name}}
-            </div>
+            
             <div class="field-wrapper">
                 <p class="text-gray-500 text-sx">תפקיד</p>
                 {{form.role}}
             </div>
-            <div class="field-wrapper">
+            <div class="field-wrapper col-start-1">
                 <p class="text-gray-500 text-sx">מקור ליד</p>
                 <div class="flex items-center gap-1 w-full">
                     {{form.lead_source}}

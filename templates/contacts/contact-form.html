@@ -14,7 +14,7 @@
 
 {% block content %}
  
-<div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200" x-init="$store.selectMainTab.change('contacts')">
+<div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200" x-init="$store.selectedMainTab.change('contacts')">
     <div>
         <h1 class="font-semibold text-3xl mb-1">{{form_header}}</h1>
         <p class="text-gray-400">לאחר השמירה, פרטי איש הקשר ישמרו במערכת</p>
@@ -64,14 +64,21 @@
                 {{form.contact_type}}
             </div>
             <div class="field-wrapper flex items-center gap-2 col-start-1">
-                {{form.is_main}}
+                <div class="relative inline-block w-11 h-5">
+                    {{form.is_main}}
+                    <label for="switch-component" class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-violet-800 cursor-pointer">
+                    </label>
+                </div>
                 <label class="text-gray-500 text-sx" for="id_is_main">ראשי</label>
                 
             </div>
             <div class="field-wrapper flex items-center gap-2 col-start-1">
-                {{form.is_alerts}}
+                <div class="relative inline-block w-11 h-5">
+                    {{form.is_alerts}}
+                    <label for="switch-component" class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-violet-800 cursor-pointer">
+                    </label>
+                </div>
                 <label class="text-gray-500 text-sx" for="id_is_alerts">התראות</label>
-
             </div>
         </form>
 </div>

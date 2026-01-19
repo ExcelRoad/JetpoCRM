@@ -258,6 +258,10 @@
             </button>
         </div>
         <div class="grid grid-cols-3 px-4 gap-2 items-center" x-show="showAdditional" x-collapse.duration.500ms>
+            <p class="text-gray-500">ראשי</p>
+            <p class="col-span-2 status-pill w-fit {% if contact.is_main %}success{% else %}danger{% endif %}">{% if contact.is_main %}כן{% else %}לא{% endif %}</p>
+            <p class="text-gray-500">התראות</p>
+            <p class="col-span-2 status-pill w-fit {% if contact.is_alerts %}success{% else %}danger{% endif %}">{% if contact.is_alerts %}כן{% else %}לא{% endif %}</p>
             <p class="text-gray-500">מקור ליד</p>
             <span class="col-span-2 rounded-lg text-xs bg-gray-200 px-2 py-1 w-fit">{% if contact.customer.lead_source %}{{contact.customer.lead_source.name}}{% endif %}</span>
             <p class="text-gray-500">תאריך יצירה</p>

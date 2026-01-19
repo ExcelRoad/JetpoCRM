@@ -14,7 +14,7 @@ class ContactForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'input-field'}),
             'role': forms.TextInput(attrs={'class': 'input-field'}),
             'customer': CustomSelect(),  # Custom searchable dropdown
-            'is_main': forms.CheckboxInput(attrs={'class': 'input-checkbox'}),
-            'is_alerts': forms.CheckboxInput(attrs={'class': 'input-checkbox'}),
+            'is_main': forms.CheckboxInput(attrs={'class': 'peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300'}),
+            'is_alerts': forms.CheckboxInput(attrs={'class': 'peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300'}),
             'contact_type': CustomSelect(),
         }
