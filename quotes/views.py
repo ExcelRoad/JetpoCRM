@@ -363,7 +363,7 @@ def quote_confirm(request, pk):
     # Create multiple projects (one per service line item)
     for quote_service in quote.quote_services.all():
         project = Project.objects.create(
-            name = f"{quote.name} - {quote_service.name}",
+            name = f"{quote.name} | {quote_service.name}",
             service = quote_service.service,
             status = 'open',
             customer = customer

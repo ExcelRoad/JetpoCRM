@@ -14,7 +14,7 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
-<div class="flex h-[846px]" x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedQuote : 0, selectedQuoteName : ''}">
+<div class="flex h-[846px]" x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedQuote : 0, selectedQuoteName : '', singleConfirmModelShow : false }" x-init="$store.selectedMainTab.change('quotes')">
     <!-- Main Section -->
     <div class="w-3/4 h-full" x-data="setSection()" x-init="init()">
         <div class="border-b border-gray-200">
@@ -32,12 +32,12 @@
                     </a>
                 </div>
                 <div class="flex items-center gap-2" x-data="{moreActions : false}">
-                    <a class="btn-main" href="{% url 'quote-confirm' quote.id %}">
+                    <button class="btn-main {% if quote.status == 'won' %}disabled{% endif %}" @click="singleConfirmModelShow = true, modelBackgroundShow = true, selectedQuoteName = '{{quote.name}}', selectedQuote = '{{quote.id}}'">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M4 14L9 19L20 8M6 8.88889L9.07692 12L16 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         <p>אישור הצעת מחיר</p>
-                    </a>
+                    </button>
                     <div class="btn-action relative" @click="moreActions = !moreActions" @click.outside="moreActions = false">
                         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m8 10 4 4 4-4"/>
@@ -169,7 +169,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="border border-gray-200 rounded-lg p-2 flex flex-col items-end pl-19">
+                    <div class="rounded-lg p-2 flex flex-col items-end pl-19">
                         <div class="flex items-center justify-between gap-2 col-start-1 w-1/5">
                             <p class="text-gray-600">סה"כ:</p>
                             <p class="text-base">₪{{ quote.total_price|floatformat:"0"|intcomma:False }}</p>
@@ -332,7 +332,7 @@
             </a>
             <p class="text-gray-500">טלפון</p>
             <p class="flex items-center gap-1 [&>svg]:size-4 col-span-2">
-                {% if quote.content_object.phone %}
+                {% if quote.content_object.phone_number %}
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 5.5C3 14.0604 9.93959 21 18.5 21C18.8862 21 19.2691 20.9859 19.6483 20.9581C20.0834 20.9262 20.3009 20.9103 20.499 20.7963C20.663 20.7019 20.8185 20.5345 20.9007 20.364C21 20.1582 21 19.9181 21 19.438V16.6207C21 16.2169 21 16.015 20.9335 15.842C20.8749 15.6891 20.7795 15.553 20.6559 15.4456C20.516 15.324 20.3262 15.255 19.9468 15.117L16.74 13.9509C16.2985 13.7904 16.0777 13.7101 15.8683 13.7237C15.6836 13.7357 15.5059 13.7988 15.3549 13.9058C15.1837 14.0271 15.0629 14.2285 14.8212 14.6314L14 16C11.3501 14.7999 9.2019 12.6489 8 10L9.36863 9.17882C9.77145 8.93713 9.97286 8.81628 10.0942 8.64506C10.2012 8.49408 10.2643 8.31637 10.2763 8.1317C10.2899 7.92227 10.2096 7.70153 10.0491 7.26005L8.88299 4.05321C8.745 3.67376 8.67601 3.48403 8.55442 3.3441C8.44701 3.22049 8.31089 3.12515 8.15802 3.06645C7.98496 3 7.78308 3 7.37932 3H4.56201C4.08188 3 3.84181 3 3.63598 3.09925C3.4655 3.18146 3.29814 3.33701 3.2037 3.50103C3.08968 3.69907 3.07375 3.91662 3.04189 4.35173C3.01413 4.73086 3 5.11378 3 5.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -426,6 +426,53 @@
                 </form>
                 
                 <button class="btn-action" @click="modelBackgroundShow = false, quoteDeleteModelShow = false">
+                    ביטול
+                </button>
+            </div>
+        </div>
+        <!-- Won Confirmation Model For single Quote -->
+        <div class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-4 min-w-1/4 min-h-1/5 flex flex-col" x-show="singleConfirmModelShow" x-cloak>
+            <button class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="modelBackgroundShow = false, singleConfirmModelShow = false">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="flex-1">
+                <h1 class="text-xl font-semibold my-3">אישור הצעת מחיר</h1>
+                <span class="flex gap-2 items-center">
+                    <p class="text-gray-500">אתה עומד לאשר את</p>
+                    <p class="text-gray-900 font-semibold" x-text="selectedQuoteName"></p>
+                </span>
+                <p class="text-gray-500">פעולה זו אינה ניתנת לשחזור</p>
+                {% if quote.content_type.model == 'lead' %}
+                <p class="text-gray-500 mt-2">הליד המקושר יומר לרשומות הבאות:</p>
+                <p class="text-gray-500">יווצר לקוח חדש בשם: <span class="font-semibold text-gray-800">{{quote.content_object.company_name}}</span></p>
+                <p class="text-gray-500">יווצר איש קשר חדש בשם: <span class="font-semibold text-gray-800">{{quote.content_object.full_name}}</span></p>
+                {% endif %}
+                <p class="text-gray-500 mt-2">לאחר האישור יווצרו הפרויקטים הבאים:</p>
+                <ul>
+                    {% for service in quote.quote_services.all %}
+                    <li class="font-semibold">• {{service.service.name}}</li>
+                    {% endfor %}
+                </ul>
+                <p class="text-gray-500 mt-2">בנוסף יווצרו התשלומים הבאים:</p>
+                <ul>
+                    {% for payment in quote.quote_payments.all %}
+                    <li class="font-semibold flex items-center gap-1">• {{payment.name}} <p class="text-gray-500 font-normal">עבור פרויקט:</p><span>{{payment.quote_service.service.name}}</span></li>
+                    {% endfor %}
+                </ul>
+                
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <form method="post" action="{% url 'quote-confirm' quote.id %}">
+                    {% csrf_token %}
+                    <input type="text" name="fallback" value="quote-list" class="hidden">
+                    <button class="btn-main" type="submit">
+                     אישור
+                    </button>
+                </form>
+                
+                <button class="btn-action" @click="modelBackgroundShow = false, singleConfirmModelShow = false">
                     ביטול
                 </button>
             </div>

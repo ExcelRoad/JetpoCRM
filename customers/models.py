@@ -76,3 +76,15 @@ class Customer(models.Model):
                 total += p.total_price
         return total
 
+    @property
+    def phone_number(self):
+        if not self.contacts.filter(is_main=True).exists():
+            return None
+        return self.contacts.filter(is_main=True).first().phone_number
+
+    @property
+    def email(self):
+        if not self.contacts.filter(is_main=True).exists():
+            return None
+        return self.contacts.filter(is_main=True).first().email
+

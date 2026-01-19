@@ -42,8 +42,8 @@ class Project(models.Model):
         qty = 0
         if not budgets:
             return {
-                'hours': 0,
-                'amount': 0
+                'hours': 0.00,
+                'amount': 0.00
             }
         if self.service.budget_type == 'fix':
             amount = amount + (budgets.qty * budgets.price)
@@ -52,8 +52,8 @@ class Project(models.Model):
             amount = amount + (budgets.qty * budgets.price) 
         
         budget = {
-            'hours': qty,
-            'amount': amount
+            'hours': float(qty),
+            'amount': float(amount)
         }
         return budget
     
@@ -66,12 +66,12 @@ class Project(models.Model):
     def budget_remaining(self):
         amount = self.budget.get('hours') - self.usage
         if self.budget.get('hours') == 0:
-            percent = 0
+            percent = 0.00
         else:
             percent = self.usage / self.budget.get('hours')
         reminder = {
             'amount': amount,
-            'percent': int(percent*100),
+            'percent': float(percent*100),
         }
         return reminder
     
