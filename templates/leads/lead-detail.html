@@ -14,7 +14,8 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
-<div class="flex h-[846px]" x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedLead : 0, selectedLeadName : '', quoteDeleteModelShow : false, selectedQuoteName : '', selectedQuote : 0, convertModelShow : false}">
+<div class="flex h-[846px]" x-init="$store.selectMainTab.change('leads')"
+x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedLead : 0, selectedLeadName : '', quoteDeleteModelShow : false, selectedQuoteName : '', selectedQuote : 0, convertModelShow : false}">
     <!-- Main Section -->
     <div class="w-3/4 h-full" x-data="setSection()" x-init="init()">
         <div class="border-b border-gray-200">

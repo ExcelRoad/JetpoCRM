@@ -15,7 +15,7 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
-    <div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200">
+    <div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200" x-init="$store.selectedMainTab.change('projects')">
         <div>
             <h1 class="font-semibold text-3xl mb-1">פרויקטים</h1>
             <p class="text-gray-400">זוהי רשימה של כל הפרויקטים שלך. מכן תוכלו לארגן, לנהל ולערוך את הפרויקטים שלכם</p>

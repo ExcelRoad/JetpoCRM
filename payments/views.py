@@ -10,7 +10,6 @@ def payment_edit(request, pk, main = False):
         payPrice = request.POST['paymentPrice']
         payName = request.POST['paymentName']
         projectId = request.POST['project']
-        project = Project.objects.get(pk = int(projectId))
         if pk != 0 and pk != '0':
             payment = Payment.objects.get(pk=pk)
             payment.qty = payQty
@@ -18,6 +17,7 @@ def payment_edit(request, pk, main = False):
             payment.name = payName
             payment.save()
         else:
+            project = Project.objects.get(pk = int(projectId))
             payment = Payment.objects.create(
                 name = payName,
                 service = project.service,
@@ -62,5 +62,44 @@ def payment_mass_delete(request):
             payment = Payment.objects.get(pk=l)
             payment.delete()
         return redirect(fallback)
+
+
+def payment_send_invoice(request, pk):
+    if request.method == "POST":
+        fallback = request.POST["fallback"]
+        payment = Payment.objects.get(pk=pk)
+        payment.status = "billed"
+        payment.save()
+        if fallback == 'customer-detail':
+            base_url = reverse('customer-detail', args=(payment.project.customer.id,))
+            query_string = urlencode({'section': 'payments'})
+            url = f'{base_url}?{query_string}'
+            return redirect(url)
+        elif fallback == 'project-detail':
+            base_url = reverse('project-detail', args=(payment.project.id,))
+            query_string = urlencode({'section': 'payments'})
+            url = f'{base_url}?{query_string}'
+            return redirect(url)
+        elif fallback == 'payment-list':
+            return redirect(reverse('payment-list'))
+
+def payment_send_recipt(request, pk):
+    if request.method == "POST":
+        fallback = request.POST["fallback"]
+        payment = Payment.objects.get(pk=pk)
+        payment.status = "paid"
+        payment.save()
+        if fallback == 'customer-detail':
+            base_url = reverse('customer-detail', args=(payment.project.customer.id,))
+            query_string = urlencode({'section': 'payments'})
+            url = f'{base_url}?{query_string}'
+            return redirect(url)
+        elif fallback == 'project-detail':
+            base_url = reverse('project-detail', args=(payment.project.id,))
+            query_string = urlencode({'section': 'payments'})
+            url = f'{base_url}?{query_string}'
+            return redirect(url)
+        elif fallback == 'payment-list':
+            return redirect(reverse('payment-list'))
 
     
