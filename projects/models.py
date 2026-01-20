@@ -70,7 +70,7 @@ class Project(models.Model):
         else:
             percent = self.usage / self.budget.get('hours')
         reminder = {
-            'amount': amount,
+            'amount': float(amount),
             'percent': float(percent*100),
         }
         return reminder

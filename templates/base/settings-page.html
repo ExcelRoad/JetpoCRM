@@ -61,14 +61,14 @@
                 </div>
             </div>
             <div class="flex mt-2 mx-4">
-                <div class="w-1/8 p-2 border border-gray-200 rounded-lg h-133">
+                <div class="w-1/10 p-2 border border-gray-200 rounded-lg h-133">
                     <nav>
                         <button class="nav-btn" @click="selectedSubSection='1'" :class="selectedSubSection=='1' ? 'active' : ''">מקורות ליד</button>
                         <button class="nav-btn" @click="selectedSubSection='2'" :class="selectedSubSection=='2' ? 'active' : ''">התראות ליד</button>
                     </nav>
                 </div>
                 <!-- Lead Sources Settings Content Section -->
-                <div x-show="selectedSubSection=='1'" class="w-6/8">
+                <div x-show="selectedSubSection=='1'" class="w-8/10">
                     <div class="flex items-center px-4 gap-4">
                         <div class="pb-1 w-full flex items-center gap-2">
                             <h2 class="text-xl font-semibold">מקורות ליד</h2>
@@ -80,7 +80,7 @@
                     </div>
                     {% if lead_sources %}
                     <!-- Lead Sources Table Section -->
-                    <div class="table-wrapper h-120 mx-2 w-full">
+                    <div class="table-wrapper h-122 mx-2 w-full">
                         <table class="w-full relative">
                             <thead class="h-full">
                                 <tr class="table-header-row">
@@ -146,6 +146,17 @@
                     </div>
                     {% endif %}
                 </div>
+                <!-- Lead Alert Settings section -->
+                 <div x-show="selectedSubSection=='2'" class="w-8/10">
+                    <div class="flex items-center px-4 gap-4">
+                        <div class="pb-1 w-full flex items-center gap-2">
+                            <h2 class="text-xl font-semibold">התראות לידים</h2>
+                        </div>
+                    </div>
+                    <div class="table-wrapper h-122 mx-2 w-full">
+                        
+                    </div>
+                 </div>
             </div>
         </div>
         <!-- Profile Tab Content -->

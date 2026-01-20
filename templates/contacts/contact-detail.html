@@ -14,7 +14,7 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
-<div class="flex h-207.5" x-init="$store.selectMainTab.change('contacts')"
+<div class="flex h-207.5" x-init="$store.selectedMainTab.change('contacts')"
     x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedContact : '', selectedContactName : ''}">
     <!-- Main Section -->
     <div class="w-3/4 h-full" x-data="setSection()" x-init="init()">
