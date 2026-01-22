@@ -16,6 +16,7 @@ urlpatterns = [
     path('payments/', include('payments.urls')),
     path('tasks/', task_list, name='task-list'),
     path('settings/', settings_page, name='settings'),
+    path('alerts/', include('alerts.urls')),
     path("admin/", admin.site.urls)
 ]
 

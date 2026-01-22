@@ -19,7 +19,7 @@ class Contact(models.Model):
     role = models.CharField(max_length=250, blank=True, null=True)
     contact_type = models.CharField(max_length=30, choices=TYPES, default='normaml', null=True)
 
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, related_name='contacts')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, related_name='contacts')
 
     notes = GenericRelation(Note, related_query_name='notes')
     quotes = GenericRelation(Quote, related_query_name='quotes')

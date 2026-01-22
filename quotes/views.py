@@ -359,6 +359,13 @@ def quote_confirm(request, pk):
                 'contact_type' : 'normal'
             }
         )
+        # update the lead info
+        lead = quote.content_object
+        lead.status = 'won'
+        lead.save()
+
+        # assign quote to customer
+        quote.content_object = customer
 
     # Create multiple projects (one per service line item)
     for quote_service in quote.quote_services.all():

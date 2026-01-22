@@ -111,7 +111,7 @@ class Timesheet(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.date} | {self.task.title} | {self.hours}'
+        return f'{self.date} | {self.task.title} | {self.hours} שעות'
     
     class Meta:
         verbose_name = 'דיווח שעות'

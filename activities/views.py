@@ -5,13 +5,24 @@ from django.http import JsonResponse
 from .models import Service, Task, Timesheet
 from projects.models import Project, ProjectBudget
 from leads.models import LeadSource
+from alerts.models import AlertSettings, AlertType
+from django.contrib import messages
 
 
 
 def settings_page(request):
     lead_sources = LeadSource.objects.all()
+    lead_alert_type, created = AlertType.objects.get_or_create(
+        name = 'Leads',
+        slug = 'leads'
+    )
+    lead_alert_settings, created = AlertSettings.objects.get_or_create(
+        user = request.user,
+        alert_type = lead_alert_type
+    )
     context = {
         'lead_sources': lead_sources,
+        'lead_alert_settings' : lead_alert_settings,
     }
     return render(request, 'base/settings-page.html', context)
 
@@ -43,12 +54,14 @@ def task_create_update(request, pk):
             urgency = taskUrgency,
             is_completed = False
         )
+        messages.success(request, 'המשימה נוצרה בהצלחה', extra_tags=task.title)
     else:
         task = Task.objects.get(pk=pk)
         task.title = taskTitle
         task.description = taskDescription
         task.urgency = taskUrgency
         task.save()
+        messages.success(request, 'המשימה עודכנה בהצלחה', extra_tags=task.title)
     if projectId != "":
         base_url = reverse('project-detail', args=(task.object_id,))
         query_string = urlencode({'section': 'tasks'})
@@ -63,6 +76,7 @@ def task_complete(request, pk, main=False):
         task = Task.objects.get(pk=pk)
         task.is_completed = True
         task.save()
+        messages.success(request, 'המשימה הושלמה בהצלחה', extra_tags=task.title)
         if main == "False":
             base_url = reverse('project-detail', args=(task.object_id,))
             query_string = urlencode({'section': 'tasks'})
@@ -76,6 +90,7 @@ def task_delete(request, pk):
         fallback = request.POST['fallback']
         task = Task.objects.get(pk=pk)
         task.delete()
+        messages.success(request, 'המשימה נמחקה בהצלחה', extra_tags=task.title)
         if fallback == "task-list":
             return redirect('task-list')
         base_url = reverse('project-detail', args=(task.object_id,))
@@ -101,13 +116,14 @@ def timesheet_create_update(request, pk):
                 task = task,
                 budget = budget
             )
+            messages.success(request, 'דיווח שעות נוצר בהצלחה', extra_tags=timesheet)
         else:
             timesheet = Timesheet.objects.get(pk=timesheetId)
             timesheet.date = ts_date
             timesheet.descriptiokn = ts_description
             timesheet.hours = ts_hours
             timesheet.save()
-        
+            messages.success(request, 'דיווח שעות עודכן בהצלחה', extra_tags=timesheet)
         base_url = reverse('project-detail', args=(task.object_id,))
         query_string = urlencode({'section': 'timesheets'})
         url = f'{base_url}?{query_string}'
@@ -117,6 +133,7 @@ def timesheet_delete(request, pk):
     if request.method == 'POST':
         timesheet = Timesheet.objects.get(pk=pk)
         timesheet.delete()
+        messages.success(request, 'דיווח שעות נמחק בהצלחה', extra_tags=timesheet)
         base_url = reverse('project-detail', args=(timesheet.task.object_id,))
         query_string = urlencode({'section': 'timesheets'})
         url = f'{base_url}?{query_string}'
@@ -138,6 +155,7 @@ def task_mass_complete(request):
             task = Task.objects.get(pk=task)
             task.is_completed = True
             task.save()
+        messages.success(request, f'{tasks.count()} משימות הושלמו בהצלחה')
         return redirect('task-list')
 
 def task_uncomplete(request, pk):
@@ -146,7 +164,9 @@ def task_uncomplete(request, pk):
         task = Task.objects.get(pk=pk)
         task.is_completed = False
         task.save()
+        messages.success(request, 'המשימה נפתחה חזרה', extra_tags=task.title)
         if fallback == "task-list":
+            
             return redirect('task-list')
         base_url = reverse('project-detail', args=(task.object_id,))
         query_string = urlencode({'section': 'tasks'})
@@ -161,10 +181,12 @@ def leadsource_save(request):
             leadsource = LeadSource.objects.create(
                 name = leadsourceName
             )
+            messages.success(request, 'מקור ליד נוצר בהצלחה', extra_tags=leadsource.name)
         else:
             leadsource = LeadSource.objects.get(pk=leadsourceId)
             leadsource.name = leadsourceName
             leadsource.save()
+            messages.success(request, 'מקור ליד עודכן בהצלחה', extra_tags=leadsource.name)
         base_url = reverse('settings')
         query_string = urlencode({'section': 'leads', 'subsection': '1'})
         url = f'{base_url}?{query_string}'
@@ -174,6 +196,7 @@ def leadsource_delete(request, pk):
     if request.method == 'POST':
         leadsource = LeadSource.objects.get(pk=pk)
         leadsource.delete()
+        messages.success(request, 'מקור ליד נמחק בהצלחה', extra_tags=leadsource.name)
         base_url = reverse('settings')
         query_string = urlencode({'section': 'leads', 'subsection': '1'})
         url = f'{base_url}?{query_string}'

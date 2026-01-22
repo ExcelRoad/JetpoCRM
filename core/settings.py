@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'contacts',
     'projects',
     'payments',
+    'alerts',
 ]
 
 

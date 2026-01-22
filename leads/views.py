@@ -40,7 +40,10 @@ def lead_create(request):
         form = LeadForm(request.POST)
         if form.is_valid():
             lead = form.save()
+            messages.success(request, 'ליד נוצר בהצלחה', extra_tags=lead.full_name)
             return redirect('lead-detail', lead.id)
+        else:
+            messages.error(request, 'הטופס אינו תקין. אנא בדוק את הנתונים ונסה שנית')
     context = {
         'form': form,
         'form_header': 'יצירת ליד',
@@ -58,10 +61,13 @@ def lead_edit(request, pk, fallback):
         form = LeadForm(request.POST, instance=lead)
         if form.is_valid():
             form.save()
+            messages.success(request, 'ליד עודכן בהצלחה', extra_tags=lead.full_name)
             if fallback == 'lead-detail':
                 return redirect(fallback, lead.id)
             elif fallback in ['lead-list', 'lead-kanban']:
                 return redirect(fallback)  
+        else:
+            messages.error(request, 'הטופס אינו תקין. אנא בדוק את הנתונים ונסה שנית')
     context = {
         'lead': lead,
         'form': form,
@@ -75,6 +81,7 @@ def lead_delete(request, pk):
         fallback = request.POST['fallback']
         lead = Lead.objects.get(pk=pk)
         lead.delete()
+        messages.success(request, 'ליד נמחק בהצלחה', extra_tags=lead.full_name)
         return redirect(fallback)
 
 def lead_convert(request, pk):
@@ -88,6 +95,8 @@ def lead_convert(request, pk):
             'lead_source': lead.lead_source,
         }
     )
+    if created:
+        messages.success(request, 'לקוח נוצר בהצלחה', extra_tags=lead.company_name)
     # pass all the Notes to the new Customer
     for note in lead.notes.all():
         note.content_object = customer
@@ -109,11 +118,13 @@ def lead_convert(request, pk):
             'contact_type' : 'normal'
         }
     )
+    if created:
+        messages.success(request, 'איש קשר נוצר בהצלחה', extra_tags=lead.full_name)
 
     # Update the lead info
     lead.status = 'won'
     lead.save()
-
+    messages.success(request, 'ליד הומר בהצלחה', extra_tags=lead.full_name)
     return redirect('customer-detail', customer.id)
 
 
@@ -126,6 +137,7 @@ def lead_mass_delete(request):
             l = int(l)
             lead = Lead.objects.get(pk=l)
             lead.delete()
+        messages.success(request, f'{leadList.count()} לידים נמחקו בהצלחה')
         return redirect(fallback)
 
 def lead_detail(request, pk):
@@ -191,6 +203,7 @@ def lead_source_create(request):
             lead_source = LeadSource.objects.create(
                 name = name
             )
+            messages.success(request, 'מקור ליד נוצר בהצלחה', extra_tags=name)
 
             return JsonResponse({
                 'success': True,
@@ -214,6 +227,7 @@ def lead_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     lead = Lead.objects.get(pk=note.object_id)
     note.delete()
+    messages.success(request, 'הערה נמחקה בהצלחה', extra_tags=lead.full_name)
     base_url = reverse('lead-detail', args=(lead.id,))
     query_string = urlencode({'section': 'notes'})
     url = f'{base_url}?{query_string}'
@@ -264,6 +278,7 @@ def lead_update_status(request):
             old_status = lead.status
             lead.status = new_status
             lead.save()
+            messages.success(request, 'סטטוס ליד עודכן בהצלחה', extra_tags=lead.full_name)
         except Lead.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Lead not found'}, status=404)
 
