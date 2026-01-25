@@ -4,6 +4,7 @@ from .forms import ContactForm
 from django.urls import reverse
 from urllib.parse import urlencode
 from activities.models import Note
+from django.contrib import messages
 
 def contact_list(request):
     contacts = Contact.objects.all()

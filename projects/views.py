@@ -6,6 +6,7 @@ from .models import Project, ProjectBudget
 from customers.models import Customer
 from .forms import ProjectForm
 from payments.models import Payment
+from django.contrib import messages
 
 
 def project_create(request, customerId = None):

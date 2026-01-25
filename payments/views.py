@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from urllib.parse import urlencode
 from .models import Payment
+from django.contrib import messages
 from projects.models import Project
 
 def payment_edit(request, pk, main = False):

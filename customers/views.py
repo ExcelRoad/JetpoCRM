@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from .models import Customer
 from .forms import CustomerForm
 from activities.models import Note
+from django.contrib import messages
 
 
 def customer_list(request):
