@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from urllib.parse import urlencode
 from django.http import JsonResponse
-from .models import Service, Task, Timesheet
+from django.contrib.contenttypes.models import ContentType
+from .models import Service, Task, Timesheet, Meeting
 from projects.models import Project, ProjectBudget
 from leads.models import LeadSource
 from alerts.models import AlertSettings, AlertType
@@ -199,5 +200,73 @@ def leadsource_delete(request, pk):
         messages.success(request, 'מקור ליד נמחק בהצלחה', extra_tags=leadsource.name)
         base_url = reverse('settings')
         query_string = urlencode({'section': 'leads', 'subsection': '1'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+
+
+def meeting_delete(request, pk):
+    if request.method == 'POST':
+        fallback = request.POST['fallback']
+        meeting = Meeting.objects.get(pk=pk)
+        meeting.delete()
+        messages.success(request, 'פגישה נמחקה בהצלחה', extra_tags=meeting.title)
+        base_url = reverse(fallback, args=(meeting.object_id,))
+        query_string = urlencode({'section': 'activities'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+
+def meeting_create_update(request, pk=None):
+    if request.method == 'POST':
+        fallback = request.POST['fallback']
+        meetingTitle = request.POST['meetingTitle']
+        meetingDescription = request.POST['meetingDescription']
+        meetingDate = request.POST['meetingDate']
+        meetingStartTime = request.POST['meetingStartTime']
+        meetingDuration = request.POST['meetingDuration']
+        if request.POST.get('meetingIsOnline') == 'on':
+            meetingIsOnline = True
+        else:
+            meetingIsOnline = False
+        meetingLocation = request.POST['meetingLocation']
+        content_type = request.POST['contentType']
+        object_id = request.POST['objectId']
+        if pk == '0' or pk == 0:
+            meeting = Meeting.objects.create(
+                title = meetingTitle,
+                description = meetingDescription,
+                date = meetingDate,
+                start_time = meetingStartTime,
+                duration = meetingDuration,
+                is_online = meetingIsOnline,
+                location = meetingLocation,
+                object_id = object_id,
+                content_type = ContentType.objects.get(model=content_type),
+            )
+            messages.success(request, 'פגישה נוצרה בהצלחה', extra_tags=meeting.title)
+        else:
+            meeting = Meeting.objects.get(pk=pk)
+            meeting.title = meetingTitle
+            meeting.description = meetingDescription
+            meeting.date = meetingDate
+            meeting.start_time = meetingStartTime
+            meeting.duration = meetingDuration
+            meeting.is_online = meetingIsOnline
+            meeting.location = meetingLocation
+            meeting.save()
+            messages.success(request, 'פגישה עודכנה בהצלחה', extra_tags=meeting.title)
+        base_url = reverse(fallback, args=(meeting.object_id,))
+        query_string = urlencode({'section': 'activities'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+
+def meeting_complete(request, pk):
+    if request.method == 'POST':
+        fallback = request.POST['fallback']
+        meeting = Meeting.objects.get(pk=pk)
+        meeting.status = 'completed'
+        meeting.save()
+        messages.success(request, 'פגישה הושלמה בהצלחה', extra_tags=meeting.title)
+        base_url = reverse(fallback, args=(meeting.object_id,))
+        query_string = urlencode({'section': 'activities'})
         url = f'{base_url}?{query_string}'
         return redirect(url)

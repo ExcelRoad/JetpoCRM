@@ -2,7 +2,7 @@ from django.db import models
 from customers.models import Customer
 from django.db.models import Sum
 from django.contrib.contenttypes.fields import GenericRelation
-from activities.models import Note, Task, Service
+from activities.models import Note, Task, Service, Meeting
 
 class Project(models.Model):
 
@@ -20,6 +20,7 @@ class Project(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='projects')
     notes = GenericRelation(Note, related_query_name='notes')
     tasks = GenericRelation(Task, related_query_name='tasks')
+    meetings = GenericRelation(Meeting, related_query_name='meetings')
 
     folder_id = models.CharField(max_length=255, null=True, blank=True)
     folder_link = models.CharField(max_length=255, null=True, blank=True)
