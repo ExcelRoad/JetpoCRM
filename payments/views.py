@@ -16,6 +16,7 @@ def payment_edit(request, pk, main = False):
             payment.price = payPrice
             payment.name = payName
             payment.save()
+            messages.success(request, 'תשלום נשמר בהצלחה', extra_tags=payment.name)
         else:
             project = Project.objects.get(pk = int(projectId))
             payment = Payment.objects.create(
@@ -26,6 +27,7 @@ def payment_edit(request, pk, main = False):
                 price = payPrice,
                 status = 'draft'
             )
+            messages.success(request, 'תשלום נוצר בהצלחה', extra_tags=payment.name)
         if main:
             url = reverse('payment-list')
         else:
@@ -37,6 +39,7 @@ def payment_edit(request, pk, main = False):
 def payment_delete(request, pk, main = False):
     payment = Payment.objects.get(pk=pk)
     payment.delete()
+    messages.success(request, 'תשלום נמחק בהצלחה', extra_tags=payment.name)
     if main:
         url = reverse('payment-list')
     else:
@@ -61,6 +64,7 @@ def payment_mass_delete(request):
             l = int(l)
             payment = Payment.objects.get(pk=l)
             payment.delete()
+        messages.success(request, f'{len(paymentList)} תשלומים נמחקו בהצלחה')
         return redirect(fallback)
 
 
@@ -70,6 +74,7 @@ def payment_send_invoice(request, pk):
         payment = Payment.objects.get(pk=pk)
         payment.status = "billed"
         payment.save()
+        messages.success(request, 'חשבונית נשלחה בהצלחה', extra_tags=payment.name)
         if fallback == 'customer-detail':
             base_url = reverse('customer-detail', args=(payment.project.customer.id,))
             query_string = urlencode({'section': 'payments'})
@@ -89,6 +94,7 @@ def payment_send_recipt(request, pk):
         payment = Payment.objects.get(pk=pk)
         payment.status = "paid"
         payment.save()
+        messages.success(request, 'קבלה נשלחה בהצלחה', extra_tags=payment.name)
         if fallback == 'customer-detail':
             base_url = reverse('customer-detail', args=(payment.project.customer.id,))
             query_string = urlencode({'section': 'payments'})

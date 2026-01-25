@@ -11,6 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from activities.models import Note
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.contrib import messages
 
 
 def quote_create(request, object_id, content_type):
@@ -29,7 +30,7 @@ def quote_create(request, object_id, content_type):
             quote = form.save(commit=False)
             quote.content_object = targetObject
             quote.save()
-            
+            messages.success(request, 'הצעת מחיר נוצרה בהצלחה', extra_tags=quote.name)
             # Save services first
             services = service_formset.save(commit=False)
             
@@ -160,6 +161,7 @@ def quote_edit(request, pk, fallback):
                              payment.quote_service = service_map_by_index[idx]
                      
                  payment.save()
+                 messages.success(request, 'הצעת מחיר נשמרה בהצלחה', extra_tags=quote.name)
 
             if fallback == "lead-detail":
                 return redirect('lead-detail', quote.content_object.id)
@@ -186,6 +188,7 @@ def quote_delete(request, pk):
         quote = Quote.objects.get(pk=pk)
         object_id = quote.object_id
         quote.delete()
+        messages.success(request, 'הצעת המחיר נמחקה בהצלחה', extra_tags=quote.name)
         if "detail" in fallback:
             return redirect(fallback, object_id)
         else:
@@ -222,6 +225,7 @@ def quote_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     quote = Quote.objects.get(pk=note.object_id)
     note.delete()
+    messages.success(request, 'הערה נמחקה בהצלחה', extra_tags=quote.name)
     base_url = reverse('quote-detail', args=(quote.id,))
     query_string = urlencode({'section': 'notes'})
     url = f'{base_url}?{query_string}'
@@ -258,6 +262,7 @@ def quote_mass_delete(request):
             l = int(l)
             quote = Quote.objects.get(pk=l)
             quote.delete()
+        messages.success(request, f'{len(quoteList)} הצעות מחיר נמחקו בהצלחה')
         return redirect(fallback)
 
 
@@ -398,6 +403,7 @@ def quote_confirm(request, pk):
     # update the quote to won
     quote.status = 'won'
     quote.save()
+    messages.success(request, 'הצעת מחיר אושרה בהצלחה', extra_tags=quote.name)
     # go to the customer page
     return redirect('customer-detail', customer.id)
 

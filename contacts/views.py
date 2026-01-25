@@ -22,7 +22,10 @@ def contact_create(request, pk=None):
         form = ContactForm(request.POST)
         if form.is_valid():
             contact = form.save()
+            messages.success(request, 'איש הקשר נוצר בהצלחה', extra_tags=contact.full_name)
             return redirect('contact-detail', contact.id)
+        else:
+            messages.error(request, 'ישנה בעיה בשמירת איש הקשר', extra_tags=contact.full_name)
     context = {
         'form': form,
         'form_header': 'יצירת איש קשר',
@@ -37,12 +40,15 @@ def contact_edit(request, pk, fallback):
         form = ContactForm(request.POST, instance=contact)
         if form.is_valid():
             form.save()
+            messages.success(request, 'איש הקשר עודכן בהצלחה', extra_tags=contact.full_name)
             if fallback == "contact-detail":
                 return redirect('contact-detail', contact.id)
             elif fallback == 'customer-detail':
                 return redirect('customer-detail', contact.customer.id)
             else:
                 return redirect(fallback)
+        else:
+            messages.error(request, 'ישנה בעיה בשמירת איש הקשר', extra_tags=contact.full_name)
     context = {
         'form': form,
         'form_header': 'עריכת איש קשר',
@@ -54,6 +60,7 @@ def contact_delete(request, pk):
         fallback = request.POST['fallback']
         contact = Contact.objects.get(pk=pk)
         contact.delete()
+        messages.success(request, 'איש הקשר נמחק בהצלחה', extra_tags=contact.full_name)
         if fallback == "customer-detail":
             return redirect('customer-detail', contact.customer.id)
         else:
@@ -108,6 +115,7 @@ def contact_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     contact = Contact.objects.get(pk=note.object_id)
     note.delete()
+    messages.success(request, 'הโนוט נמחק בהצלחה', extra_tags=contact.full_name)
     base_url = reverse('contact-detail', args=(contact.id,))
     query_string = urlencode({'section': 'notes'})
     url = f'{base_url}?{query_string}'
@@ -138,6 +146,7 @@ def contact_mass_delete(request):
             l = int(l)
             contact = Contact.objects.get(pk=l)
             contact.delete()
+        messages.success(request, f'{len(contactList)} אנשי קשר נמחקו בהצלחה')
         return redirect(fallback)
 
 

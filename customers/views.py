@@ -26,7 +26,10 @@ def customer_create(request):
         form = CustomerForm(request.POST, request.FILES)
         if form.is_valid():
             customer = form.save()
+            messages.success(request, 'לקוח נוצר בהצלחה', extra_tags=customer.name)
             return redirect('customer-detail', customer.id)
+        else:
+            messages.error(request, 'שגיאה ביצירת לקוח')
     context = {
         'form': form,
         'form_header': 'יצירת לקוח',
@@ -40,10 +43,13 @@ def customer_edit(request, pk, fallback):
         form = CustomerForm(request.POST, request.FILES, instance=customer)
         if form.is_valid():
             form.save()
+            messages.success(request, 'לקוח עודכן בהצלחה', extra_tags=customer.name)
             if fallback == "customer-detail":
                 return redirect('customer-detail', customer.id)
             else:
                 return redirect(fallback)
+        else:
+            messages.error(request, 'שגיאה בעדכון לקוח')
     context = {
         'form': form,
         'form_header': 'עריכת לקוח',
@@ -55,6 +61,7 @@ def customer_delete(request, pk):
         fallback = request.POST['fallback']
         customer = Customer.objects.get(pk=pk)
         customer.delete()
+        messages.success(request, 'לקוח נמחק בהצלחה', extra_tags=customer.name)
         return redirect(fallback)
 
 def customer_detail(request, pk):
@@ -184,6 +191,7 @@ def customer_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     customer = Customer.objects.get(pk=note.object_id)
     note.delete()
+    messages.success(request, 'הערה נמחקה בהצלחה', extra_tags=customer.name)
     base_url = reverse('customer-detail', args=(customer.id,))
     query_string = urlencode({'section': 'notes'})
     url = f'{base_url}?{query_string}'
@@ -212,4 +220,5 @@ def customer_mass_delete(request):
             l = int(l)
             customer = Customer.objects.get(pk=l)
             customer.delete()
+        messages.success(request, f'{len(customerList)} לקוחות נמחקו בהצלחה')
         return redirect(fallback)

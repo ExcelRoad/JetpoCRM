@@ -18,10 +18,12 @@ def project_create(request, customerId = None):
         form = ProjectForm()
     if request.method == 'POST':
         form = ProjectForm(request.POST)
-
         if form.is_valid():
             project = form.save()
+            messages.success(request, 'פרויקט נוצר בהצלחה', extra_tags=project.name)
             return redirect('project-detail', project.id)
+        else:
+            messages.error(request, 'שגיאה ביצירת הפרויקט')
     context = {
         'form': form,
         'form_header': 'יצירת פרויקט',
@@ -37,12 +39,15 @@ def project_edit(request, pk, fallback):
 
         if form.is_valid():
             form.save()
+            messages.success(request, 'פרויקט עודכן בהצלחה', extra_tags=project.name)
             if fallback == "customer-detail":
                 return redirect('customer-detail', project.customer.id)
             elif fallback == 'project-detail':
                 return redirect('project-detail', project.id)
             else:
                 return redirect(fallback)
+        else:
+            messages.error(request, 'שגיאה בשמירת הפרויקט')
     context = {
         'form': form,
         'form_header': 'עריכת פרויקט',
@@ -56,6 +61,7 @@ def project_delete(request, pk):
         fallback = request.POST['fallback']
         project = Project.objects.get(pk=pk)
         project.delete()
+        messages.success(request, 'פרויקט נמחק בהצלחה', extra_tags=project.name)
         if "detail" in fallback:
             return redirect(fallback, project.customer.id)
         else:
@@ -90,6 +96,7 @@ def project_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     project = Project.objects.get(pk=note.object_id)
     note.delete()
+    messages.success(request, 'הערה נמחקה בהצלחה', extra_tags=project.name)
     base_url = reverse('project-detail', args=(project.id,))
     query_string = urlencode({'section': 'notes'})
     url = f'{base_url}?{query_string}'
@@ -127,6 +134,7 @@ def project_mass_delete(request):
             l = int(l)
             project = Project.objects.get(pk=l)
             project.delete()
+        messages.success(request, f'{len(projectList)} פרויקטים נמחקו בהצלחה')
         return redirect(fallback)
     
 
@@ -144,6 +152,7 @@ def project_budget_activate(request, pk):
 def budget_delete(request, pk):
     budget = ProjectBudget.objects.get(pk=pk)
     budget.delete()
+    messages.success(request, 'תקציב פרויקט נמחק בהצלחה', extra_tags=budget.project.name)
     base_url = reverse('project-detail', args=(budget.project.id,))
     query_string = urlencode({'section': 'budgets'})
     url = f'{base_url}?{query_string}'
@@ -167,13 +176,14 @@ def budget_create_update(request, pk):
                 project = project,
                 is_active = True
             )
-            
+            messages.success(request, 'תקציב פרויקט נוצר בהצלחה', extra_tags=budget.project.name)
         else:
             budget = ProjectBudget.objects.get(pk=pk)
             budget.name = name
             budget.qty = qty
             budget.price = price
             budget.save()
+            messages.success(request, 'תקציב פרויקט עודכן בהצלחה', extra_tags=budget.project.name)
     base_url = reverse('project-detail', args=(budget.project.id,))
     query_string = urlencode({'section': 'budgets'})
     url = f'{base_url}?{query_string}'
@@ -196,6 +206,7 @@ def budget_add(request, pk):
             project = budget.project,
             status = 'draft'
         )
+        messages.success(request, 'תקציב פרויקט עודכן בהצלחה', extra_tags=budget.project.name)
         base_url = reverse('project-detail', args=(budget.project.id,))
         query_string = urlencode({'section': 'budgets'})
         url = f'{base_url}?{query_string}'
