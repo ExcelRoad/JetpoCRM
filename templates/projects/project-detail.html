@@ -1147,7 +1147,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                     <input type="text" name="timesheet" :value="selectedTimesheet" class="hidden">
                     <div class="flex flex-col gap-1">
                         <label for="taskTitle" class="text-gray-600">תאריך</label>
-                        <input type="date" id="timesheetDate" name="timesheetDate" class="input-field" :value="selectedTimesheetDate">
+                        {% include 'components/datepicker.html' with name='timesheetDate' model='selectedTimesheetDate' required=True %}
                         <label for="timesheetHours" class="text-gray-600">שעות</label>
                         <input type="decimal" class="input-field" id="timesheetHours" name="timesheetHours" :value="selectedTimesheetHours">
                         <label for="timesheetDescription" class="text-gray-600">תיאור</label>
@@ -1191,11 +1191,11 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                         </div>
                         <div class="col-start-1">
                             <label for="meetingDate" class="text-gray-600">תאריך</label>
-                        <input type="date" id="meetingDate" name="meetingDate" :value="selectedMeetingDate" class="input-field" required>
+                            {% include 'components/datepicker.html' with name='meetingDate' model='selectedMeetingDate' required=True %}
                         </div>
                         <div class="col-start-2">
                             <label for="meetingStartTime" class="text-gray-600">שעת התחלה</label>
-                            <input type="time" id="meetingStartTime" name="meetingStartTime" x-model="selectedMeetingStartTime" class="input-field" required>
+                            {% include 'components/timepicker.html' with name='meetingStartTime' model='selectedMeetingStartTime' required=True %}
                         </div>
                         <div class="col-start-1">
                             <label for="meetingDuration" class="text-gray-600">משך</label>
