@@ -51,6 +51,130 @@
                     <p class="text-gray-500">כאן ניתן לנהל את החיבורים של המערכת עם מערכות אחרות. אנא עקבו אחרי ההנחיות</p>
                 </div>
             </div>
+            <div class="flex mt-2 mx-4">
+                <div class="w-1/10 p-2 border border-gray-200 rounded-lg h-133">
+                    <nav>
+                        <button class="nav-btn" @click="selectedSubSection='1'" :class="selectedSubSection=='1' ? 'active' : ''">
+                            WorkDrive
+                            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                                <defs><style>.a{fill:none;stroke:#397CBA;stroke-linecap:round;stroke-linejoin:round;stroke-width:4}</style></defs>
+                                <path class="a" d="M43.5,37.0237a2.1763,2.1763,0,0,1-2.1806,2.1717H6.6735A2.1762,2.1762,0,0,1,4.5,37.0165v-26.04A2.1762,2.1762,0,0,1,6.6806,8.8046v.0018h9.9013c2.257,0,6.2253,4.13,8.1881,4.2372H41.6783A1.8217,1.8217,0,0,1,43.5,14.8652Z"/>
+                                  <circle class="a" cx="38.7664" cy="22.9346" r="3.0841"/>
+                                  <circle class="a" cx="24.1933" cy="28.5637" r="3.0841"/>
+                                  <circle class="a" cx="31.4798" cy="25.7491" r="3.0841"/>
+                                  <path class="a" d="M17.8785,39.1954V36.322a3,3,0,0,1,1.9229-2.8l5.07-1.95"/>
+                                  <path class="a" d="M24.8992,39.1954V33.5835a3,3,0,0,1,1.9229-2.8l5.07-1.95"/>
+                                  <path class="a" d="M32.1857,39.1954V30.769a3,3,0,0,1,1.923-2.8l5.07-1.95"/>
+                              </svg>
+                            </button>
+                        <button class="nav-btn" @click="selectedSubSection='2'" :class="selectedSubSection=='2' ? 'active' : ''">Sumit
+                            <img src="{% static 'images/sumit-logo.png' %}" alt="Sumit Logo" class="size-4">
+                        </button>
+                    </nav>
+                </div>
+                <!-- Workdrive Settings Content Section -->
+                <div x-show="selectedSubSection=='1'" class="w-8/10">
+                    <div class="flex items-center px-4 gap-4">
+                        <div class="pb-1 flex-1 flex items-center gap-2">
+                            <h2 class="text-xl font-semibold">Zoho WorkDrive</h2>
+                            <span class="status-pill {% if workdrive.is_connected %}success{% else %}danger{% endif %}">{% if workdrive.is_connected %}מחובר{% else %}לא מחובר{% endif %}</span>
+                        </div>
+                        <div class="flex items-center justify-end gap-2">
+                            {% if workdrive.is_connected %}
+                            <button class="btn-action danger">הסר חיבור</button>
+                            {% else %}
+                            <button class="btn-main">בדוק חיבור</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if workdrive.is_connected %}
+                    <div class="flex flex-col gap-2 p-4 rounded-lg border border-gray-200 mt-2 w-3/8 mr-2">
+                        <div>
+                            <h4 class="text-base text-gray-600">הגדרות חיבור</h4>
+                        </div>
+                        <div class="field-wrapper flex items-center gap-2 col-start-1">
+                            <div class="relative inline-block w-11 h-5">
+                                <input {% if workdrive.customer_folder %}checked{% endif %} type="checkbox" name="customer-folder" id="customer-folder" class="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300">
+                                <label for="customer-folder" class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-violet-800 cursor-pointer">
+                                </label>
+                            </div>
+                            <label class="text-gray-500 text-sx" for="customer-folder">יצירת תקייה עבור לקוח ביצירה</label>
+                        </div>
+                        <div class="field-wrapper flex items-center gap-2 col-start-1">
+                            <div class="relative inline-block w-11 h-5">
+                                <input {% if workdrive.project_folder %}checked{% endif %} type="checkbox" name="project-folder" id="project-folder" class="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300">
+                                <label for="project-folder" class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-violet-800 cursor-pointer">
+                                </label>
+                            </div>
+                            <label class="text-gray-500 text-sx" for="project-folder">יצירת תקייה עבור פרויקט ביצירה</label>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="flex flex-col gap-2 p-4 rounded-lg border border-gray-200 mt-2 w-3/8 mr-2">
+                        <div>
+                            <h4 class="text-base text-gray-600">פרטי חיבור</h4>
+                        </div>
+                        <div>
+                            <label for="">Client ID</label>
+                            <input type="text" class="input-field">
+                        </div>
+                        <div>
+                            <label for="">Client Secret</label>
+                            <input type="password" class="input-field">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <!-- Sumit Settings Content Section -->
+                <div x-show="selectedSubSection=='2'" class="w-8/10">
+                    <div class="flex items-center px-4 gap-4">
+                        <div class="pb-1 flex-1 flex items-center gap-2">
+                            <h2 class="text-xl font-semibold">Sumit</h2>
+                            <span class="status-pill {% if sumit.is_connected %}success{% else %}danger{% endif %}">{% if sumit.is_connected %}מחובר{% else %}לא מחובר{% endif %}</span>
+                        </div>
+                        <div class="flex items-center justify-end gap-2">
+                            {% if sumit.is_connected %}
+                            <button class="btn-action danger">הסר חיבור</button>
+                            {% else %}
+                            <button class="btn-main">בדוק חיבור</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if sumit.is_connected %}
+                    <div class="flex flex-col gap-2 p-4 rounded-lg border border-gray-200 mt-2 w-3/8 mr-2">
+                        <div>
+                            <h4 class="text-base text-gray-600">הגדרות חיבור</h4>
+                        </div>
+                        <div class="field-wrapper flex items-center gap-2 col-start-1">
+                            <div class="relative inline-block w-11 h-5">
+                                <input {% if sumit.customer_create %}checked{% endif %} type="checkbox" name="customer-create" id="customer-create" class="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300">
+                                <label for="customer-create" class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-violet-800 cursor-pointer">
+                                </label>
+                            </div>
+                            <label class="text-gray-500 text-sx" for="customer-create">יצירת לקוח בSUMIT כאשר נוצר לקוח במערכת</label>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="flex flex-col gap-2 p-4 rounded-lg border border-gray-200 mt-2 w-3/8 mr-2">
+                        <div>
+                            <h4 class="text-base text-gray-600">פרטי חיבור</h4>
+                        </div>
+                        <div>
+                            <label for="">מזהה עסק (CompanyId)</label>
+                            <input type="text" class="input-field" name="sumit_companyID">
+                        </div>
+                        <div>
+                            <label for="">מפתח API</label>
+                            <input type="password" class="input-field" name="sumit_api_key">
+                        </div>
+                        <div>
+                            <label for="">מהזהה תקיית לקוחות</label>
+                            <input type="text" class="input-field" name="sumit_customer_folder">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         <!-- Leads Tab Content -->
         <div x-show="selectTab == 'leads'" class="mt-2" x-cloak>
