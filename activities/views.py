@@ -8,6 +8,7 @@ from projects.models import Project, ProjectBudget
 from leads.models import LeadSource
 from alerts.models import AlertSettings, AlertType
 from django.contrib import messages
+from connections.models import Workdrive, Sumit
 
 
 
@@ -21,9 +22,26 @@ def settings_page(request):
         user = request.user,
         alert_type = lead_alert_type
     )
+    workdrive_settings = Workdrive.objects.first()
+    if workdrive_settings is None:
+        workdrive_settings = Workdrive.objects.create(
+            client_id = '',
+            client_secret = '',
+            is_connected = False
+        )
+    sumit_settings = Sumit.objects.first()
+    if sumit_settings is None:
+        sumit_settings = Sumit.objects.create(
+            company_id = '',
+            api_key = '',
+            customer_folder_id = '',
+            is_connected = False
+        )
     context = {
         'lead_sources': lead_sources,
         'lead_alert_settings' : lead_alert_settings,
+        'workdrive': workdrive_settings,
+        'sumit': sumit_settings
     }
     return render(request, 'base/settings-page.html', context)
 
