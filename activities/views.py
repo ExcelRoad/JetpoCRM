@@ -47,7 +47,11 @@ def settings_page(request):
     }
     return render(request, 'base/settings-page.html', context)
 
-
+def profile_page(request):
+    base_url = reverse('settings')
+    query_string = urlencode({'section': 'profile'})
+    url = f'{base_url}?{query_string}'
+    return redirect(url)
 
 def get_service_info(request, pk):
 
