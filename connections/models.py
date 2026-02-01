@@ -6,6 +6,8 @@ class Workdrive(models.Model):
     client_secret = models.CharField(max_length=255, unique=True)
 
     is_connected = models.BooleanField(default=False)
+    customer_folder = models.BooleanField(default=False)
+    project_folder = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -28,6 +30,7 @@ class Sumit(models.Model):
     customer_folder_id = models.CharField(max_length=255, unique=True)
 
     is_connected = models.BooleanField(default=False)
+    customer_create = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

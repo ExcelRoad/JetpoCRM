@@ -61,7 +61,7 @@ class Project(models.Model):
     @property
     def usage(self):
         budget = ProjectBudget.objects.filter(project=self, is_active=True).first()
-        return budget.reported_hours
+        return float(budget.reported_hours)
     
     @property
     def budget_remaining(self):

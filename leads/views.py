@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from .models import Lead, LeadSource
 from .forms import LeadForm, LeadSourceForm
 from activities.models import Note
+from django.contrib import messages
 
 
 def lead_list(request):

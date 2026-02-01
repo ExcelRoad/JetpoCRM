@@ -14,6 +14,7 @@ from connections.models import Workdrive, Sumit
 
 def settings_page(request):
     lead_sources = LeadSource.objects.all()
+    services = Service.objects.all()
     lead_alert_type, created = AlertType.objects.get_or_create(
         name = 'Leads',
         slug = 'leads'
@@ -41,7 +42,8 @@ def settings_page(request):
         'lead_sources': lead_sources,
         'lead_alert_settings' : lead_alert_settings,
         'workdrive': workdrive_settings,
-        'sumit': sumit_settings
+        'sumit': sumit_settings,
+        'services': services
     }
     return render(request, 'base/settings-page.html', context)
 
@@ -272,7 +274,7 @@ def meeting_create_update(request, pk=None):
             meeting.location = meetingLocation
             meeting.save()
             messages.success(request, 'פגישה עודכנה בהצלחה', extra_tags=meeting.title)
-        base_url = reverse(fallback, args=(meeting.object_id,))
+        base_url = reverse(fallback, args=(object_id,))
         query_string = urlencode({'section': 'activities'})
         url = f'{base_url}?{query_string}'
         return redirect(url)
@@ -286,5 +288,43 @@ def meeting_complete(request, pk):
         messages.success(request, 'פגישה הושלמה בהצלחה', extra_tags=meeting.title)
         base_url = reverse(fallback, args=(meeting.object_id,))
         query_string = urlencode({'section': 'activities'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+
+
+def service_delete(request, pk):
+    if request.method == 'POST':
+        service = Service.objects.get(pk=pk)
+        service.delete()
+        messages.success(request, 'שירות נמחק בהצלחה', extra_tags=service.name)
+        base_url = reverse('settings')
+        query_string = urlencode({'section': 'general', 'subsection': '1'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+
+def service_save(request):
+    if request.method == 'POST':
+        serviceId = request.POST['service']
+        serviceName = request.POST['serviceName']
+        if serviceId == '0' or serviceId == 0:
+            service = Service.objects.create(
+                name = serviceName,
+                budget_type = request.POST['serviceBudgetType'],
+                default_qty = request.POST['serviceQty'],
+                default_price = request.POST['servicePrice'],
+                is_subscription = request.POST.get('service_is_subscription') == 'on',
+            )
+            messages.success(request, 'שירות נוצר בהצלחה', extra_tags=service.name)
+        else:
+            service = Service.objects.get(pk=serviceId)
+            service.name = serviceName
+            service.budget_type = request.POST['serviceBudgetType']
+            service.default_qty = request.POST['serviceQty']
+            service.default_price = request.POST['servicePrice']
+            service.is_subscription = request.POST.get('service_is_subscription') == 'on'
+            service.save()
+            messages.success(request, 'שירות עודכן בהצלחה', extra_tags=service.name)
+        base_url = reverse('settings')
+        query_string = urlencode({'section': 'general', 'subsection': '1'})
         url = f'{base_url}?{query_string}'
         return redirect(url)

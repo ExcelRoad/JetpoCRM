@@ -142,12 +142,23 @@ class Meeting(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveBigIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
+
+    customer = models.ForeignKey('customers.Customer', on_delete=models.CASCADE, null=True, blank=True, related_name='meetings')
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.title
+
+
+    def save(self, *args, **kwargs):
+        # set the customer if its not a lead
+        if not self.customer:
+            if self.content_type.model != 'lead':
+                if self.content_object.customer:
+                    self.customer = self.content_object.customer
+        super().save(*args, **kwargs)
     
     class Meta:
         verbose_name = "פגישה"

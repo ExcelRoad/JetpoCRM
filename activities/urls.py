@@ -15,4 +15,6 @@ urlpatterns = [
     path('api/meetings/delete/<pk>', views.meeting_delete, name='meeting-delete'),
     path('api/meetings/createupdate/<pk>', views.meeting_create_update, name='meeting-create-update'),
     path('api/meetings/complete/<pk>', views.meeting_complete, name='meeting-complete'),
+    path('api/service/delete/<pk>', views.service_delete, name='service-delete'),
+    path('api/service/save', views.service_save, name='service-save'),
 ]
