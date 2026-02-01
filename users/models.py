@@ -22,10 +22,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     Custom User model where the email is the username.
     The user can add profile image.
     """
-    email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=250, blank=True)
-    last_name = models.CharField(max_length=250, blank=True)
-    profile_image = models.ImageField(blank=True, upload_to='avatars/')
+    email = models.EmailField(unique=True, verbose_name="אימייל")
+    first_name = models.CharField(max_length=250, blank=True, verbose_name="שם פרטי")
+    last_name = models.CharField(max_length=250, blank=True, verbose_name="שם משפחה")
+    profile_image = models.ImageField(blank=True, upload_to='avatars/', verbose_name="תמונת פרופיל")
     
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
