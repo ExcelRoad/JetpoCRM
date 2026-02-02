@@ -104,6 +104,7 @@
             </div>
             
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     Chart.defaults.font.family = "'Rubik', sans-serif";
@@ -115,6 +116,7 @@
 
                     new Chart(ctx, {
                         type: 'line',
+                        plugins: [ChartDataLabels],
                         data: {
                             labels: labels,
                             datasets: [{
@@ -132,6 +134,11 @@
                             }]
                         },
                         options: {
+                            layout: {
+                                padding: {
+                                    top: 20
+                                }
+                            },
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
@@ -153,6 +160,25 @@
                                             }
                                             return label;
                                         }
+                                    }
+                                },
+                                datalabels: {
+                                    display: true,
+                                    align: '-45',
+                                    anchor: 'center',
+                                    offset: 6,
+                                    color: '#4b5563',
+                                    font: {
+                                        weight: 'normal',
+                                        family: "'Rubik', sans-serif"
+                                    },
+                                    formatter: function(value, context) {
+                                        if (value === 0) return '';
+                                        // Format as X.XK if large, or just X
+                                        if (value >= 1000) {
+                                            return '₪' + (value / 1000).toFixed(1) + 'k';
+                                        }
+                                        return '₪' + value.toLocaleString();
                                     }
                                 }
                             },
@@ -193,8 +219,7 @@
                     <div x-show="selectTab=='source'" class="grid grid-cols-3 gap-2">
                         {% for ls in leadSources %}
                         <div class="border border-gray-200 rounded-lg p-2 flex flex-col">
-                            <span class="status-pill w-1/10 h-1"></span>
-                            <h4 class="font-semibold">{{ ls.name }}</h4>
+                            <span class="status-pill w-fit">{{ ls.name }}</span>
                             <p class="text-lg text-semibold">{{ ls.leads.all.count|floatformat:"0"|intcomma:False }}</p>
                         </div>
                         {% endfor %}
@@ -221,6 +246,22 @@
                 <!-- Customers Ranking -->
                 <div class="p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100">
                     <h3 class="text-base font-semibold">דירוג לקוחות</h3>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        {% for customer in customer_ranking_list %}
+                        <div class="border border-gray-200 rounded-lg p-2 flex items-center justify-between gap-2">
+                            <div class="flex gap-2 flex-col">
+                                <div class="flex items-center gap-2">
+                                    <span class="status-pill w-fit">{{ customer.rank }}</span>
+                                    <a href="{% url 'customer-detail' customer.customer_id %}" class="font-semibold hover:text-indigo-800 transition-all duration-100">{{ customer.name }}</a>
+                                </div>
+                                <p class="">₪{{ customer.income|floatformat:"0"|intcomma:False }}</p>
+                            </div>
+                            <div class="p-3">
+                                <img src="{{ customer.logo.url }}" alt="" class="size-10 squircle">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
              </div>
         </div>
@@ -247,7 +288,7 @@
                                 <span class="status-pill {% if project.status == 'open' %}proccess{% elif project.status == 'onHold' %}alert{% endif %}">{{ project.get_status_display }}</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <a class="btn-action w-fit">
+                                <a class="btn-action w-fit" href="{% url 'customer-detail' project.customer.id %}">
                                     <img src="{{ project.customer.logo.url }}" alt="" class="size-6 squircle">
                                     {{project.customer.name}}
                                 </a>

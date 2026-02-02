@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.utils import timezone
 from urllib.parse import urlencode
 from .models import Payment
 from django.contrib import messages
@@ -80,6 +81,7 @@ def payment_send_invoice(request, pk):
         fallback = request.POST["fallback"]
         payment = Payment.objects.get(pk=pk)
         payment.status = "billed"
+        payment.invoice_date = timezone.now().date()
         payment.save()
         messages.success(request, 'חשבונית נשלחה בהצלחה', extra_tags=payment.name)
         if fallback == 'customer-detail':
@@ -101,6 +103,7 @@ def payment_send_recipt(request, pk):
         fallback = request.POST["fallback"]
         payment = Payment.objects.get(pk=pk)
         payment.status = "paid"
+        payment.recipt_date = timezone.now().date()
         payment.save()
         messages.success(request, 'קבלה נשלחה בהצלחה', extra_tags=payment.name)
         if fallback == 'customer-detail':

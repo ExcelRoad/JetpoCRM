@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from leads.models import Lead, LeadSource
+from customers.models import Customer
 from quotes.models import Quote
 from payments.models import Payment
 from projects.models import Project
@@ -135,10 +136,25 @@ def homePage(request):
         # Find matching data
         total = 0
         for entry in monthly_income:
-            if entry['month'].date().year == m_date.year and entry['month'].date().month == m_date.month:
+            if entry['month'].year == m_date.year and entry['month'].month == m_date.month:
                 total = entry['total_income']
                 break
         income_data_list.append(float(total))
+    
+    # Customer Ranking by income with the ranking number and only 4 top customers
+    customer_ranking_list = []
+    all_customers = Customer.objects.all()
+    for customer in all_customers:
+        customer_ranking_list.append({
+            'name': customer.name,
+            'income': customer.total_income,
+            'logo': customer.logo,
+            'customer_id': customer.id,
+        })
+    customer_ranking_list = sorted(customer_ranking_list, key=lambda x: x['income'], reverse=True)
+    customer_ranking_list = customer_ranking_list[:4]
+    for i, customer in enumerate(customer_ranking_list):
+        customer['rank'] = i + 1
 
 
     context = {
@@ -158,6 +174,7 @@ def homePage(request):
         'leadCreatelist': leadCreatelist,
         'income_labels': income_labels,
         'income_data': income_data_list,
+        'customer_ranking_list': customer_ranking_list,
     }
     return render(request, 'base/home.html', context)
 
