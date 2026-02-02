@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from leads.models import Lead
+from leads.models import Lead, LeadSource
 from quotes.models import Quote
 from payments.models import Payment
 from projects.models import Project
@@ -43,6 +43,37 @@ def homePage(request):
     billed_payments = open_payments.filter(status='billed')
     # Projects
     open_projects = Project.objects.filter(status__in=['open', 'onHold'])
+    # Lead Source
+    lead_sources = LeadSource.objects.all()
+    # Lead Status
+    leadStatus = Lead.LEAD_STATUSES
+    leadStatusCount = []
+    for i, status in enumerate(leadStatus):
+        statusMap = {}
+        statusMap['name'] = status[0]
+        statusMap['display'] = status[1]
+        statusMap['count'] = Lead.objects.filter(status=status[0]).count()
+        leadStatusCount.append(statusMap)
+    # Lead Create Date
+    leadCreatelist = [
+        {
+            'name': 'היום',
+            'count': Lead.objects.filter(created_at=timezone.now()).count()
+        },
+        {
+            'name': 'שבוע שעבר',
+            'count': this_week_leads.count()
+        },
+        {
+            'name': 'חודש שעבר',
+            'count': Lead.objects.filter(created_at__gte=timezone.now() - timedelta(days=30)).count()
+        },
+        {
+            'name': 'שנה שעברה',
+            'count': Lead.objects.filter(created_at__gte=timezone.now() - timedelta(days=365)).count()
+        }
+    ]
+
     context = {
         'open_leads': open_leads,
         'this_week_leads': this_week_leads,
@@ -55,6 +86,9 @@ def homePage(request):
         'draft_payments': draft_payments,
         'billed_payments': billed_payments,
         'open_projects': open_projects,
+        'leadSources': lead_sources,
+        'leadStatusCount': leadStatusCount,
+        'leadCreatelist': leadCreatelist
     }
     return render(request, 'base/home.html', context)
 

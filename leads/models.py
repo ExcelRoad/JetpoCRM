@@ -26,7 +26,7 @@ class Lead(models.Model):
     company_name = models.CharField(max_length=250, null=True, blank=True)
     status = models.CharField(max_length=50, choices=LEAD_STATUSES, default='new')
     role = models.CharField(max_length=250, blank=True, null=True)
-    lead_source = models.ForeignKey('LeadSource', on_delete=models.SET_NULL, null=True, blank=True)
+    lead_source = models.ForeignKey('LeadSource', on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
 
     notes = GenericRelation(Note, related_query_name='notes')
     quotes = GenericRelation(Quote, related_query_name='quotes')
