@@ -74,6 +74,73 @@ def homePage(request):
         }
     ]
 
+    # Income Chart Data
+        # Calculate start date (11 months ago from current month start) to cover 12 months including current
+    today = timezone.localtime(timezone.now()).date()
+    # If today is 2023-10-15, start_date should be 2022-11-01
+    start_date = (today.replace(day=1) - timedelta(days=1)).replace(day=1) # Go back to start of prev month, then go back 11 more months?
+    # Simpler approach: go back 365 days
+    start_date = today - timedelta(days=365)
+    
+    from django.db.models import Sum, F
+    from django.db.models.functions import TruncMonth
+
+    monthly_income = (
+        Payment.objects
+        .filter(status='paid', recipt_date__gte=start_date)
+        .annotate(month=TruncMonth('recipt_date'))
+        .values('month')
+        .annotate(total_income=Sum(F('qty') * F('price')))
+        .order_by('month')
+    )
+
+    # Process data to ensure all 12 months are present and formatted for Chart.js
+    income_labels = []
+    income_data_list = []
+    
+    # Generate list of last 12 months
+    current_month_start = today.replace(day=1)
+    months_list = []
+    for i in range(12):
+        d = current_month_start
+        month_ago = i
+        year = d.year
+        month = d.month - month_ago
+        while month <= 0:
+            month += 12
+            year -= 1
+        months_list.append(d.replace(year=year, month=month))
+        
+    hebrew_months = {
+        1: 'ינואר',
+        2: 'פברואר',
+        3: 'מרץ',
+        4: 'אפריל',
+        5: 'מאי',
+        6: 'יוני',
+        7: 'יולי',
+        8: 'אוגוסט',
+        9: 'ספטמבר',
+        10: 'אוקטובר',
+        11: 'נובמבר',
+        12: 'דצמבר'
+    }
+
+    for m_date in months_list:
+        # Label format: "HebrewMonth Year" e.g., "אוקטובר 2023"
+        month_name = hebrew_months[m_date.month]
+        label = f"{month_name} {m_date.year}"
+        income_labels.append(label)
+        
+        # Find matching data
+        total = 0
+        for entry in monthly_income:
+            if entry['month'].date().year == m_date.year and entry['month'].date().month == m_date.month:
+                total = entry['total_income']
+                break
+        income_data_list.append(float(total))
+
+
     context = {
         'open_leads': open_leads,
         'this_week_leads': this_week_leads,
@@ -88,7 +155,9 @@ def homePage(request):
         'open_projects': open_projects,
         'leadSources': lead_sources,
         'leadStatusCount': leadStatusCount,
-        'leadCreatelist': leadCreatelist
+        'leadCreatelist': leadCreatelist,
+        'income_labels': income_labels,
+        'income_data': income_data_list,
     }
     return render(request, 'base/home.html', context)
 

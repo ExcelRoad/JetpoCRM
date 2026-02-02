@@ -93,16 +93,96 @@
                 </div>
             </div>
             <!-- Income Chart -->
-            <div class="col-span-3 p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100 row-span-28">
-                <div class="flex flex-col">
+            <div class="col-span-3 p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100 row-span-28 relative flex flex-col">
+                <div class="flex flex-col mb-2">
                     <h3 class="text-base font-semibold">הכנסות</h3>
                     <p class="text-xs text-gray-500">הכנסות לפי חודשים ושנים. הכנסות הינם תשלומים בסטטוס שולם</p>
                 </div>
+                <div class="flex-1 w-full relative">
+                    <canvas id="incomeChart"></canvas>
+                </div>
             </div>
+            
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Chart.defaults.font.family = "'Rubik', sans-serif";
+                    const ctx = document.getElementById('incomeChart').getContext('2d');
+                    
+                    // Data from Django
+                    const labels = {{ income_labels|safe }};
+                    const data = {{ income_data|safe }};
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'הכנסות (₪)',
+                                data: data,
+                                borderColor: '#6366f1', // Indigo-500
+                                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.3, // Smooth curves
+                                pointBackgroundColor: '#ffffff',
+                                pointBorderColor: '#6366f1',
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false 
+                                },
+                                tooltip: {
+                                    rtl: true,
+                                    titleAlign: 'right',
+                                    bodyAlign: 'right',
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.parsed.y !== null) {
+                                                label += new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' }).format(context.parsed.y);
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    position: 'right',
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value, index, values) {
+                                            return '₪' + value.toLocaleString();
+                                        }
+                                    },
+                                    grid: {
+                                        color: '#f3f4f6'
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+            </script>
             <!-- Bottom Section-->
              <div class="col-span-3 grid grid-cols-2 gap-2 row-span-21">
                 <!-- Lead Management -->
-                <div class="p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100 h-full overflow-y-auto" x-data="{'selectTab': 'status'}">
+                <div class="p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100 h-full overflow-y-auto" x-data="{'selectTab': 'source'}">
                     <h3 class="text-base font-semibold">ניהול לידים</h3>
                     <div class="flex items-center justify-between mb-2">
                         <button class="btn-tab flex-1" :class="selectTab=='source' ? 'active' : ''" @click="selectTab = 'source'">מקור ליד</button>
