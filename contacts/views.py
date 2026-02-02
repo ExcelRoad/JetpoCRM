@@ -5,7 +5,9 @@ from django.urls import reverse
 from urllib.parse import urlencode
 from activities.models import Note
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def contact_list(request):
     contacts = Contact.objects.all()
     context = {
@@ -14,6 +16,7 @@ def contact_list(request):
     return render(request, 'contacts/contact-list.html', context)
 
 
+@login_required
 def contact_create(request, pk=None):
     if pk == None:
         form = ContactForm()
@@ -34,6 +37,7 @@ def contact_create(request, pk=None):
     return render(request, 'contacts/contact-form.html', context)
 
 
+@login_required
 def contact_edit(request, pk, fallback):
     contact = Contact.objects.get(pk=pk)
     form = ContactForm(instance=contact)
@@ -56,6 +60,7 @@ def contact_edit(request, pk, fallback):
     }
     return render(request, 'contacts/contact-form.html', context)
 
+@login_required
 def contact_delete(request, pk):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -68,6 +73,7 @@ def contact_delete(request, pk):
             return redirect('contact-list')
     
 
+@login_required
 def contact_set_main(request, pk):
     if request.method == 'POST':
         fallback = request.POST['fallback']
@@ -90,6 +96,7 @@ def contact_set_main(request, pk):
             return redirect('contact-list')
     
 
+@login_required
 def contact_detail(request, pk):
     contact = Contact.objects.get(pk=pk)
     tagged_note = contact.notes.all().filter(tagged=True).first()
@@ -101,6 +108,7 @@ def contact_detail(request, pk):
     return render(request, 'contacts/contact-detail.html', context)
 
 
+@login_required
 def contact_submit_note(request, pk):
     contact = Contact.objects.get(pk = pk)
     note = Note.objects.create(
@@ -112,6 +120,7 @@ def contact_submit_note(request, pk):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def contact_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     contact = Contact.objects.get(pk=note.object_id)
@@ -123,6 +132,7 @@ def contact_delete_note(request, noteid):
     return redirect(url)
 
 
+@login_required
 def contact_tag_note(request, noteid):
     # remove tag from all Notes for this Lead
     note = Note.objects.get(pk=noteid)
@@ -138,6 +148,7 @@ def contact_tag_note(request, noteid):
     return redirect(url)
 
 
+@login_required
 def contact_mass_delete(request):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -151,6 +162,7 @@ def contact_mass_delete(request):
         return redirect(fallback)
 
 
+@login_required
 def contact_toggle_alerts(request, pk):
     contact = Contact.objects.get(pk = pk)
     contact.is_alerts = not contact.is_alerts
@@ -168,7 +180,7 @@ def contact_toggle_alerts(request, pk):
         return redirect(url)
     else:
         return redirect('contact-list')
-
+    
         
     base_url = reverse('contact-detail', args=(pk,))
     query_string = urlencode({'section': 'notes'})

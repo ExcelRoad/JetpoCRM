@@ -5,8 +5,9 @@ from .models import Customer
 from .forms import CustomerForm
 from activities.models import Note
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def customer_list(request):
     customers = Customer.objects.all()
     context = {
@@ -14,6 +15,7 @@ def customer_list(request):
     }
     return render(request, 'customers/customers-list.html', context)
 
+@login_required
 def customer_card(request):
     customers = Customer.objects.all()
     context = {
@@ -21,6 +23,7 @@ def customer_card(request):
     }
     return render(request, 'customers/customers-card.html', context)
 
+@login_required
 def customer_create(request):
     form = CustomerForm()
     if request.method == 'POST':
@@ -37,6 +40,7 @@ def customer_create(request):
     }
     return render(request, 'customers/customer-form.html', context)
 
+@login_required
 def customer_edit(request, pk, fallback):
     customer = Customer.objects.get(pk=pk)
     form = CustomerForm(instance=customer)
@@ -57,6 +61,7 @@ def customer_edit(request, pk, fallback):
     }
     return render(request, 'customers/customer-form.html', context)
 
+@login_required
 def customer_delete(request, pk):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -65,6 +70,7 @@ def customer_delete(request, pk):
         messages.success(request, 'לקוח נמחק בהצלחה', extra_tags=customer.name)
         return redirect(fallback)
 
+@login_required
 def customer_detail(request, pk):
     customer = Customer.objects.get(pk=pk)
     tagged_note = customer.notes.all().filter(tagged=True).first()
@@ -177,6 +183,7 @@ def customer_detail(request, pk):
     }
     return render(request, 'customers/customer-detail.html', context)
 
+@login_required
 def customer_submit_note(request, pk):
     customer = Customer.objects.get(pk = pk)
     note = Note.objects.create(
@@ -188,6 +195,7 @@ def customer_submit_note(request, pk):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def customer_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     customer = Customer.objects.get(pk=note.object_id)
@@ -198,6 +206,7 @@ def customer_delete_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def customer_tag_note(request, noteid):
     # remove tag from all Notes for this Lead
     note = Note.objects.get(pk=noteid)
@@ -212,6 +221,7 @@ def customer_tag_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def customer_mass_delete(request):
     if request.method == "POST":
         fallback = request.POST['fallback']

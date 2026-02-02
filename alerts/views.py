@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from urllib.parse import urlencode
 from alerts.models import AlertSettings, AlertType
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def change_lead_alert_settings(request):
     if request.method == "POST":
         lead_alert_settings = AlertSettings.objects.get(

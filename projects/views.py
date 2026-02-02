@@ -7,8 +7,10 @@ from customers.models import Customer
 from .forms import ProjectForm
 from payments.models import Payment
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def project_create(request, customerId = None):
     if customerId:
         customer = Customer.objects.get(pk=customerId)
@@ -32,6 +34,7 @@ def project_create(request, customerId = None):
     return render(request, 'projects/project-form.html', context)
 
 
+@login_required
 def project_edit(request, pk, fallback):
     project = Project.objects.get(pk=pk)
     form = ProjectForm(instance=project)
@@ -57,6 +60,7 @@ def project_edit(request, pk, fallback):
     return render(request, 'projects/project-form.html', context)
 
 
+@login_required
 def project_delete(request, pk):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -68,6 +72,7 @@ def project_delete(request, pk):
         else:
             return redirect(fallback)
         
+@login_required
 def project_detail(request, pk):
     project = Project.objects.get(pk=pk)
     tagged_note = Note.objects.filter(
@@ -82,6 +87,7 @@ def project_detail(request, pk):
     return render(request, 'projects/project-detail.html', context)
 
 
+@login_required
 def project_submit_note(request, pk):
     project = Project.objects.get(pk = pk)
     note = Note.objects.create(
@@ -93,6 +99,7 @@ def project_submit_note(request, pk):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def project_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     project = Project.objects.get(pk=note.object_id)
@@ -103,6 +110,7 @@ def project_delete_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def project_tag_note(request, noteid):
     # remove tag from all Notes for this Lead
     note = Note.objects.get(pk=noteid)
@@ -117,6 +125,7 @@ def project_tag_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def project_list(request):
     projects = Project.objects.all()
 
@@ -126,6 +135,7 @@ def project_list(request):
     return render(request, 'projects/project-list.html', context)
 
 
+@login_required
 def project_mass_delete(request):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -139,6 +149,7 @@ def project_mass_delete(request):
         return redirect(fallback)
     
 
+@login_required
 def project_budget_activate(request, pk):
     budget = ProjectBudget.objects.get(pk=pk)
     allBudgets = ProjectBudget.objects.filter(project = budget.project).update(is_active = False)
@@ -150,6 +161,7 @@ def project_budget_activate(request, pk):
     return redirect(url)
 
 
+@login_required
 def budget_delete(request, pk):
     budget = ProjectBudget.objects.get(pk=pk)
     budget.delete()
@@ -160,6 +172,7 @@ def budget_delete(request, pk):
     return redirect(url)
 
 
+@login_required
 def budget_create_update(request, pk):
     if request.method == 'POST':
         name = request.POST['budgetName']
@@ -191,6 +204,7 @@ def budget_create_update(request, pk):
     return redirect(url)
 
 
+@login_required
 def budget_add(request, pk):
     from decimal import Decimal
     if request.method == 'POST':

@@ -157,7 +157,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <a class="rounded-lg px-2 py-1 text-xs w-fit text-gray-500 flex gap-1 items-center hover:bg-gray-100" href="{% url 'customer-detail' quote.content_object.id %}">
+                                    <a class="rounded-lg px-2 py-1 text-xs w-fit text-gray-500 flex gap-1 items-center hover:bg-gray-100" href="{% if quote.content_type.model_name == 'customer' %}{% url 'customer-detail' quote.content_object.id %}{% else %}{% url 'lead-detail' quote.content_object.id %}{% endif %}">
                                         <img src="{% if quote.content_object.logo %}{{ quote.content_object.logo.url }}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="w-6 h-6 squircle">
                                         {{ quote.related_to }}
                                     </a>

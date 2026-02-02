@@ -13,9 +13,9 @@ class Quote(models.Model):
 
     STATUSES = (
         ('draft', 'טיוטה'),
+        ('sent', 'נשלחה'),
         ('lost', 'אבודה'),
         ('won', 'מאושרת'),
-        ('sent', 'נשלחה'),
     )
 
     name = models.CharField(max_length=255)

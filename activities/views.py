@@ -9,9 +9,10 @@ from leads.models import LeadSource
 from alerts.models import AlertSettings, AlertType
 from django.contrib import messages
 from connections.models import Workdrive, Sumit
+from django.contrib.auth.decorators import login_required
 
 
-
+@login_required
 def settings_page(request):
     lead_sources = LeadSource.objects.all()
     services = Service.objects.all()
@@ -47,12 +48,14 @@ def settings_page(request):
     }
     return render(request, 'base/settings-page.html', context)
 
+@login_required
 def profile_page(request):
     base_url = reverse('settings')
     query_string = urlencode({'section': 'profile'})
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def get_service_info(request, pk):
 
     service = Service.objects.get(pk=pk)
@@ -65,6 +68,7 @@ def get_service_info(request, pk):
     return JsonResponse(info)
 
 
+@login_required
 def task_create_update(request, pk):
     taskTitle = request.POST['taskTitle']
     taskDescription = request.POST['taskDescription']
@@ -96,6 +100,7 @@ def task_create_update(request, pk):
         return redirect('task-list')
 
 
+@login_required
 def task_complete(request, pk, main=False):
     if request.method == 'POST':
         task = Task.objects.get(pk=pk)
@@ -110,6 +115,7 @@ def task_complete(request, pk, main=False):
         else:
             return redirect('task-list')
 
+@login_required
 def task_delete(request, pk):
     if request.method == 'POST':
         fallback = request.POST['fallback']
@@ -124,6 +130,7 @@ def task_delete(request, pk):
         return redirect(url)
     
 
+@login_required
 def timesheet_create_update(request, pk):
     if request.method == 'POST':
         timesheetId = request.POST['timesheet']
@@ -154,6 +161,7 @@ def timesheet_create_update(request, pk):
         url = f'{base_url}?{query_string}'
         return redirect(url)
     
+@login_required
 def timesheet_delete(request, pk):
     if request.method == 'POST':
         timesheet = Timesheet.objects.get(pk=pk)
@@ -165,6 +173,7 @@ def timesheet_delete(request, pk):
         return redirect(url)
 
 
+@login_required
 def task_list(request):
     tasks = Task.objects.all()
     context = {
@@ -173,6 +182,7 @@ def task_list(request):
     return render(request, 'projects/task-list.html', context)
 
 
+@login_required
 def task_mass_complete(request):
     if request.method == 'POST':
         tasks = request.POST['tasks'].split(',')
@@ -183,6 +193,7 @@ def task_mass_complete(request):
         messages.success(request, f'{tasks.count()} משימות הושלמו בהצלחה')
         return redirect('task-list')
 
+@login_required
 def task_uncomplete(request, pk):
     if request.method == 'POST':
         fallback = request.POST['fallback']
@@ -198,6 +209,7 @@ def task_uncomplete(request, pk):
         url = f'{base_url}?{query_string}'
         return redirect(url)
 
+@login_required
 def leadsource_save(request):
     if request.method == 'POST':
         leadsourceId = request.POST['leadsource']
@@ -217,6 +229,7 @@ def leadsource_save(request):
         url = f'{base_url}?{query_string}'
         return redirect(url)
 
+@login_required
 def leadsource_delete(request, pk):
     if request.method == 'POST':
         leadsource = LeadSource.objects.get(pk=pk)
@@ -228,6 +241,7 @@ def leadsource_delete(request, pk):
         return redirect(url)
 
 
+@login_required
 def meeting_delete(request, pk):
     if request.method == 'POST':
         fallback = request.POST['fallback']
@@ -239,6 +253,7 @@ def meeting_delete(request, pk):
         url = f'{base_url}?{query_string}'
         return redirect(url)
 
+@login_required
 def meeting_create_update(request, pk=None):
     if request.method == 'POST':
         fallback = request.POST['fallback']
@@ -283,6 +298,7 @@ def meeting_create_update(request, pk=None):
         url = f'{base_url}?{query_string}'
         return redirect(url)
 
+@login_required
 def meeting_complete(request, pk):
     if request.method == 'POST':
         fallback = request.POST['fallback']
@@ -296,6 +312,7 @@ def meeting_complete(request, pk):
         return redirect(url)
 
 
+@login_required
 def service_delete(request, pk):
     if request.method == 'POST':
         service = Service.objects.get(pk=pk)
@@ -306,6 +323,7 @@ def service_delete(request, pk):
         url = f'{base_url}?{query_string}'
         return redirect(url)
 
+@login_required
 def service_save(request):
     if request.method == 'POST':
         serviceId = request.POST['service']

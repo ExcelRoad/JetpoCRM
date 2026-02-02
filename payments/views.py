@@ -4,7 +4,9 @@ from urllib.parse import urlencode
 from .models import Payment
 from django.contrib import messages
 from projects.models import Project
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def payment_edit(request, pk, main = False):
     if request.method == "POST":
         payQty = request.POST['paymentQty']
@@ -37,6 +39,7 @@ def payment_edit(request, pk, main = False):
             url = f'{base_url}?{query_string}'
         return redirect(url)
 
+@login_required
 def payment_delete(request, pk, main = False):
     payment = Payment.objects.get(pk=pk)
     payment.delete()
@@ -49,6 +52,7 @@ def payment_delete(request, pk, main = False):
         url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def payment_list(request):
     payments = Payment.objects.all()
     context = {
@@ -56,6 +60,7 @@ def payment_list(request):
     }
     return render(request, 'payments/payment-list.html', context)
 
+@login_required
 def payment_mass_delete(request):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -69,6 +74,7 @@ def payment_mass_delete(request):
         return redirect(fallback)
 
 
+@login_required
 def payment_send_invoice(request, pk):
     if request.method == "POST":
         fallback = request.POST["fallback"]
@@ -89,6 +95,7 @@ def payment_send_invoice(request, pk):
         elif fallback == 'payment-list':
             return redirect(reverse('payment-list'))
 
+@login_required
 def payment_send_recipt(request, pk):
     if request.method == "POST":
         fallback = request.POST["fallback"]

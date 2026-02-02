@@ -7,8 +7,10 @@ from .models import Lead, LeadSource
 from .forms import LeadForm, LeadSourceForm
 from activities.models import Note
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def lead_list(request):
     all_leads = Lead.objects.all()
 
@@ -18,6 +20,7 @@ def lead_list(request):
     }
     return render(request, 'leads/leads-list.html', context)
 
+@login_required
 def lead_kanban(request):
     all_leads = Lead.objects.all()
     statuses = Lead.LEAD_STATUSES
@@ -34,6 +37,7 @@ def lead_kanban(request):
     }
     return render(request, 'leads/leads-kanban.html', context)
 
+@login_required
 def lead_create(request):
     form = LeadForm()
     leadSources = list(LeadSource.objects.values('id', 'name'))
@@ -52,6 +56,7 @@ def lead_create(request):
     }
     return render(request, 'leads/lead-form.html', context)
 
+@login_required
 def lead_edit(request, pk, fallback):
     lead = Lead.objects.get(pk=pk)
     leadSources = list(LeadSource.objects.values('id', 'name'))
@@ -77,6 +82,7 @@ def lead_edit(request, pk, fallback):
     }
     return render(request, 'leads/lead-form.html', context)
 
+@login_required
 def lead_delete(request, pk):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -85,6 +91,7 @@ def lead_delete(request, pk):
         messages.success(request, 'ליד נמחק בהצלחה', extra_tags=lead.full_name)
         return redirect(fallback)
 
+@login_required
 def lead_convert(request, pk):
     lead = Lead.objects.get(pk=pk)
     # create customer
@@ -129,6 +136,7 @@ def lead_convert(request, pk):
     return redirect('customer-detail', customer.id)
 
 
+@login_required
 def lead_mass_delete(request):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -141,6 +149,7 @@ def lead_mass_delete(request):
         messages.success(request, f'{leadList.count()} לידים נמחקו בהצלחה')
         return redirect(fallback)
 
+@login_required
 def lead_detail(request, pk):
     lead = Lead.objects.get(pk=pk)
     tagged_note = lead.notes.all().filter(tagged=True).first()
@@ -184,6 +193,7 @@ def lead_detail(request, pk):
     }
     return render(request, 'leads/lead-detail.html', context)
 
+@login_required
 def lead_source_create(request):
     if request.method == 'POST':
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -213,6 +223,7 @@ def lead_source_create(request):
             })
     return JsonResponse({'error': 'Invalid Request'}, status=400)
 
+@login_required
 def lead_submit_note(request, pk):
     lead = Lead.objects.get(pk = pk)
     note = Note.objects.create(
@@ -224,6 +235,7 @@ def lead_submit_note(request, pk):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def lead_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     lead = Lead.objects.get(pk=note.object_id)
@@ -234,6 +246,7 @@ def lead_delete_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def lead_tag_note(request, noteid):
     # remove tag from all Notes for this Lead
     note = Note.objects.get(pk=noteid)
@@ -248,6 +261,7 @@ def lead_tag_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def lead_update_status(request):
     """
     AJAX endpoint to update lead status on drag-drop

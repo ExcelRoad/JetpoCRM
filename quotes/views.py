@@ -12,8 +12,9 @@ from activities.models import Note
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def quote_create(request, object_id, content_type):
     form = QuoteForm()
     service_formset = ServiceFormSet()
@@ -88,6 +89,7 @@ def quote_create(request, object_id, content_type):
     return render(request, 'quotes/quote-form.html', context)
 
 
+@login_required
 def quote_edit(request, pk, fallback):
     quote = Quote.objects.get(pk=pk)
     form = QuoteForm(instance=quote)
@@ -182,6 +184,7 @@ def quote_edit(request, pk, fallback):
     }
     return render(request, 'quotes/quote-form.html', context)
 
+@login_required
 def quote_delete(request, pk):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -195,6 +198,7 @@ def quote_delete(request, pk):
             return redirect(fallback)
 
 
+@login_required
 def quote_detail(request, pk):
     quote = Quote.objects.get(pk=pk)
     tagged_note = Note.objects.filter(
@@ -210,6 +214,7 @@ def quote_detail(request, pk):
     return render(request, 'quotes/quote-detail.html', context)
 
 
+@login_required
 def quote_submit_note(request, pk):
     quote = Quote.objects.get(pk = pk)
     note = Note.objects.create(
@@ -221,6 +226,7 @@ def quote_submit_note(request, pk):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def quote_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
     quote = Quote.objects.get(pk=note.object_id)
@@ -231,6 +237,7 @@ def quote_delete_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def quote_tag_note(request, noteid):
     # remove tag from all Notes for this Lead
     note = Note.objects.get(pk=noteid)
@@ -245,6 +252,7 @@ def quote_tag_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+@login_required
 def quote_list(request):
     quotes = Quote.objects.all()
 
@@ -253,6 +261,7 @@ def quote_list(request):
     }
     return render(request, 'quotes/quote-list.html', context)
 
+@login_required
 def quote_mass_delete(request):
     if request.method == "POST":
         fallback = request.POST['fallback']
@@ -266,6 +275,7 @@ def quote_mass_delete(request):
         return redirect(fallback)
 
 
+@login_required
 def quote_kanban(request):
     all_quotes = Quote.objects.all()
     statuses = Quote.STATUSES
@@ -283,6 +293,7 @@ def quote_kanban(request):
     return render(request, 'quotes/quote-kanban.html', context)
 
 
+@login_required
 def quote_update_status(request):
     """
     AJAX endpoint to update quote status on drag-drop
@@ -334,6 +345,7 @@ def quote_update_status(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=405)
 
 
+@login_required
 def quote_confirm(request, pk):
     """
     Confirm a quote: create customer/contact if needed, then create multiple projects
@@ -408,6 +420,7 @@ def quote_confirm(request, pk):
     return redirect('customer-detail', customer.id)
 
 
+@login_required
 def get_service_form_row(request):
     """
     AJAX endpoint to get a new service form row with proper Django widget rendering
@@ -430,6 +443,7 @@ def get_service_form_row(request):
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
+@login_required
 def get_payment_form_row(request):
     """
     AJAX endpoint to get a new payment form row with proper Django widget rendering
