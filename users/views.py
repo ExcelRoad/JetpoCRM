@@ -2,6 +2,7 @@ from django.shortcuts import render
 from leads.models import Lead
 from quotes.models import Quote
 from payments.models import Payment
+from projects.models import Project
 from django.contrib.auth import login as login_func
 from .forms import LoginForm, RegisterForm
 from django.shortcuts import redirect
@@ -38,6 +39,10 @@ def homePage(request):
     open_payments_value = 0
     for payment in open_payments:
         open_payments_value += payment.total_price
+    draft_payments = open_payments.filter(status='draft')
+    billed_payments = open_payments.filter(status='billed')
+    # Projects
+    open_projects = Project.objects.filter(status__in=['open', 'onHold'])
     context = {
         'open_leads': open_leads,
         'this_week_leads': this_week_leads,
@@ -47,6 +52,9 @@ def homePage(request):
         'old_open_quotes_percent': old_open_quotes_percent,
         'open_payments': open_payments,
         'open_payments_value': open_payments_value,
+        'draft_payments': draft_payments,
+        'billed_payments': billed_payments,
+        'open_projects': open_projects,
     }
     return render(request, 'base/home.html', context)
 

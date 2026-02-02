@@ -23,10 +23,10 @@
             <a class="btn-main" href="{% url 'customer-create' %}">לקוח חדש</a>
         </div>
     </div>
-    <div class="flex">
-        <div class="w-2/3 grid grid-cols-3 p-4 gap-2">
+    <div class="flex h-180">
+        <div class="w-2/3 grid grid-cols-3 py-4 px-2 gap-2">
             <!-- Open Lead KPI -->
-            <div class="p-3 border border-gray-200 rounded-lg hover:border-violet-300 transition-all duration-100">
+            <div class="p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100">
                 <div class="flex items-center justify-between">
                     <h3 class="text-base font-semibold">לידים </h3>
                     <a href="{% url 'lead-kanban' %}" class="text-gray-400 hover:text-violet-500 transition-all duration-100" @click="$store.selectMainTab.change('leads')">
@@ -39,16 +39,16 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-end gap-2">
                             <p class="text-2xl font-semibold">{{ open_leads.count }}</p>
-                            <p class="text-xs text-gray-400">לידים פתוחים</p>
+                            <p class="text-xs text-gray-500">לידים פתוחים</p>
                         </div>
                         <span class="status-pill {% if mom_lead_change_percent > 0 %}success{% else %}danger{% endif %}">{{ mom_lead_change_percent|floatformat:"0"|intcomma:False }}% מחודש שעבר</span>
                     </div>
                     
-                    <p class="text-gray-500"><span class="text-violet-600 text-base font-semibold">{{ this_week_leads.count|floatformat:"0"|intcomma:False }}</span> נוספו השבוע </p>
+                    <p class="text-gray-500"><span class="text-indigo-600 text-base font-semibold">{{ this_week_leads.count|floatformat:"0"|intcomma:False }}</span> נוספו השבוע </p>
                 </div>
             </div>
             <!-- Open Quotes KPI -->
-            <div class="p-3 border border-gray-200 rounded-lg hover:border-violet-300 transition-all duration-100">
+            <div class="p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100">
                 <div class="flex items-center justify-between">
                     <h3 class="text-base font-semibold">הצעות מחיר</h3>
                     <a href="{% url 'quote-kanban' %}" class="text-gray-400 hover:text-violet-500 transition-all duration-100" @click="$store.selectMainTab.change('quotes')">
@@ -62,11 +62,11 @@
                         <p class="text-2xl font-semibold">₪{{ open_quotes_value|floatformat:"0"|intcomma:False }}</p>
                         <span title="הצעות שנוצרו לפני יותר מ3 שבועות" class="status-pill {% if old_open_quotes_percent < 20 %}success{% elif old_open_quotes_percent < 50 %}alert{% else %}danger{% endif %}">{{ old_open_quotes_percent|floatformat:"0"|intcomma:False }}%  הצעות ישנות</span>
                     </div>
-                    <p class="text-gray-500"><span class="text-violet-600 text-base font-semibold">{{ open_quotes.count|floatformat:"0"|intcomma:False }}</span> הצעות פתוחות</p>
+                    <p class="text-gray-500"><span class="text-indigo-600 text-base font-semibold">{{ open_quotes.count|floatformat:"0"|intcomma:False }}</span> הצעות פתוחות</p>
                 </div>
             </div>
             <!-- Open Payments KPI -->
-            <div class="p-3 border border-gray-200 rounded-lg hover:border-violet-300 transition-all duration-100">
+            <div class="p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100">
                 <div class="flex items-center justify-between">
                     <h3 class="text-base font-semibold">תשלומים</h3>
                     <a href="{% url 'payment-list' %}" class="text-gray-400 hover:text-violet-500 transition-all duration-100" @click="$store.selectMainTab.change('payments')">
@@ -81,19 +81,87 @@
                         <div class="flex items-center gap-2">
                             <div class="flex items-center gap-2">
                                 <p class="text-xs text-gray-500">טיוטה</p>
-                                <span class="status-pill info">1</span>
+                                <span class="status-pill info">{{ draft_payments.count|floatformat:"0"|intcomma:False }}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <p class="text-xs text-gray-500">חוייב</p>
-                                <span class="status-pill proccess">0</span>
+                                <span class="status-pill proccess">{{ billed_payments.count|floatformat:"0"|intcomma:False }}</span>
                             </div>
                         </div>
                     </div>
-                    <p class="text-gray-500"><span class="text-violet-600 text-base font-semibold">{{ open_payments.count|floatformat:"0"|intcomma:False }}</span> תשלומים פתוחים</p>
+                    <p class="text-gray-500"><span class="text-indigo-600 text-base font-semibold">{{ open_payments.count|floatformat:"0"|intcomma:False }}</span> תשלומים פתוחים</p>
                 </div>
             </div>
+            <!-- Income Chart -->
+            <div class="col-span-3 p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100 row-span-28">
+                <div class="flex flex-col">
+                    <h3 class="text-base font-semibold">הכנסות</h3>
+                    <p class="text-xs text-gray-500">הכנסות לפי חודשים ושנים. הכנסות הינם תשלומים בסטטוס שולם</p>
+                </div>
+            </div>
+            <!-- Bottom Section-->
+             <div class="col-span-3 grid grid-cols-2 gap-2 row-span-21">
+                <!-- Lead Management -->
+                <div class="p-3 border border-gray-200 rounded-lg hover:border-violet-300 transition-all duration-100">
+                    <h3 class="text-base font-semibold">ניהול לידים</h3>
+                </div>
+                <!-- Customers Ranking -->
+                <div class="p-3 border border-gray-200 rounded-lg hover:border-violet-300 transition-all duration-100">
+                    <h3 class="text-base font-semibold">דירוג לקוחות</h3>
+                </div>
+             </div>
         </div>
-        <div class="w-1/3">
+        <!-- Active Projects list -->
+        <div class="w-1/3 py-4 px-2 ml-6">
+            <div class="p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-all duration-100 h-full">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-base font-semibold">פרויקטים פעילים</h3>
+                        <span class="status-pill proccess">{{ open_projects.count|floatformat:"0"|intcomma:False }}</span>
+                    </div>
+                    <a href="{% url 'project-list' %}" class="text-gray-400 hover:text-violet-500 transition-all duration-100" @click="$store.selectMainTab.change('projects')">
+                        <svg class="size-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 4L12 12M20 4V8.5M20 4H15.5M19 12.5V16.8C19 17.9201 19 18.4802 18.782 18.908C18.5903 19.2843 18.2843 19.5903 17.908 19.782C17.4802 20 16.9201 20 15.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8V8.2C4 7.0799 4 6.51984 4.21799 6.09202C4.40973 5.71569 4.71569 5.40973 5.09202 5.21799C5.51984 5 6.07989 5 7.2 5H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="flex flex-col gap-2 h-158 overflow-y-auto custom-scrollbar">
+                    {% for project in open_projects %}
+                    <div class="p-2 border border-gray-200 rounded-lg hover:shadow-sm transition-all duration-100" href="{% url 'project-detail' project.id %}" @click="$store.selectMainTab.change('projects')">
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <a href="{% url 'project-detail' project.id %}" class="text-base font-semibold hover:text-indigo-800 transition-all duration-100">{{ project.name }}</a>
+                                <span class="status-pill {% if project.status == 'open' %}proccess{% elif project.status == 'onHold' %}alert{% endif %}">{{ project.get_status_display }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <a class="btn-action w-fit">
+                                    <img src="{{ project.customer.logo.url }}" alt="" class="size-6 squircle">
+                                    {{project.customer.name}}
+                                </a>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="flex flex-col border-r border-gray-100 pr-2">
+                                        <p class="text-xs text-gray-500">תקציב</p>
+                                        <span class="">₪{{ project.budget.amount|floatformat:"0"|intcomma:False }}</span>
+                                    </div>
+                                    <div class="flex flex-col border-r border-gray-100 pr-2">
+                                        <p class="text-xs text-gray-500">שעות</p>
+                                        <span class="">{{ project.usage|floatformat:"0"|intcomma:False }}/{{ project.budget.hours|floatformat:"0"|intcomma:False }}</span>
+                                    </div>
+                                    <div class="flex flex-col border-r border-gray-100 pr-2">
+                                        <p class="text-xs text-gray-500">הכנסות</p>
+                                        <span class="">₪{{ project.total_income|floatformat:"0"|intcomma:False }}</span>
+                                    </div>
+                                    <div class="flex flex-col border-r border-gray-100 pr-2">
+                                        <p class="text-xs text-gray-500">תשלומים פתוחים</p>
+                                        <span class="">₪{{ project.open_payments.amount|floatformat:"0"|intcomma:False }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock content %}
