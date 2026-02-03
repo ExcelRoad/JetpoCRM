@@ -101,6 +101,7 @@ def lead_convert(request, pk):
         name = lead.company_name,
         defaults= {
             'lead_source': lead.lead_source,
+            'description': lead.description
         }
     )
     if created:

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+import datetime
 from django.urls import reverse
 from urllib.parse import urlencode
 from .models import Quote
@@ -13,6 +14,22 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+
+
+MONTH_HEBREW = {
+    '1': 'ינואר',
+    '2': 'פברואר',
+    '3': 'מרץ',
+    '4': 'אפריל',
+    '5': 'מאי',
+    '6': 'יוני',
+    '7': 'יולי',
+    '8': 'אוגוסט',
+    '9': 'ספטמבר',
+    '10': 'אוקטובר',
+    '11': 'נובמבר',
+    '12': 'דצמבר'
+}
 
 @login_required
 def quote_create(request, object_id, content_type):
@@ -184,6 +201,7 @@ def quote_edit(request, pk, fallback):
     }
     return render(request, 'quotes/quote-form.html', context)
 
+
 @login_required
 def quote_delete(request, pk):
     if request.method == "POST":
@@ -226,6 +244,7 @@ def quote_submit_note(request, pk):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+
 @login_required
 def quote_delete_note(request, noteid):
     note = Note.objects.get(pk=noteid)
@@ -236,6 +255,7 @@ def quote_delete_note(request, noteid):
     query_string = urlencode({'section': 'notes'})
     url = f'{base_url}?{query_string}'
     return redirect(url)
+
 
 @login_required
 def quote_tag_note(request, noteid):
@@ -252,6 +272,7 @@ def quote_tag_note(request, noteid):
     url = f'{base_url}?{query_string}'
     return redirect(url)
 
+
 @login_required
 def quote_list(request):
     quotes = Quote.objects.all()
@@ -260,6 +281,7 @@ def quote_list(request):
         'quotes': quotes,
     }
     return render(request, 'quotes/quote-list.html', context)
+
 
 @login_required
 def quote_mass_delete(request):
@@ -393,12 +415,19 @@ def quote_confirm(request, pk):
             customer = customer
         )
         # Create budget for each project
+        if quote_service.service.is_subscription:
+            # get the month name and year for current date in hebrew
+            now = datetime.datetime.now()
+            month_name = MONTH_HEBREW[str(now.month)]
+            budgetName = 'תקציב חודש ' + month_name + ' ' + str(now.year)
+        else:
+            budgetName = quote_service.name
         ProjectBudget.objects.create(
             project = project,
             qty = quote_service.qty,
             price = quote_service.price,
             is_active = True,
-            name = quote_service.name
+            name = budgetName
         )
 
         # Create payments linked to this service's project

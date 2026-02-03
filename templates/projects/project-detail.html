@@ -405,7 +405,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                                         {% if not task.is_completed %}
                                         <form method="post" action="{% url 'task-complete' task.id False %}">
                                             {% csrf_token %}
-                                            <button type="submit" class="w-fit text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded-lg hover:bg-emerald-100 cursor-pointer">✓</button>
+                                            <button type="submit" class="w-fit text-emerald-600 px-1.5 py-0.5 rounded hover:bg-emerald-100 cursor-pointer">✓</button>
                                         </form>
                                         {% endif %}
                                     </td>

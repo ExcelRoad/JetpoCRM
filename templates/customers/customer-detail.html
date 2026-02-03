@@ -716,7 +716,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                             <div>
                                 <h4 class="text-gray-500 text-xs">סך תשלומים</h4>
                                 <span class="text-base font-semibold">{{ paymentInfo.total_price|floatformat:"0"|intcomma:False }} ₪</span>
-                                <span class="rounded-full bg-violet-200 text-violet-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.total_count|floatformat:"0"|intcomma:False }}</span>
+                                <span class="rounded-full bg-indigo-200 text-indigo-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.total_count|floatformat:"0"|intcomma:False }}</span>
                             </div>
                         </div>
                         <div class="p-2 border-r-2 border-gray-100 flex gap-2">
@@ -728,7 +728,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                             <div>
                                 <h4 class="text-gray-500 text-xs">טיוטה</h4>
                                 <span class="text-base font-semibold">{{ paymentInfo.draft_price|floatformat:"0"|intcomma:False }} ₪</span>
-                                <span class="rounded-full bg-violet-200 text-violet-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.draft_count|floatformat:"0"|intcomma:False }}</span>
+                                <span class="rounded-full bg-gray-200 text-gray-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.draft_count|floatformat:"0"|intcomma:False }}</span>
                             </div>
                         </div>
                         <div class="p-2 border-r-2 border-gray-100 flex gap-2">
@@ -740,7 +740,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                             <div>
                                 <h4 class="text-gray-500 text-xs">חוייבו</h4>
                                 <span class="text-base font-semibold">{{ paymentInfo.billed_price|floatformat:"0"|intcomma:False }} ₪</span>
-                                <span class="rounded-full bg-blue-200 text-blue-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.billed_count|floatformat:"0"|intcomma:False }}</span>
+                                <span class="rounded-full bg-violet-200 text-violet-700 px-1.5 py-0.5 mx-1">{{ paymentInfo.billed_count|floatformat:"0"|intcomma:False }}</span>
                             </div>
                         </div>
                         <div class="p-2 border-r-2 border-gray-100 flex gap-2">

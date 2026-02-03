@@ -281,7 +281,7 @@
                 </div>
                 <div class="flex flex-col gap-2 h-158 overflow-y-auto custom-scrollbar">
                     {% for project in open_projects %}
-                    <div class="p-2 border border-gray-200 rounded-lg hover:shadow-sm transition-all duration-100" href="{% url 'project-detail' project.id %}" @click="$store.selectMainTab.change('projects')">
+                    <div class="p-2 border border-gray-200 rounded-lg hover:border-gray-400 transition-all duration-100" href="{% url 'project-detail' project.id %}" @click="$store.selectMainTab.change('projects')">
                         <div class="flex flex-col gap-2">
                             <div class="flex items-center justify-between">
                                 <a href="{% url 'project-detail' project.id %}" class="text-base font-semibold hover:text-indigo-800 transition-all duration-100">{{ project.name }}</a>
