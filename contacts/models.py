@@ -35,11 +35,11 @@ class Contact(models.Model):
         verbose_name_plural = 'אנשי קשר'
     
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return f'{self.first_name} {self.last_name or ''}'
     
     @property
     def full_name(self):
-        return f'{self.first_name} {self.last_name}'
+        return f'{self.first_name} {self.last_name or ''}'
     
     @property
     def phone_number(self):

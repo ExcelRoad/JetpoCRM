@@ -15,6 +15,7 @@ class LeadForm(forms.ModelForm):
             'status',
             'role',
             'lead_source',
+            'description'
         ]
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'input-field'}),
@@ -25,6 +26,7 @@ class LeadForm(forms.ModelForm):
             'status': StatusSelect(),  # Custom status dropdown with colored pills
             'role': forms.TextInput(attrs={'class': 'input-field'}),
             'lead_source': CustomSelect(allow_dynamic_options=True),  # Custom searchable dropdown with dynamic options
+            'description': forms.Textarea(attrs={'class': 'input-field'}),
         }
 
 

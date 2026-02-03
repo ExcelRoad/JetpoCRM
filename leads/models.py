@@ -27,6 +27,7 @@ class Lead(models.Model):
     status = models.CharField(max_length=50, choices=LEAD_STATUSES, default='new')
     role = models.CharField(max_length=250, blank=True, null=True)
     lead_source = models.ForeignKey('LeadSource', on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
+    description = models.TextField(blank=True, null=True)
 
     notes = GenericRelation(Note, related_query_name='notes')
     quotes = GenericRelation(Quote, related_query_name='quotes')
@@ -39,16 +40,22 @@ class Lead(models.Model):
         verbose_name_plural = 'לידים'
     
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return f'{self.first_name} {self.last_name or ''}'
     
     @property
     def full_name(self):
-        return f'{self.first_name} {self.last_name}'
+        return f'{self.first_name} {self.last_name or ''}'
     
     @property
     def phone_number(self):
         n = ''.join(filter(str.isdigit, self.phone))
         return f'{n[:3]}-{n[3:6]}-{n[6:]}'
+
+    @property
+    def whatsapp_number(self):
+        # Remove the 0 at the begining and adding israel country code
+        n = ''.join(filter(str.isdigit, self.phone))
+        return f'972{n[1:]}'
 
 
 
