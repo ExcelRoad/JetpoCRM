@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.contrib import messages
 from urllib.parse import urlencode
 from alerts.models import AlertSettings, AlertType
 from django.contrib.auth.decorators import login_required
@@ -43,7 +44,7 @@ def change_lead_alert_settings(request):
             lead_alert_settings.deleted_in_app = False
 
         lead_alert_settings.save()
-
+        messages.success(request, 'הגדרות ההתראות עודכנו בהצלחה')
         base_url = reverse('settings')
         query_string = urlencode({'section': 'leads', 'subsection': '2'})
         url = f'{base_url}?{query_string}'

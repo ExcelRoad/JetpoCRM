@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.contrib.contenttypes.models import ContentType
 from .models import Service, Task, Timesheet, Meeting
 from projects.models import Project, ProjectBudget
-from leads.models import LeadSource
+from leads.models import LeadSource, LostReason
 from alerts.models import AlertSettings, AlertType
 from django.contrib import messages
 from connections.models import Workdrive, Sumit
@@ -41,6 +41,7 @@ def settings_page(request):
         )
     context = {
         'lead_sources': lead_sources,
+        'lost_reasons': LostReason.objects.all(),
         'lead_alert_settings' : lead_alert_settings,
         'workdrive': workdrive_settings,
         'sumit': sumit_settings,
@@ -230,6 +231,26 @@ def leadsource_save(request):
         return redirect(url)
 
 @login_required
+def lostreason_save(request):
+    if request.method == 'POST':
+        lostreasonId = request.POST['lostreason']
+        lostreasonName = request.POST['lostreasonName']
+        if lostreasonId == '0' or lostreasonId == 0:
+            lostreason = LostReason.objects.create(
+                name = lostreasonName
+            )
+            messages.success(request, 'סיבת אובדן נוצרה בהצלחה', extra_tags=lostreason.name)
+        else:
+            lostreason = LostReason.objects.get(pk=lostreasonId)
+            lostreason.name = lostreasonName
+            lostreason.save()
+            messages.success(request, 'סיבת אובדן עודכנה בהצלחה', extra_tags=lostreason.name)
+        base_url = reverse('settings')
+        query_string = urlencode({'section': 'leads', 'subsection': '3'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+
+@login_required
 def leadsource_delete(request, pk):
     if request.method == 'POST':
         leadsource = LeadSource.objects.get(pk=pk)
@@ -237,6 +258,17 @@ def leadsource_delete(request, pk):
         messages.success(request, 'מקור ליד נמחק בהצלחה', extra_tags=leadsource.name)
         base_url = reverse('settings')
         query_string = urlencode({'section': 'leads', 'subsection': '1'})
+        url = f'{base_url}?{query_string}'
+        return redirect(url)
+
+@login_required
+def lostreason_delete(request, pk):
+    if request.method == 'POST':
+        lostreason = LostReason.objects.get(pk=pk)
+        lostreason.delete()
+        messages.success(request, 'סיבת אובדן נמחקה בהצלחה', extra_tags=lostreason.name)
+        base_url = reverse('settings')
+        query_string = urlencode({'section': 'leads', 'subsection': '3'})
         url = f'{base_url}?{query_string}'
         return redirect(url)
 

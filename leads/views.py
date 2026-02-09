@@ -3,7 +3,7 @@ from django.urls import reverse
 from urllib.parse import urlencode
 import json
 from django.http import JsonResponse
-from .models import Lead, LeadSource
+from .models import Lead, LeadSource, LostReason
 from .forms import LeadForm, LeadSourceForm
 from activities.models import Note
 from django.contrib import messages
@@ -41,6 +41,7 @@ def lead_kanban(request):
 def lead_create(request):
     form = LeadForm()
     leadSources = list(LeadSource.objects.values('id', 'name'))
+    lostReasons = list(LostReason.objects.values('id', 'name'))
     if request.method == 'POST':
         form = LeadForm(request.POST)
         if form.is_valid():
@@ -53,6 +54,7 @@ def lead_create(request):
         'form': form,
         'form_header': 'יצירת ליד',
         'leadSources': json.dumps(leadSources),
+        'lostReasons': json.dumps(lostReasons),
     }
     return render(request, 'leads/lead-form.html', context)
 
@@ -60,6 +62,7 @@ def lead_create(request):
 def lead_edit(request, pk, fallback):
     lead = Lead.objects.get(pk=pk)
     leadSources = list(LeadSource.objects.values('id', 'name'))
+    lostReasons = list(LostReason.objects.values('id', 'name'))
     form = LeadForm(
         instance=lead
     )
@@ -79,6 +82,7 @@ def lead_edit(request, pk, fallback):
         'form': form,
         'form_header': 'עריכת ליד',
         'leadSources': json.dumps(leadSources),
+        'lostReasons': json.dumps(lostReasons),
     }
     return render(request, 'leads/lead-form.html', context)
 
@@ -221,6 +225,36 @@ def lead_source_create(request):
                 'success': True,
                 'id': lead_source.id,
                 'name': lead_source.name
+            })
+    return JsonResponse({'error': 'Invalid Request'}, status=400)
+
+@login_required
+def lost_reason_create(request):
+    if request.method == 'POST':
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            name = request.POST.get('name', '').strip()
+            if not name:
+                error = 'שם סיבת אובדן הינו חובה'
+                return JsonResponse({
+                    'error': error
+                }, status = 400)
+            
+            if LostReason.objects.filter(name__iexact=name).exists():
+                error = 'קיימת סיבת אובדן עם שם זה'
+                return JsonResponse({
+                    'error': error
+                }, status=400)
+            
+            
+            lost_reason = LostReason.objects.create(
+                name = name
+            )
+            messages.success(request, 'סיבת אובדן נוצרה בהצלחה', extra_tags=name)
+
+            return JsonResponse({
+                'success': True,
+                'id': lost_reason.id,
+                'name': lost_reason.name
             })
     return JsonResponse({'error': 'Invalid Request'}, status=400)
 

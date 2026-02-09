@@ -579,7 +579,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                     <div class="grid grid-cols-4 w-full gap-2">
                     {% for contact in customer.contacts.all %}
                     <div x-data="{modeOptions : false}">
-                        <div class="bg-white rounded-lg p-4 border border-gray-200 flex flex-col hover:border-gray-300" @contextmenu="$event.preventDefault(); modeOptions = !modeOptions">
+                        <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-gray-300" @contextmenu="$event.preventDefault(); modeOptions = !modeOptions">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-1">
                                 <span class="status-pill ">{{ contact.get_contact_type_display }}</span>

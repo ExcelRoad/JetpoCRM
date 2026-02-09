@@ -1,5 +1,5 @@
 from django import forms
-from leads.models import Lead, LeadSource
+from leads.models import Lead, LeadSource, LostReason
 from customers.widgets import StatusSelect, CustomSelect
 
 
@@ -15,6 +15,7 @@ class LeadForm(forms.ModelForm):
             'status',
             'role',
             'lead_source',
+            'lost_reason',
             'description'
         ]
         widgets = {
@@ -26,6 +27,7 @@ class LeadForm(forms.ModelForm):
             'status': StatusSelect(),  # Custom status dropdown with colored pills
             'role': forms.TextInput(attrs={'class': 'input-field'}),
             'lead_source': CustomSelect(allow_dynamic_options=True),  # Custom searchable dropdown with dynamic options
+            'lost_reason': CustomSelect(allow_dynamic_options=True),  # Custom searchable dropdown with dynamic options
             'description': forms.Textarea(attrs={'class': 'input-field'}),
         }
 
@@ -33,6 +35,17 @@ class LeadForm(forms.ModelForm):
 class LeadSourceForm(forms.ModelForm):
     class Meta:
         model = LeadSource
+        fields = [
+            'name',
+        ]
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'input-field'}),
+        }
+
+
+class LostReasonForm(forms.ModelForm):
+    class Meta:
+        model = LostReason
         fields = [
             'name',
         ]

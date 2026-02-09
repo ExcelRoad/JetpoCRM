@@ -61,6 +61,8 @@ class Project(models.Model):
     @property
     def usage(self):
         budget = ProjectBudget.objects.filter(project=self, is_active=True).first()
+        if not budget:
+            return 0.00
         return float(budget.reported_hours)
     
     @property

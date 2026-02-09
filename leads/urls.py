@@ -10,6 +10,7 @@ urlpatterns = [
     path('massdelete/', views.lead_mass_delete, name='lead-mass-delete'),
     path('<pk>/', views.lead_detail, name='lead-detail'),
     path('api/leadsource/create', views.lead_source_create, name='lead-source-create'),
+    path('api/lostreason/create', views.lost_reason_create, name='lost-reason-create'),
     path('<pk>/note/new', views.lead_submit_note, name='lead-submit-note'),
     path('api/note/<noteid>/delete', views.lead_delete_note, name='lead-delete-note'),
     path('api/note/<noteid>/tagging', views.lead_tag_note, name='lead-tag-note'),

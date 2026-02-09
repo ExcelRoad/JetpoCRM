@@ -74,9 +74,24 @@
                     </button>
                 </div>
             </div>
-            <div class="field-wrapper">
+            <div class="field-wrapper" @change="if ($event.target.name === 'status') status = $event.target.value">
                 <p class="text-gray-500 text-sx">סטטוס</p>
                 {{form.status}}
+            </div>
+            <div x-show="status == 'lost'"
+                 x-cloak
+                 class="field-wrapper col-start-1">
+                <p class="text-gray-500 text-sx">סיבת אובדן</p>
+                <div class="flex items-center gap-1 w-full">
+                    {{form.lost_reason}}
+                    <button
+                        type="button"
+                        @click="openInfoModal('add_lost_reason')"
+                        class="btn-action"
+                    >
+                        +
+                    </button>
+                </div>
             </div>
             <div class="field-wrapper col-start-1 col-span-2">
                 <p class="text-gray-500 text-sx">תיאור</p>
@@ -88,7 +103,7 @@
         x-cloak
         class="fixed top-0 right-0 h-screen w-screen bg-black/30 flex items-start justify-center pt-60" >
     <!-- Lead Source Form -->
-        <form class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-2 min-w-1/4 min-h-1/5 flex flex-col"
+        <form x-show="modalMode == 'add_lead_source'" class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-2 min-w-1/4 min-h-1/5 flex flex-col"
             @submit.prevent="submitLeadSource">
             {% csrf_token %}
             <div class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="closeModal">
@@ -113,6 +128,32 @@
                 </div>
             </div>
         </form>
+    <!-- Lost Reason Form -->
+        <form x-show="modalMode == 'add_lost_reason'" class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-2 min-w-1/4 min-h-1/5 flex flex-col"
+            @submit.prevent="submitLostReason">
+            {% csrf_token %}
+            <div class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="closeModal">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold mt-2">הוספת סיבת אובדן</h3>
+            <div class="my-6 w-full">
+                <input type="text"
+                        id="reason_name"
+                        x-model="newLostReason.name"
+                        required
+                        class="input-field">
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <button class="btn-main" type="submit" :disabled="submitting">
+                    שמירה
+                </button>
+                <div class="btn-action" @click="closeModal">
+                    ביטול
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -121,8 +162,10 @@
     function leadFormHandler() {
     return {
         modalOpen: false,
+        modalMode: '', // 'add_lead_source' or 'add_lost_reason'
         submitting: false,
         error: '',
+        status: '{{ lead.status|default:"new" }}',
         lead_source_selected: '{{ lead.lead_source.id | default:""}}',
         lead_source_options: {{ leadSources|safe }}.map(source => ({
             value: String(source.id),
@@ -132,15 +175,45 @@
         newLeadSource: {
             name: '',
         },
+        lost_reason_selected: '{{ lead.lost_reason.id | default:""}}',
+        lost_reason_options: {{ lostReasons|safe }}.map(reason => ({
+            value: String(reason.id),
+            label: reason.name,
+            selected: String(reason.id) === '{{ lead.lost_reason.id | default:""}}'
+        })),
+        newLostReason: {
+            name: '',
+        },
+
+        init() {
+            this.$watch('status', value => {
+                if (value !== 'lost') {
+                    // Start of Selection
+                    this.lost_reason_selected = '';
+                }
+            });
+        },
+
+
+        openInfoModal(mode) {
+            this.modalOpen = true;
+            this.modalMode = mode;
+            this.error = '';
+            if (mode === 'add_lead_source') {
+                this.newLeadSource = { name: ''};
+            } else if (mode === 'add_lost_reason') {
+                this.newLostReason = { name: ''};
+            }
+        },
 
         openModal() {
-            this.modalOpen = true;
-            this.error = '';
-            this.newLeadSource = { name: ''};
+            // Deprecated, use openInfoModal('add_lead_source')
+            this.openInfoModal('add_lead_source');
         },
 
         closeModal() {
             this.modalOpen = false;
+            this.modalMode = '';
             this.error = '';
         },
 
@@ -181,6 +254,62 @@
                 } else {
                     this.error = data.error || 'Failed to create lead source';
                     console.log(this.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.error = 'An error occurred. Please try again.';
+            } finally {
+                this.submitting = false;
+            }
+        },
+
+        async submitLostReason() {
+            this.submitting = true;
+            this.error = '';
+
+            const formData = new FormData();
+            formData.append('name', this.newLostReason.name);
+            // Reusing lead-source-create logic pattern but pointing to a new endpoint if it existed,
+            // OR reuse the exact same logic if we made a generic endpoint.
+            // But per plan, we made lostreason_save in activities/views.py which is for settings.
+            // We need an API endpoint for this form similar to lead-source-create?
+            // Wait, lead-source-create is in leads/views.py.
+            // I should have created lost-reason-create in leads/views.py or used the one in activities/views.py.
+            // The one in activities/views.py returns redirect, not JSON.
+            // The user asked to "add it to the form".
+            // I need to add an AJAX endpoint for creating lost reason in leads/views.py OR modify the one in activities to handle AJAX.
+            // Let's assume I missed adding an AJAX endpoint for LostReason in leads/views.py.
+            // For now, I will point to 'lostreason-save' and hope it handles AJAX or I will fix it in the validation step.
+            // Actually, looking at `lead_source_create` in `leads/views.py`, it returns JSON.
+            // The `leadsource_save` in `activities/views.py` returns redirect.
+            // I need an AJAX endpoint for LostReason.
+            // I will create `lost_reason_create` in `leads/views.py` in the next step to support this.
+            // For now, I'll put the fetch call here.
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            try {
+                const response = await fetch('{% url "lost-reason-create" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.lost_reason_options.push({
+                        value: String(data.id),
+                        label: data.name,
+                        selected: false
+                    });
+                    this.lost_reason_selected = String(data.id);
+                    this.closeModal();
+                } else {
+                    this.error = data.error || 'Failed to create lost reason';
                 }
             } catch (error) {
                 console.error('Error:', error);

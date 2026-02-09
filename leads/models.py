@@ -27,6 +27,7 @@ class Lead(models.Model):
     status = models.CharField(max_length=50, choices=LEAD_STATUSES, default='new')
     role = models.CharField(max_length=250, blank=True, null=True)
     lead_source = models.ForeignKey('LeadSource', on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
+    lost_reason = models.ForeignKey('LostReason', on_delete=models.SET_NULL, null=True, blank=True, related_name='leads')
     description = models.TextField(blank=True, null=True)
 
     notes = GenericRelation(Note, related_query_name='notes')
@@ -73,6 +74,23 @@ class LeadSource(models.Model):
     class Meta:
         verbose_name = 'מקור ליד'
         verbose_name_plural = 'מקורות ליד'
+    
+    def __str__(self):
+        return self.name
+
+
+class LostReason(models.Model):
+    """
+    Lost reasons for leads base on the lead contact reasoning
+    """
+    name = models.CharField(max_length=250, unique=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'סיבת אובדן ליד'
+        verbose_name_plural = 'סיבות אובדן ליד'
     
     def __str__(self):
         return self.name
