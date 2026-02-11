@@ -8,6 +8,18 @@ from .forms import LeadForm, LeadSourceForm
 from activities.models import Note
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from core.utils import export_to_excel
+
+@login_required
+def lead_export(request):
+    if request.method == "POST":
+        leadList = request.POST.get('leadList')
+        if leadList:
+            lead_ids = [int(id) for id in leadList.split(',')]
+            leads = Lead.objects.filter(id__in=lead_ids)
+            return export_to_excel(leads, filename_prefix="leads_export")
+    return redirect('lead-list')
+
 
 
 @login_required

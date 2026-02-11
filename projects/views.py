@@ -8,6 +8,7 @@ from .forms import ProjectForm
 from payments.models import Payment
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from core.utils import export_to_excel
 
 
 @login_required
@@ -133,6 +134,17 @@ def project_list(request):
         'projects': projects,
     }
     return render(request, 'projects/project-list.html', context)
+
+
+@login_required
+def project_export(request):
+    if request.method == "POST":
+        projectList = request.POST.get('projectList')
+        if projectList:
+            project_ids = [int(id) for id in projectList.split(',')]
+            projects = Project.objects.filter(id__in=project_ids)
+            return export_to_excel(projects, filename_prefix="projects_export")
+    return redirect('project-list')
 
 
 @login_required

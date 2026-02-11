@@ -65,7 +65,7 @@
                     <label for="{{ field.id_for_label }}" class="text-gray-600 font-medium">{{ field.label }}</label>
                     {{ field }}
                     {% if field.help_text %}
-                    <span class="status-pill info font-light">{{ field.help_text|safe }}</span>
+                    <span class="rounded-md bg-indigo-200/20 text-indigo-800 text-xs p-1">{{ field.help_text|safe }}</span>
                     {% endif %}
                     {% for error in field.errors %}
                     <span class="text-xs text-rose-500">{{ error }}</span>

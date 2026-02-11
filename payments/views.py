@@ -6,6 +6,7 @@ from .models import Payment
 from django.contrib import messages
 from projects.models import Project
 from django.contrib.auth.decorators import login_required
+from core.utils import export_to_excel
 
 @login_required
 def payment_edit(request, pk, main = False):
@@ -60,6 +61,16 @@ def payment_list(request):
         'payments': payments,
     }
     return render(request, 'payments/payment-list.html', context)
+
+@login_required
+def payment_export(request):
+    if request.method == "POST":
+        paymentList = request.POST.get('paymentList')
+        if paymentList:
+            payment_ids = [int(id) for id in paymentList.split(',')]
+            payments = Payment.objects.filter(id__in=payment_ids)
+            return export_to_excel(payments, filename_prefix="payments_export")
+    return redirect('payment-list')
 
 @login_required
 def payment_mass_delete(request):

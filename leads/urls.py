@@ -16,4 +16,5 @@ urlpatterns = [
     path('api/note/<noteid>/tagging', views.lead_tag_note, name='lead-tag-note'),
     path('api/update-status', views.lead_update_status, name='lead-update-status'),
     path('api/lead-convert/<pk>', views.lead_convert, name='lead-convert'),
+    path('api/lead-export/', views.lead_export, name='lead-export'),
 ]

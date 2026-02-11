@@ -14,6 +14,7 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from core.utils import export_to_excel
 
 
 MONTH_HEBREW = {
@@ -200,6 +201,19 @@ def quote_edit(request, pk, fallback):
         'quote': quote
     }
     return render(request, 'quotes/quote-form.html', context)
+
+
+    return render(request, 'quotes/quote-form.html', context)
+
+@login_required
+def quote_export(request):
+    if request.method == "POST":
+        quoteList = request.POST.get('quoteList')
+        if quoteList:
+            quote_ids = [int(id) for id in quoteList.split(',')]
+            quotes = Quote.objects.filter(id__in=quote_ids)
+            return export_to_excel(quotes, filename_prefix="quotes_export")
+    return redirect('quote-list')
 
 
 @login_required

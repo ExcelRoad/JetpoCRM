@@ -7,6 +7,7 @@ urlpatterns = [
     path('create', views.customer_create, name='customer-create'),
     path('<pk>/edit/<fallback>', views.customer_edit, name='customer-edit'),
     path('<pk>/delete', views.customer_delete, name='customer-delete'),
+    path('api/customer-export/', views.customer_export, name='customer-export'),
     path('massdelete/', views.customer_mass_delete, name='customer-mass-delete'),
     path('<pk>/', views.customer_detail, name='customer-detail'),
     path('<pk>/note/new', views.customer_submit_note, name='customer-submit-note'),

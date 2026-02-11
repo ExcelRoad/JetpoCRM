@@ -6,6 +6,7 @@ urlpatterns = [
     path('<pk>/delete', views.project_delete, name='project-delete'),
     path('<customerId>/create', views.project_create, name='project-create'),
     path('create', views.project_create, name='project-create'),
+    path('api/project-export/', views.project_export, name='project-export'),
     path('massdelete/', views.project_mass_delete, name='project-mass-delete'),
     path('<pk>/edit/<fallback>', views.project_edit, name='project-edit'),
     path('<pk>/', views.project_detail, name='project-detail'),

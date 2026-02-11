@@ -10,6 +10,7 @@ from alerts.models import AlertSettings, AlertType
 from django.contrib import messages
 from connections.models import Workdrive, Sumit
 from django.contrib.auth.decorators import login_required
+from core.utils import export_to_excel
 
 
 @login_required
@@ -181,6 +182,17 @@ def task_list(request):
         'tasks': tasks,
     }
     return render(request, 'projects/task-list.html', context)
+
+
+@login_required
+def task_export(request):
+    if request.method == "POST":
+        tasks = request.POST.get('tasks')
+        if tasks:
+            task_ids = [int(id) for id in tasks.split(',')]
+            tasks = Task.objects.filter(id__in=task_ids)
+            return export_to_excel(tasks, filename_prefix="tasks_export")
+    return redirect('task-list')
 
 
 @login_required

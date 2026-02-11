@@ -3,3 +3,4 @@ pillow
 django-tailwind[cookiecutter,honcho,reload]
 phonenumbers
 django-htmx
+openpyxl

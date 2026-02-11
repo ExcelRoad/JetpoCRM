@@ -59,7 +59,7 @@
                     stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <p x-show="$store.sidebarOpen.on">אנשי קשר</p>
-            <div x-show="!$store.sidebarOpen.on && showTip" class="absolute right-12 rounded-lg bg-gray-700 text-gray-100 px-2 py-1 z-100 text-center" x-cloak>אנשי קשר</div>
+            <div x-show="!$store.sidebarOpen.on && showTip" class="absolute right-12 rounded-lg bg-gray-700 text-gray-100 px-2 py-1 z-100 w-24 text-center" x-cloak>אנשי קשר</div>
         </a>
         <a @click="$store.selectedMainTab.change('customers')" :class="$store.selectedMainTab.tab == 'customers' ? 'active' : ''" class="nav-btn relative" href="{% url 'customer-card' %}" x-data="{showTip : false}" @mouseenter="showTip = true" @mouseleave="showTip = false">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -77,7 +77,7 @@
                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <p x-show="$store.sidebarOpen.on">הצעות מחיר</p>
-            <div x-show="!$store.sidebarOpen.on && showTip" class="absolute right-12 rounded-lg bg-gray-700 text-gray-100 px-2 py-1 z-100 text-center" x-cloak>הצעות מחיר</div>
+            <div x-show="!$store.sidebarOpen.on && showTip" class="absolute right-12 rounded-lg bg-gray-700 text-gray-100 px-2 py-1 z-100 w-24 text-center" x-cloak>הצעות מחיר</div>
         </a>
         <p class="nav-section-header">פעילות</p>
         <a @click="$store.selectedMainTab.change('projects')" :class="$store.selectedMainTab.tab == 'projects' ? 'active' : ''" class="nav-btn relative" href="{% url 'project-list' %}" x-data="{showTip : false}" @mouseenter="showTip = true" @mouseleave="showTip = false">

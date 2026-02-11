@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from activities.models import Note
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from core.utils import export_to_excel
 
 @login_required
 def contact_list(request):
@@ -59,6 +60,16 @@ def contact_edit(request, pk, fallback):
         'form_header': 'עריכת איש קשר',
     }
     return render(request, 'contacts/contact-form.html', context)
+
+@login_required
+def contact_export(request):
+    if request.method == "POST":
+        contactList = request.POST.get('contactList')
+        if contactList:
+            contact_ids = [int(id) for id in contactList.split(',')]
+            contacts = Contact.objects.filter(id__in=contact_ids)
+            return export_to_excel(contacts, filename_prefix="contacts_export")
+    return redirect('contact-list')
 
 @login_required
 def contact_delete(request, pk):

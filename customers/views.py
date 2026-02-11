@@ -4,8 +4,8 @@ from urllib.parse import urlencode
 from .models import Customer
 from .forms import CustomerForm
 from activities.models import Note
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from core.utils import export_to_excel
 
 @login_required
 def customer_list(request):
@@ -60,6 +60,16 @@ def customer_edit(request, pk, fallback):
         'form_header': 'עריכת לקוח',
     }
     return render(request, 'customers/customer-form.html', context)
+
+@login_required
+def customer_export(request):
+    if request.method == "POST":
+        customerList = request.POST.get('customerList')
+        if customerList:
+            customer_ids = [int(id) for id in customerList.split(',')]
+            customers = Customer.objects.filter(id__in=customer_ids)
+            return export_to_excel(customers, filename_prefix="customers_export")
+    return redirect('customer-list')
 
 @login_required
 def customer_delete(request, pk):

@@ -7,6 +7,7 @@ urlpatterns = [
     path('create/<pk>', views.contact_create, name='contact-create'),
     path('<pk>/edit/<fallback>', views.contact_edit, name='contact-edit'),
     path('<pk>/delete', views.contact_delete, name='contact-delete'),
+    path('api/contact-export/', views.contact_export, name='contact-export'),
     path('massdelete/', views.contact_mass_delete, name='contact-mass-delete'),
     path('<pk>/', views.contact_detail, name='contact-detail'),
     path('<pk>/note/new', views.contact_submit_note, name='contact-submit-note'),
