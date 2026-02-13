@@ -381,8 +381,8 @@ def meeting_create_update(request, pk=None):
             meeting.save()
             messages.success(request, 'פגישה עודכנה בהצלחה', extra_tags=meeting.title)
         
-        if fallback == 'meeting-list':
-             return redirect('meeting-list')
+        if fallback == 'meeting-list' or fallback == 'meeting-calendar':
+             return redirect(fallback)
         
         base_url = reverse(fallback, args=(object_id,))
         query_string = urlencode({'section': 'activities'})

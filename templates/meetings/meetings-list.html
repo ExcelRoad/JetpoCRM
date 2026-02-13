@@ -367,11 +367,11 @@
                         
                         <div class="flex flex-col gap-1">
                             <label for="meetingDate" class="text-gray-600">תאריך</label>
-                            <input type="date" id="meetingDate" name="meetingDate" :value="selectedMeetingDate" class="input-field" required>
+                            {% include 'components/datepicker.html' with name='meetingDate' model='selectedMeetingDate' required=True %}
                         </div>
                         <div class="flex flex-col gap-1">
                             <label for="meetingStartTime" class="text-gray-600">שעה</label>
-                            <input type="time" id="meetingStartTime" name="meetingStartTime" :value="selectedMeetingStartTime" class="input-field" required>
+                            {% include 'components/timepicker.html' with name='meetingStartTime' model='selectedMeetingStartTime' required=True %}
                         </div>
                         <div class="flex flex-col gap-1">
                             <label for="meetingDuration" class="text-gray-600">משך (דקות)</label>

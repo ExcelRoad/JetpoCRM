@@ -59,12 +59,11 @@
 
                 <!-- Calendar Grid -->
                 <template x-for="date in calendarDays" :key="date.dateString">
-                    <div class="bg-white min-h-32 p-2 flex flex-col gap-1 hover:bg-gray-50 transition-colors relative border-t border-r border-gray-100" 
+                    <div class="bg-white min-h-32 p-2 flex flex-col gap-1 transition-colors relative border-t border-r border-gray-100 hover:bg-gray-100" 
                          :class="{
-                             'bg-gray-50 text-gray-400': !date.isCurrentMonth, 
-                             'z-10 ring-2 ring-indigo-500 ring-inset': isToday(date.dateString)
+                             'bg-gray-50 text-gray-400': !date.isCurrentMonth
                          }">
-                        <span class="text-sm font-semibold" :class="{'text-indigo-600': isToday(date.dateString)}" x-text="date.day"></span>
+                        <span class="text-sm font-semibold" :class="{'text-indigo-600 bg-indigo-50 w-fit p-1 rounded-lg': isToday(date.dateString)}" x-text="date.day"></span>
                         
                         <div class="flex flex-col gap-1 mt-1 overflow-y-auto max-h-24 custom-scrollbar">
                             <template x-for="meeting in getMeetingsForDate(date.dateString)" :key="meeting.id">
@@ -151,11 +150,11 @@
                         </div>
                         <div class="flex flex-col gap-1">
                             <label class="text-gray-600">תאריך</label>
-                            <input type="date" name="meetingDate" x-model="selectedMeeting.date" class="input-field" required>
+                            {% include 'components/datepicker.html' with name='meetingDate' model='selectedMeeting.date' required=True %}
                         </div>
                         <div class="flex flex-col gap-1">
                             <label class="text-gray-600">שעה</label>
-                            <input type="time" name="meetingStartTime" x-model="selectedMeeting.time" class="input-field" required>
+                            {% include 'components/timepicker.html' with name='meetingStartTime' model='selectedMeeting.time' required=True %}
                         </div>
                         <div class="flex flex-col gap-1">
                             <label class="text-gray-600">משך (דקות)</label>
