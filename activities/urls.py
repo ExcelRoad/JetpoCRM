@@ -20,4 +20,7 @@ urlpatterns = [
     path('api/meetings/complete/<pk>', views.meeting_complete, name='meeting-complete'),
     path('api/service/delete/<pk>', views.service_delete, name='service-delete'),
     path('api/service/save', views.service_save, name='service-save'),
+    path('meetings/', views.meetings_list, name='meeting-list'),
+    path('meetings/calendar/', views.meetings_calendar, name='meeting-calendar'),
+    path('api/meetings/export/', views.meeting_export, name='meeting-export'),
 ]

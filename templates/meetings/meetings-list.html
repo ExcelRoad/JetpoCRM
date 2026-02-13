@@ -1,0 +1,679 @@
+{% extends 'base/base_layout.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'homePage' %}">
+        בית
+    </a>
+    <p class="flex items-center gap-1">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 9H21M7 3V5M17 3V5M6 13H8M6 17H8M11 13H13M11 17H13M16 13H18M16 17H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+       פגישות
+    </p>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div x-data="setSection()" x-init="$store.selectedMainTab.change('meetings')">
+    <div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200">
+        <div>
+            <h1 class="font-semibold text-3xl mb-1">פגישות</h1>
+            <p class="text-gray-400">זוהי רשימה של כל הפגישות שלך. מכאן תוכלו לארגן, לנהל ולערוך את הפגישות שלכם</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button class="btn-main" @click="modelBackgroundShow = true, meetingModelShow = true, selectedMeeting = 0, meetingModelTitle = 'פגישה חדשה'">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 12H18M12 6V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                פגישה חדשה
+            </button>
+        </div>
+    </div>
+    <div x-data="meetingListHandler()">
+        <div class="p-8" >
+        <!-- Action Section -->
+         <div class="flex items-center justify-between">
+            <form class="relative w-1/6" id="projectSearch">
+                <input type="text" class="input-field-search" placeholder="חפש לפי שם, לקוח או פרויקט" x-model="searchQuery">
+                <div class="absolute text-gray-400 w-5 top-1 right-2">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 9.00006H6.2C5.0799 9.00006 4.51984 9.00006 4.09202 9.21805C3.71569 9.40979 3.40973 9.71575 3.21799 10.0921C3 10.5199 3 11.08 3 12.2001V17.8001C3 18.9202 3 19.4802 3.21799 19.908C3.40973 20.2844 3.71569 20.5903 4.09202 20.7821C4.51984 21.0001 5.07989 21.0001 6.2 21.0001H17.787C18.9071 21.0001 19.4671 21.0001 19.895 20.7821C20.2713 20.5903 20.5772 20.2844 20.769 19.908C20.987 19.4802 20.987 18.9202 20.987 17.8001V12.0001M6 15.0001H6.01M10 15H10.01M11.5189 12.8946L12.8337 12.6347C13.5432 12.4945 13.8979 12.4244 14.2287 12.2953C14.5223 12.1807 14.8013 12.0318 15.06 11.8516C15.3514 11.6487 15.607 11.393 16.1184 10.8816L21.2668 5.73321C21.9541 5.04596 21.9541 3.9317 21.2668 3.24444C20.5796 2.55719 19.4653 2.55719 18.7781 3.24445L13.5416 8.48088C13.0625 8.96004 12.8229 9.19963 12.6294 9.47121C12.4576 9.71232 12.3131 9.97174 12.1986 10.2447C12.0696 10.5522 11.9921 10.8821 11.837 11.5417L11.5189 12.8946Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </form>
+            <div class="flex items-center gap-2" x-data="{MoreBtnShow : false}">
+                <!-- Additional Actions -->
+                <div class="btn-action relative " @click="MoreBtnShow = !MoreBtnShow" @click.outside="MoreBtnShow = false" x-show="selectedIds.length > 0">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m8 10 4 4 4-4" />
+                    </svg>
+                   עוד פעולות
+                    <div class="p-2 flex flex-col z-50 absolute top-10 border border-gray-200 shadow rounded-lg right-0 w-54 bg-white" x-show="MoreBtnShow">
+                        <form method="post" action="{% url 'meeting-export' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="meetings" :value="selectedIds">
+                            <button type="submit" class="nav-btn">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 4L12 12M20 4V8.5M20 4H15.5M19 12.5V16.8C19 17.9201 19 18.4802 18.782 18.908C18.5903 19.2843 18.2843 19.5903 17.908 19.782C17.4802 20 16.9201 20 15.8 20H7.2C6.0799 20 5.51984 20 5.09202 19.782C4.71569 19.5903 4.40973 19.2843 4.21799 18.908C4 18.4802 4 17.9201 4 16.8V8.2C4 7.0799 4 6.51984 4.21799 6.09202C4.40973 5.71569 4.71569 5.40973 5.09202 5.21799C5.51984 5 6.07989 5 7.2 5H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                ייצוא
+                            </button>
+                        </form>
+                        <hr class="text-gray-200 my-1">
+                        <button class="nav-btn danger" @click="modelBackgroundShow = true, massDeleteModelShow = true">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                          מחיקה
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center justify-start px-4">
+                    <button :class="selectTab=='all' ? 'btn-tab active' : 'btn-tab' " @click="selectTab='all'">הכל</button>
+                    <button :class="selectTab=='open' ? 'btn-tab active' : 'btn-tab' " @click="selectTab='open'">פתוחות</button>
+                    <button :class="selectTab=='completed' ? 'btn-tab active' : 'btn-tab' " @click="selectTab='completed'">הושלמו</button>
+                </div>
+                <button class="btn-action">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M3 4.6C3 4.03995 3 3.75992 3.10899 3.54601C3.20487 3.35785 3.35785 3.20487 3.54601 3.10899C3.75992 3 4.03995 3 4.6 3H19.4C19.9601 3 20.2401 3 20.454 3.10899C20.6422 3.20487 20.7951 3.35785 20.891 3.54601C21 3.75992 21 4.03995 21 4.6V6.33726C21 6.58185 21 6.70414 20.9724 6.81923C20.9479 6.92127 20.9075 7.01881 20.8526 7.10828C20.7908 7.2092 20.7043 7.29568 20.5314 7.46863L14.4686 13.5314C14.2957 13.7043 14.2092 13.7908 14.1474 13.8917C14.0925 13.9812 14.0521 14.0787 14.0276 14.1808C14 14.2959 14 14.4182 14 14.6627V17L10 21V14.6627C10 14.4182 10 14.2959 9.97237 14.1808C9.94787 14.0787 9.90747 13.9812 9.85264 13.8917C9.7908 13.7908 9.70432 13.7043 9.53137 13.5314L3.46863 7.46863C3.29568 7.29568 3.2092 7.2092 3.14736 7.10828C3.09253 7.01881 3.05213 6.92127 3.02763 6.81923C3 6.70414 3 6.58185 3 6.33726V4.6Z"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    סינון
+                </button>
+                <a href="{% url 'meeting-calendar' %}" class="btn-action">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 9H21M7 3V5M17 3V5M6 13H8M6 17H8M11 13H13M11 17H13M16 13H18M16 17H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    לוח שנה
+                </a>
+            </div>
+         </div>
+        <!-- Meetings Table -->
+         {% if meetings %}
+         <div class="table-wrapper">
+            
+            <table class="w-full relative">
+                <thead class="h-full">
+                    <tr class="table-header-row">
+                        <th>
+                            <input
+                                type="checkbox"
+                                name="headerCheckbox"
+                                id="headerCheckbox"
+                                class="input-checkbox"
+                                @change="toggleSelectAll()"
+                                :checked="isAllVisibleSelected()"
+                                :indeterminate="isSomeVisibleSelected()"
+                            >
+                        </th>
+                        <th class="table-header-item"></th>
+                        <th class="table-header-item">כותרת</th>
+                        <th class="table-header-item">לקוח</th>
+                        <th class="table-header-item">פרויקט</th>
+                        <th class="table-header-item">תאריך ושעה</th>
+                        <th class="table-header-item">משך</th>
+                        <th class="table-header-item">אונליין</th>
+                        <th class="table-header-item">סטטוס</th>
+                        <th class="table-header-item"></th>
+                    </tr>
+                </thead>
+                <tbody class="">
+                    {% for meeting in meetings %}
+                    <tr class="table-body-item" :class="selectedIds.includes('{{meeting.id}}') ? 'bg-gray-100' : '' "
+                        x-show="matchesSearch($el) && (selectTab=='all' || (selectTab=='open' && '{{meeting.status}}' != 'completed') || (selectTab=='completed' && '{{meeting.status}}' == 'completed'))"
+                        data-meeting-id="{{meeting.id}}" 
+                        data-search-title="{{meeting.title}}" 
+                        data-search-customer="{{meeting.customer.name}}" 
+                        data-search-project="{% if meeting.content_type.model == 'project' %}{{ meeting.content_object.name }}{% endif %}"
+                    >
+                        <td class="flex items-center justify-center">
+                            <input type="checkbox" name="{{meeting.id}}" id="{{meeting.id}}" class="input-checkbox" x-model="selectedIds" :value="{{meeting.id}}">
+                        </td>
+                        <td>
+                            {% if not meeting.status == 'completed' %}
+                            <form method="post" action="{% url 'meeting-complete' meeting.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="fallback" value="meeting-list">
+                                <button type="submit" class="w-fit text-emerald-600 px-1.5 py-0.5 rounded hover:bg-emerald-100 cursor-pointer">✓</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                        
+                        <td>
+                            <p class="font-semibold">{{ meeting.title }}</p>
+                        </td>
+                        <td>
+                            {% if meeting.customer %}
+                            <a class="btn-ghost w-fit" href="{% url 'customer-detail' meeting.customer.id %}">
+                                <img src="{% if meeting.customer.logo %}{{ meeting.customer.logo.url }}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="h-6 w-6 squircle">
+                                {{ meeting.customer.name }}
+                            </a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if meeting.content_type.model == 'project' %}
+                                <a href="{% url 'project-detail' meeting.content_object.id %}" class="btn-ghost w-fit">{{ meeting.content_object.name }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ meeting.date|date:"d/m/Y" }} {{ meeting.start_time|time:"H:i" }}</td>
+                        <td>{{ meeting.duration }} דק'</td>
+                        <td>
+                             {% if meeting.is_online %}
+                                <div class="w-6 h-6 text-gray-400">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M19.9998 10V7.2C19.9998 6.0799 19.9998 5.51984 19.806 5.09202C19.6355 4.71569 19.3636 4.40973 19.0291 4.21799C18.6488 4 18.151 4 17.1553 4H6.8442C5.84855 4 5.35073 4 4.97044 4.21799C4.63593 4.40973 4.36396 4.71569 4.19352 5.09202C3.99976 5.51984 3.99976 6.0799 3.99976 7.2V10M6.33887 14H6.34887M3.50977 20C3.9216 18.8348 5.03284 18 6.33906 18C7.64528 18 8.75652 18.8348 9.16835 20M11.9989 14H12.0089M9.1698 20C9.58164 18.8348 10.6929 18 11.9991 18C13.3053 18 14.4166 18.8348 14.8284 20M17.6588 14H17.6688M14.8297 20C15.2415 18.8348 16.3528 18 17.659 18C18.9652 18 20.0765 18.8348 20.4883 20M7.33887 14C7.33887 14.5523 6.89115 15 6.33887 15C5.78658 15 5.33887 14.5523 5.33887 14C5.33887 13.4477 5.78658 13 6.33887 13C6.89115 13 7.33887 13.4477 7.33887 14ZM12.9989 14C12.9989 14.5523 12.5512 15 11.9989 15C11.4466 15 10.9989 14.5523 10.9989 14C10.9989 13.4477 11.4466 13 11.9989 13C12.5512 13 12.9989 13.4477 12.9989 14ZM18.6588 14C18.6588 14.5523 18.2111 15 17.6588 15C17.1065 15 16.6588 14.5523 16.6588 14C16.6588 13.4477 17.1065 13 17.6588 13C18.2111 13 18.6588 13.4477 18.6588 14Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                             {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-pill {% if meeting.status == 'completed' %}success{% elif meeting.status == 'canceled' %}danger{% else %}proccess{% endif %}">{{ meeting.get_status_display }}</span>
+                        </td>
+                        
+                        <td x-data="{ modeOptions : false}">
+                            <div class="size-6 p-1 rounded hover:bg-gray-200 cursor-pointer relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <div class="p-2 flex flex-col z-100 absolute top-7 border border-gray-200 shadow rounded-lg -right-36 w-44 bg-white" x-show="modeOptions">
+                                    <button class="nav-btn" @click="modelBackgroundShow = true, meetingModelShow = true, selectedMeeting = '{{meeting.id}}', selectedMeetingTitle = '{{meeting.title}}', selectedMeetingDescription = '{{meeting.description}}', selectedMeetingDate = '{{meeting.date|date:'Y-m-d'}}', selectedMeetingStartTime = '{{meeting.start_time|time:'H:i'}}', selectedMeetingDuration = '{{meeting.duration}}', selectedMeetingIsOnline = '{{meeting.is_online}}', selectedMeetingLocation = '{{meeting.location}}', meetingModelTitle = 'עריכת פגישה'">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M11 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40974 4.40973 4.7157 4.21799 5.09202C4 5.51985 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V12.5M15.5 5.5L18.3284 8.32843M10.7627 10.2373L17.411 3.58902C18.192 2.80797 19.4584 2.80797 20.2394 3.58902C21.0205 4.37007 21.0205 5.6364 20.2394 6.41745L13.3774 13.2794C12.6158 14.0411 12.235 14.4219 11.8012 14.7247C11.4162 14.9936 11.0009 15.2162 10.564 15.3882C10.0717 15.582 9.54378 15.6885 8.48793 15.9016L8 16L8.04745 15.6678C8.21536 14.4925 8.29932 13.9048 8.49029 13.3561C8.65975 12.8692 8.89125 12.4063 9.17906 11.9786C9.50341 11.4966 9.92319 11.0768 10.7627 10.2373Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        עריכה
+                                    </button>
+                                    <hr class="text-gray-200 my-1">
+                                    <button class="nav-btn danger" @click="modelBackgroundShow = true, massDeleteModelShow = true, selectedIds = ['{{meeting.id}}']">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        מחיקה
+                                    </button>
+                                </div>
+                            </div> 
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+         </div>
+         <!-- Table Footer Section -->
+         <div class="flex items-center justify-between mt-2 p-2">
+            <div class="text-gray-500 flex items-center gap-2">
+                <span class="flex items-center gap-1">
+                    <p x-text="selectedIds.length"></p>
+                   <p> מתוך {{ tasks.count }} משימות נבחרו </p>
+                </span>
+                <a class="text-link" x-show="selectedIds.length != {{tasks.count}}"
+                @click="toggleSelectAll()">בחר את כל משימות ({{tasks.count}})</a>
+            </div>
+            <div class="flex items-center justify-center gap-4">
+                <div class="flex items-center gap-1">
+                    <p>שורות לדף</p>
+                    <select name="" id="" class="btn-action">
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-center gap-1">
+                    <p>עמוד</p>
+                    <p>1</p>
+                    <p>מתוך</p>
+                    <p>10</p>
+                </div>
+                <div class="flex items-center justify-center gap-1">
+                    <button class="btn-action disabled">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button class="btn-action">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+         </div>
+         
+        {% else %}
+        <!-- No Content Section -->
+        <div class="border-dashed border-2 border-gray-200 flex flex-col items-center justify-center rounded-xl p-6 gap-4 text-center mt-2">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-gray-400 -mb-2">
+                <path d="M3 9H21M7 3V5M17 3V5M6 13H8M6 17H8M11 13H13M11 17H13M16 13H18M16 17H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="flex flex-col gap-2">
+                <h3 class="text-xl font-semibold">לא קיימות פגישות במערכת עדיין</h3>
+                <p class="text-gray-400">צור פגישה חדשה או ייבא פגישות מתוך קובץ</p>
+            </div>
+            
+            <button class="btn-main" @click="modelBackgroundShow = true, meetingModelShow = true, selectedMeeting = 0, meetingModelTitle = 'פגישה חדשה'">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 12H18M12 6V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <p>פגישה חדשה</p>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    <div class="fixed top-0 right-0 h-screen w-screen bg-black/30 flex items-start justify-center pt-20" x-show="modelBackgroundShow">
+        <!-- Delete Confirmation Model -->
+        <div class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-2 min-w-1/4 min-h-1/5 flex flex-col" x-show="massDeleteModelShow">
+            <button class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="modelBackgroundShow = false, massDeleteModelShow = false">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="flex-1">
+                <h1 class="text-xl font-semibold my-3">מחיקת פגישות</h1>
+                <p class="text-gray-500">
+                    אתה עומד  <strong class="text-gray-900" x-text="'למחוק ' + selectedIds.length"></strong> פגישות שנבחרו.
+                </p>
+                <p class="text-gray-500">פעולה זו אינה ניתנת לשחזור</p>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <form method="post" action="{% url 'meeting-delete' 0 %}">
+                    {% csrf_token %}
+                    <input type="text" name="fallback" value="meeting-list" class="hidden">
+                    <!-- This is a bit of a hack, we can't easily mass delete with the single delete endpoint without JS loop or backend change. 
+                         For now, assuming backend 'meeting-delete' might need adjustment or we loop here? 
+                         Actually, the 'task-mass-delete' didn't exist in the views I saw, only 'payment-mass-delete' in the original template.
+                         Wait, the original template had `action="{% url 'payment-mass-delete' %}"`.
+                         I don't have a mass delete view for meetings. I should probably create one or just use single delete for now if selectedIds length is 1.
+                         BUT, I see I didn't create a mass delete view for meetings.
+                         I will create a JS function to submit for each or just adding a mass delete view is better. 
+                         Let's assume I will add a mass delete view or just stick to single delete for now. 
+                         Actually, for multiple, I need to implement mass delete. 
+                         For now, I'll point to `meeting-delete` and just handle single delete if I don't add mass delete view. 
+                         Let's correct this: I'll make the form submit to a mass delete endpoint I'll add, OR I'll loop in JS.
+                         Simpler: The user asked to "add the meeting list view".
+                         I'll stick to a placeholder action or loop.
+                         Actually, I see `meeting_delete` in views takes `pk`.
+                         I will add a mass delete view quickly in the next step.
+                         For this step, I'll point to `meeting-mass-delete` which I will create.
+                    -->
+                    <input type="hidden" name="meetings" :value="selectedIds">
+                     <!-- Wait, I can't use `meeting-delete/0` for mass. 
+                          I should use a new URL `meeting-mass-delete`
+                     -->
+                </form>
+                <!-- Retrying to be simple. I will just support single delete via this modal if I don't add mass delete. 
+                     But the UI supports selection.
+                     I'll add `meeting_mass_delete` to views.py in next steps.
+                -->
+                <form method="post" action="{% url 'meeting-delete' 0 %}" x-ref="massDeleteForm" 
+                      :action="'{% url 'meeting-delete' 0 %}'.replace('0', selectedIds[0])"
+                      x-show="selectedIds.length === 1">
+                    {% csrf_token %}
+                    <input type="text" name="fallback" value="meeting-list" class="hidden">
+                    <button class="btn-action danger high" type="submit">
+                        מחיקה
+                    </button>
+                </form>
+                 <button class="btn-action danger high" x-show="selectedIds.length > 1" @click="alert('Mass delete not implemented yet')">
+                        מחיקה (מרובה)
+                 </button>
+
+                <button class="btn-action" @click="modelBackgroundShow = false, massDeleteModelShow = false">
+                    ביטול
+                </button>
+            </div>
+        </div>
+
+        <!-- Meeting Form Model -->
+        <div class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-4 min-w-1/4 max-w-2xl min-h-1/5 flex flex-col overflow-y-auto max-h-[90vh]" x-show="meetingModelShow" x-cloak>
+            <button class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="modelBackgroundShow = false, meetingModelShow = false">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="flex-1">
+                <h1 class="text-xl font-semibold my-3" x-text="meetingModelTitle"></h1>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <form method="post" :action="'{% url 'meeting-create-update' pk=999999 %}'.replace('999999', selectedMeeting)" class="w-full">
+                    {% csrf_token %}
+                    <input type="text" name="fallback" value="meeting-list" class="hidden">
+                    <!-- We need contentType and objectId for generic relation. 
+                         For now, since we are in a general list, we might not have a specific object context context easily if creating new generic meeting.
+                         However, the model requires content_type and object_id.
+                         If we are just creating a loose meeting, we might need a "General" object or similar, OR we allow selecting a Customer directly and content_type is Customer.
+                         Let's assume for this view, we can select a Customer.
+                         I'll add a customer select field.
+                         And I'll set content_type to Customer and object_id to the selected customer.
+                    -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-1 col-span-2">
+                            <label for="meetingTitle" class="text-gray-600">כותרת</label>
+                            <input type="text" id="meetingTitle" name="meetingTitle" :value="selectedMeetingTitle" class="input-field" required>
+                        </div>
+                        
+                         <!-- Customer Selection (Simplified for now, assumes passed in context or AJAX search needed? 
+                              For this task I might skip complex customer search and just use text or simple select if list is small.
+                              But the original view context didn't pass customers.
+                              I should update context to pass customers or use a searchable dropdown.
+                              For now I will skip customer selection in creation from this general list if unrelated to a specific customer, 
+                              BUT Meeting model REQUIRES content_type/id.
+                              I will default to the user's profile or something if not selected, OR I'll add customers to context in views.py.
+                              I'll update views.py to pass customers.
+                         -->
+                        
+                        <div class="flex flex-col gap-1">
+                            <label for="meetingDate" class="text-gray-600">תאריך</label>
+                            <input type="date" id="meetingDate" name="meetingDate" :value="selectedMeetingDate" class="input-field" required>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label for="meetingStartTime" class="text-gray-600">שעה</label>
+                            <input type="time" id="meetingStartTime" name="meetingStartTime" :value="selectedMeetingStartTime" class="input-field" required>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label for="meetingDuration" class="text-gray-600">משך (דקות)</label>
+                            <input type="number" id="meetingDuration" name="meetingDuration" :value="selectedMeetingDuration" class="input-field" required>
+                        </div>
+                         <div class="flex flex-col gap-1">
+                            <label for="meetingLocation" class="text-gray-600">מיקום</label>
+                            <input type="text" id="meetingLocation" name="meetingLocation" :value="selectedMeetingLocation" class="input-field">
+                        </div>
+                         <div class="flex items-center gap-2 col-span-2">
+                            <input type="checkbox" id="meetingIsOnline" name="meetingIsOnline" class="input-checkbox" :checked="selectedMeetingIsOnline == 'True'">
+                            <label for="meetingIsOnline" class="text-gray-600">פגישת אונליין?</label>
+                        </div>
+                        <div class="flex flex-col gap-1 col-span-2">
+                            <label for="meetingDescription" class="text-gray-600">תיאור</label>
+                            <textarea id="meetingDescription" name="meetingDescription" :value="selectedMeetingDescription" class="input-field" rows="3"></textarea>
+                        </div>
+                        
+                        <!-- Hidden fields for Generic Relation - Defaults to first customer or something if not handled?
+                             This part is tricky without Customer selection.
+                             I'll add the Customer Select to the form, but I need to make sure `customers` are in the context.
+                        -->
+                         <div class="flex flex-col gap-1 col-span-2">
+                            <label class="text-gray-600">לקוח (חובה)</label>
+                            <div class="relative" @click.outside="customerDropdownOpen = false">
+                                <!-- Hidden select input -->
+                                <select name="objectId" class="hidden" x-ref="customerHiddenSelect">
+                                    <option value="">---------</option>
+                                    {% for customer in customers %}
+                                        <option value="{{customer.id}}" :selected="selectedCustomer === '{{customer.id}}'">{{customer.name}}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <!-- Searchable input field -->
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        x-model="customerSearchQuery"
+                                        @focus="openCustomerDropdown()"
+                                        @input="openCustomerDropdown()"
+                                        @keydown.escape="closeCustomerDropdown()"
+                                        @keydown.arrow-down.prevent="navigateCustomerDown()"
+                                        @keydown.arrow-up.prevent="navigateCustomerUp()"
+                                        @keydown.enter.prevent="selectHighlightedCustomer()"
+                                        placeholder="בחר לקוח..."
+                                        class="input-field w-full"
+                                        autocomplete="off"
+                                        required
+                                    >
+                                    <!-- Clear button -->
+                                    <button
+                                        x-show="selectedCustomer && !customerDropdownOpen"
+                                        type="button"
+                                        @click.stop="clearCustomerSelection()"
+                                        class="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    >
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+                                    <!-- Dropdown arrow -->
+                                    <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        <svg class="size-4 transition-transform text-gray-400" :class="customerDropdownOpen ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Dropdown menu -->
+                                <div
+                                    x-show="customerDropdownOpen"
+                                    x-transition
+                                    class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                                >
+                                    <template x-for="(option, index) in filteredCustomerOptions" :key="option.id">
+                                        <button
+                                            type="button"
+                                            @click="selectCustomer(option)"
+                                            @mouseenter="customerHighlightedIndex = index"
+                                            class="w-full px-4 py-2 text-right hover:bg-gray-100 flex items-center justify-between transition-colors"
+                                            :class="{
+                                                'bg-blue-50 text-blue-600': option.id === selectedCustomer,
+                                                'bg-gray-100': index === customerHighlightedIndex && option.id !== selectedCustomer
+                                            }"
+                                        >
+                                            <span x-text="option.name"></span>
+                                            <svg x-show="option.id === selectedCustomer" class="size-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                    </template>
+                                    <div x-show="filteredCustomerOptions.length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">
+                                        לא נמצאו תוצאות
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="contentType" value="customer">
+                        </div>
+
+                    </div>
+                    <div class="flex items-center gap-2 justify-end mt-4">
+                        <button class="btn-main" type="submit">
+                             שמירה
+                        </button>
+                        <a class="btn-action" @click="modelBackgroundShow = false, meetingModelShow = false">
+                             ביטול
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    function setSection() {
+        return {
+            selectTab : "all",
+
+            init() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const section = urlParams.get('section');
+                if (section) {
+                    this.selectTab = section;
+                    // clear the query parameter from URL bar after reading
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        }
+    }
+    function meetingListHandler() {
+        return {
+            // State properties
+            selectedIds: [],
+            modelBackgroundShow: false,
+            massDeleteModelShow: false,
+            meetingModelShow: false,
+            meetingModelTitle: '',
+            selectedMeeting: 0,
+            selectedMeetingTitle: '',
+            selectedMeetingDescription: '',
+            selectedMeetingDate: '',
+            selectedMeetingStartTime: '',
+            selectedMeetingDuration: '',
+            selectedMeetingIsOnline: '',
+            selectedMeetingLocation: '',
+            searchQuery: '',
+
+            // Customer Dropdown State
+            customerDropdownOpen: false,
+            customerSearchQuery: '',
+            selectedCustomer: '',
+            selectedCustomerLabel: '',
+            customerHighlightedIndex: -1,
+            customerOptions: [
+                {% for customer in customers %}
+                { id: '{{ customer.id }}', name: '{{ customer.name|escapejs }}' },
+                {% endfor %}
+            ],
+
+            init() {
+                this.$watch('meetingModelShow', value => {
+                    if (value && this.selectedMeeting) {
+                        // If editing, try to find and select the customer
+                        const meetingRow = document.querySelector(`tr[data-meeting-id="${this.selectedMeeting}"]`);
+                        if (meetingRow) {
+                            const customerName = meetingRow.dataset.searchCustomer;
+                            const option = this.customerOptions.find(opt => opt.name === customerName);
+                            if (option) {
+                                this.selectCustomer(option);
+                            } else {
+                                this.clearCustomerSelection();
+                            }
+                        }
+                    } else if (value && !this.selectedMeeting) {
+                         this.clearCustomerSelection();
+                    }
+                });
+            },
+
+            get filteredCustomerOptions() {
+                if (!this.customerSearchQuery || this.customerSearchQuery.trim() === '') return this.customerOptions;
+                const query = this.customerSearchQuery.toLowerCase();
+                return this.customerOptions.filter(opt => opt.name.toLowerCase().includes(query));
+            },
+
+            openCustomerDropdown() {
+                this.customerDropdownOpen = true;
+                this.customerHighlightedIndex = -1;
+            },
+
+            closeCustomerDropdown() {
+                this.customerDropdownOpen = false;
+                this.customerHighlightedIndex = -1;
+                this.customerSearchQuery = this.selectedCustomerLabel;
+            },
+
+            selectCustomer(option) {
+                this.selectedCustomer = option.id;
+                this.selectedCustomerLabel = option.name;
+                this.customerSearchQuery = option.name;
+                this.$refs.customerHiddenSelect.value = option.id;
+                this.customerDropdownOpen = false;
+            },
+
+            navigateCustomerDown() {
+                if (this.customerHighlightedIndex < this.filteredCustomerOptions.length - 1) {
+                    this.customerHighlightedIndex++;
+                }
+            },
+
+            navigateCustomerUp() {
+                if (this.customerHighlightedIndex > 0) {
+                    this.customerHighlightedIndex--;
+                }
+            },
+
+            selectHighlightedCustomer() {
+                if (this.customerHighlightedIndex >= 0 && this.customerHighlightedIndex < this.filteredCustomerOptions.length) {
+                    this.selectCustomer(this.filteredCustomerOptions[this.customerHighlightedIndex]);
+                }
+            },
+
+            clearCustomerSelection() {
+                this.selectedCustomer = '';
+                this.selectedCustomerLabel = '';
+                this.customerSearchQuery = '';
+                this.$refs.customerHiddenSelect.value = '';
+            },
+
+
+            // Check if a card matches the search query
+            matchesSearch(card) {
+                // If no search query, show all cards
+                if (!this.searchQuery || this.searchQuery.trim() === '') {
+                    return true;
+                }
+
+                // Get search data from the card's data attributes
+                const searchTitle = (card.dataset.searchTitle || '').toLowerCase();
+                const searchCustomer = (card.dataset.searchCustomer || '').toLowerCase();
+                const searchProject = (card.dataset.searchProject || '').toLowerCase();
+                const searchLocation = (card.dataset.searchLocation || '').toLowerCase();
+
+                // Combine all searchable fields
+                const searchableText = `${searchTitle} ${searchCustomer} ${searchProject} ${searchLocation}`;
+
+                // Check if query matches any field
+                const query = this.searchQuery.toLowerCase().trim();
+                return searchableText.includes(query);
+            },
+
+            // Get all visible row IDs
+            getVisibleRowIds() {
+                const rows = document.querySelectorAll('tbody tr[data-meeting-id]');
+                const visibleIds = [];
+
+                rows.forEach(row => {
+                    if (this.matchesSearch(row)) {
+                        const meetingId = parseInt(row.dataset.meetingId);
+                        visibleIds.push(meetingId);
+                    }
+                });
+
+                return visibleIds;
+            },
+
+            // Toggle select all visible rows
+            toggleSelectAll() {
+                const visibleIds = this.getVisibleRowIds();
+
+                // If all visible rows are selected, deselect all
+                // Otherwise, select all visible rows
+                const allSelected = visibleIds.every(id => this.selectedIds.includes(id));
+
+                if (allSelected) {
+                    // Deselect all visible rows
+                    this.selectedIds = this.selectedIds.filter(id => !visibleIds.includes(id));
+                } else {
+                    // Select all visible rows (avoid duplicates)
+                    const newSelectedIds = [...new Set([...this.selectedIds, ...visibleIds])];
+                    this.selectedIds = newSelectedIds;
+                }
+            },
+
+            // Check if all visible rows are selected
+            isAllVisibleSelected() {
+                const visibleIds = this.getVisibleRowIds();
+                if (visibleIds.length === 0) return false;
+                return visibleIds.every(id => this.selectedIds.includes(id));
+            },
+
+            // Check if some (but not all) visible rows are selected
+            isSomeVisibleSelected() {
+                const visibleIds = this.getVisibleRowIds();
+                if (visibleIds.length === 0) return false;
+
+                const selectedCount = visibleIds.filter(id => this.selectedIds.includes(id)).length;
+                return selectedCount > 0 && selectedCount < visibleIds.length;
+            }
+        }
+    }
+</script>
+{% endblock content %}

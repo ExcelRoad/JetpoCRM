@@ -5,12 +5,53 @@ from django.http import JsonResponse
 from django.contrib.contenttypes.models import ContentType
 from .models import Service, Task, Timesheet, Meeting
 from projects.models import Project, ProjectBudget
+from customers.models import Customer
 from leads.models import LeadSource, LostReason
 from alerts.models import AlertSettings, AlertType
 from django.contrib import messages
 from connections.models import Workdrive, Sumit
 from django.contrib.auth.decorators import login_required
 from core.utils import export_to_excel
+
+
+@login_required
+def meetings_list(request):
+    status = request.GET.get('status', 'all')
+    meetings = Meeting.objects.all()
+    
+    if status == 'open':
+        meetings = meetings.exclude(status='completed').exclude(status='canceled')
+    elif status == 'completed':
+        meetings = meetings.filter(status='completed')
+        
+    context = {
+        'meetings': meetings,
+        'status': status,
+        'customers': Customer.objects.all()
+    }
+    return render(request, 'meetings/meetings-list.html', context)
+
+
+@login_required
+def meeting_export(request):
+    if request.method == "POST":
+        meetings = request.POST.get('meetings')
+        if meetings:
+            meeting_ids = [int(id) for id in meetings.split(',')]
+            meetings = Meeting.objects.filter(id__in=meeting_ids)
+            return export_to_excel(meetings, filename_prefix="meetings_export")
+    return redirect('meeting-list')
+
+
+@login_required
+def meetings_calendar(request):
+    meetings = Meeting.objects.all()
+    context = {
+        'meetings': meetings,
+        'customers': Customer.objects.all(),
+    }
+    return render(request, 'meetings/meetings-calendar.html', context)
+
 
 
 @login_required
@@ -292,6 +333,8 @@ def meeting_delete(request, pk):
         meeting = Meeting.objects.get(pk=pk)
         meeting.delete()
         messages.success(request, 'פגישה נמחקה בהצלחה', extra_tags=meeting.title)
+        if fallback == 'meeting-list':
+             return redirect('meeting-list')
         base_url = reverse(fallback, args=(meeting.object_id,))
         query_string = urlencode({'section': 'activities'})
         url = f'{base_url}?{query_string}'
@@ -337,6 +380,10 @@ def meeting_create_update(request, pk=None):
             meeting.location = meetingLocation
             meeting.save()
             messages.success(request, 'פגישה עודכנה בהצלחה', extra_tags=meeting.title)
+        
+        if fallback == 'meeting-list':
+             return redirect('meeting-list')
+        
         base_url = reverse(fallback, args=(object_id,))
         query_string = urlencode({'section': 'activities'})
         url = f'{base_url}?{query_string}'
@@ -350,6 +397,8 @@ def meeting_complete(request, pk):
         meeting.status = 'completed'
         meeting.save()
         messages.success(request, 'פגישה הושלמה בהצלחה', extra_tags=meeting.title)
+        if fallback == 'meeting-list':
+             return redirect('meeting-list')
         base_url = reverse(fallback, args=(meeting.object_id,))
         query_string = urlencode({'section': 'activities'})
         url = f'{base_url}?{query_string}'

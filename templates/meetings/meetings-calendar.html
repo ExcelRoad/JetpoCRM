@@ -1,0 +1,507 @@
+{% extends 'base/base_layout.html' %}
+{% load static %}
+
+{% block breadcrumbs %}
+    <a href="{% url 'homePage' %}">
+        בית
+    </a>
+    <a href="{% url 'meeting-list' %}">
+        פגישות
+    </a>
+    <p>
+       לוח שנה
+    </p>
+{% endblock breadcrumbs %}
+
+{% block content %}
+<div x-data="calendarHandler()" x-init="initCalendar()">
+    <div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200">
+        <div>
+            <h1 class="font-semibold text-3xl mb-1">לוח שנה</h1>
+            <p class="text-gray-400">תצוגת לוח שנה של הפגישות שלך.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <!-- New placeholder if needed -->
+        </div>
+    </div>
+
+    <div class="p-8">
+        <div class="bg-white rounded-lg shadow border border-gray-200 p-4">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold" x-text="monthNames[currentMonth] + ' ' + currentYear"></h2>
+                <div class="flex items-center gap-2">
+                    <button class="btn-action" @click="prevMonth()">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button class="btn-action" @click="today()">היום</button>
+                    <button class="btn-action" @click="nextMonth()">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="h-6 w-px bg-gray-200 mx-1"></div>
+                    <a href="{% url 'meeting-list' %}" class="btn-action">
+                        <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        רשימה
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-7 gap-px bg-gray-200 border border-gray-200 rounded-lg overflow-hidden">
+                <!-- Days Header -->
+                <template x-for="day in dayNames" :key="day">
+                    <div class="bg-gray-50 p-2 text-center text-sm font-medium text-gray-500" x-text="day"></div>
+                </template>
+
+                <!-- Calendar Grid -->
+                <template x-for="date in calendarDays" :key="date.dateString">
+                    <div class="bg-white min-h-32 p-2 flex flex-col gap-1 hover:bg-gray-50 transition-colors relative border-t border-r border-gray-100" 
+                         :class="{
+                             'bg-gray-50 text-gray-400': !date.isCurrentMonth, 
+                             'z-10 ring-2 ring-indigo-500 ring-inset': isToday(date.dateString)
+                         }">
+                        <span class="text-sm font-semibold" :class="{'text-indigo-600': isToday(date.dateString)}" x-text="date.day"></span>
+                        
+                        <div class="flex flex-col gap-1 mt-1 overflow-y-auto max-h-24 custom-scrollbar">
+                            <template x-for="meeting in getMeetingsForDate(date.dateString)" :key="meeting.id">
+                                <div class="text-xs p-1 rounded border border-r-4 cursor-pointer truncate"
+                                     :class="{
+                                         'border-emerald-600/50': meeting.status === 'completed',
+                                         'border-rose-600/50': meeting.status === 'canceled',
+                                         'border-indigo-600/50': meeting.status === 'pending'
+                                     }"
+                                     @click="showMeetingDetails(meeting)">
+                                    <span x-text="meeting.time"></span>
+                                    <span x-text="meeting.title"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+    
+     <!-- Meeting Details Model -->
+     <div class="fixed top-0 right-0 h-screen w-screen bg-black/30 flex items-center justify-center z-50" x-show="detailsModelShow" x-cloak>
+        <div class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-4 min-w-1/4 max-w-lg flex flex-col" @click.outside="detailsModelShow = false">
+            <button class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="detailsModelShow = false">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="flex-1">
+                <h1 class="text-xl font-semibold my-2" x-text="selectedMeeting.title"></h1>
+                <div class="flex flex-col gap-2 text-gray-700">
+                    <p><strong>תאריך:</strong> <span x-text="formatDate(selectedMeeting.date)"></span></p>
+                    <p><strong>שעה:</strong> <span x-text="selectedMeeting.time"></span></p>
+                    <p><strong>משך:</strong> <span x-text="selectedMeeting.duration + ' דקות'"></span></p>
+                    <p><strong>לקוח:</strong> <span x-text="selectedMeeting.customer"></span></p>
+                    <p x-show="selectedMeeting.location"><strong>מיקום:</strong> <span x-text="selectedMeeting.location"></span></p>
+                    <div x-show="selectedMeeting.is_online">
+                         <strong>אונליין:</strong> 
+                         <a :href="selectedMeeting.online_url" target="_blank" class="text-blue-500 hover:underline">הצטרף לפגישה</a>
+                    </div>
+                    <p x-show="selectedMeeting.description"><strong>תיאור:</strong> <br><span x-text="selectedMeeting.description"></span></p>
+                    <div class="mt-2">
+                        <span class="status-pill" 
+                              :class="{
+                                  'success': selectedMeeting.status === 'completed',
+                                  'danger': selectedMeeting.status === 'canceled',
+                                  'proccess': selectedMeeting.status === 'pending'
+                              }"
+                              x-text="getStatusDisplay(selectedMeeting.status)"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 mt-4">
+                 <button class="btn-main" @click="openEditModal(selectedMeeting)">
+                     עריכה
+                 </button>
+                <button class="btn-action" @click="detailsModelShow = false">
+                    סגירה
+                </button>
+            </div>
+        </div>
+    </div>
+    
+     <!-- Edit Meeting Model (Same as list view) -->
+     <div class="fixed top-0 right-0 h-screen w-screen bg-black/30 flex items-start justify-center pt-20 z-60" x-show="editModelShow" x-cloak>
+        <div class="relative bg-white border border-gray-200 shadow rounded-lg px-4 py-4 min-w-1/4 max-w-2xl min-h-1/5 flex flex-col overflow-y-auto max-h-[90vh]" @click.outside="editModelShow = false">
+            <button class="absolute top-2 left-2 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer" @click="editModelShow = false">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="flex-1">
+                <h1 class="text-xl font-semibold my-3">עריכת פגישה</h1>
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <form method="post" :action="'{% url 'meeting-create-update' pk=999999 %}'.replace('999999', selectedMeeting.id)" class="w-full">
+                    {% csrf_token %}
+                    <input type="hidden" name="fallback" value="meeting-calendar">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-1 col-span-2">
+                            <label class="text-gray-600">כותרת</label>
+                            <input type="text" name="meetingTitle" x-model="selectedMeeting.title" class="input-field" required>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-gray-600">תאריך</label>
+                            <input type="date" name="meetingDate" x-model="selectedMeeting.date" class="input-field" required>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-gray-600">שעה</label>
+                            <input type="time" name="meetingStartTime" x-model="selectedMeeting.time" class="input-field" required>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-gray-600">משך (דקות)</label>
+                            <input type="number" name="meetingDuration" x-model="selectedMeeting.duration" class="input-field" required>
+                        </div>
+                         <div class="flex flex-col gap-1">
+                            <label class="text-gray-600">מיקום</label>
+                            <input type="text" name="meetingLocation" x-model="selectedMeeting.location" class="input-field">
+                        </div>
+                         <div class="flex items-center gap-2 col-span-2">
+                            <input type="checkbox" id="meetingIsOnline" name="meetingIsOnline" class="input-checkbox" :checked="selectedMeeting.is_online">
+                            <label for="meetingIsOnline" class="text-gray-600">פגישת אונליין?</label>
+                        </div>
+                        <div class="flex flex-col gap-1 col-span-2">
+                            <label class="text-gray-600">תיאור</label>
+                            <textarea name="meetingDescription" x-model="selectedMeeting.description" class="input-field" rows="3"></textarea>
+                        </div>
+                         <div class="flex flex-col gap-1 col-span-2">
+                             <label class="text-gray-600">לקוח</label>
+                             <div class="relative" @click.outside="customerDropdownOpen = false">
+                                 <!-- Hidden select input -->
+                                 <select name="objectId" class="hidden" x-ref="customerHiddenSelect">
+                                     <option value="">---------</option>
+                                     {% for customer in customers %}
+                                         <option value="{{customer.id}}" :selected="selectedCustomer === '{{customer.id}}'">{{customer.name}}</option>
+                                     {% endfor %}
+                                 </select>
+
+                                 <!-- Searchable input field -->
+                                 <div class="relative">
+                                     <input
+                                         type="text"
+                                         x-model="customerSearchQuery"
+                                         @focus="openCustomerDropdown()"
+                                         @input="openCustomerDropdown()"
+                                         @keydown.escape="closeCustomerDropdown()"
+                                         @keydown.arrow-down.prevent="navigateCustomerDown()"
+                                         @keydown.arrow-up.prevent="navigateCustomerUp()"
+                                         @keydown.enter.prevent="selectHighlightedCustomer()"
+                                         placeholder="בחר לקוח..."
+                                         class="input-field w-full"
+                                         autocomplete="off"
+                                         required
+                                     >
+                                     <!-- Clear button -->
+                                     <button
+                                         x-show="selectedCustomer && !customerDropdownOpen"
+                                         type="button"
+                                         @click.stop="clearCustomerSelection()"
+                                         class="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                     >
+                                         <svg class="size-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                         </svg>
+                                     </button>
+                                     <!-- Dropdown arrow -->
+                                     <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                         <svg class="size-4 transition-transform text-gray-400" :class="customerDropdownOpen ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                             <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                         </svg>
+                                     </div>
+                                 </div>
+
+                                 <!-- Dropdown menu -->
+                                 <div
+                                     x-show="customerDropdownOpen"
+                                     x-transition
+                                     class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                                 >
+                                     <template x-for="(option, index) in filteredCustomerOptions" :key="option.id">
+                                         <button
+                                             type="button"
+                                             @click="selectCustomer(option)"
+                                             @mouseenter="customerHighlightedIndex = index"
+                                             class="w-full px-4 py-2 text-right hover:bg-gray-100 flex items-center justify-between transition-colors"
+                                             :class="{
+                                                 'bg-blue-50 text-blue-600': option.id === selectedCustomer,
+                                                 'bg-gray-100': index === customerHighlightedIndex && option.id !== selectedCustomer
+                                             }"
+                                         >
+                                             <span x-text="option.name"></span>
+                                             <svg x-show="option.id === selectedCustomer" class="size-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                 <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                             </svg>
+                                         </button>
+                                     </template>
+                                     <div x-show="filteredCustomerOptions.length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">
+                                         לא נמצאו תוצאות
+                                     </div>
+                                 </div>
+                             </div>
+                             <input type="hidden" name="contentType" value="customer">
+                         </div>
+                    </div>
+                    <div class="flex items-center gap-2 justify-end mt-4">
+                        <button class="btn-main" type="submit">שמירה</button>
+                        <button type="button" class="btn-action" @click="editModelShow = false">ביטול</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function calendarHandler() {
+        return {
+            currentMonth: new Date().getMonth(),
+            currentYear: new Date().getFullYear(),
+            monthNames: ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'],
+            dayNames: ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'],
+            calendarDays: [],
+            meetings: [
+                {% for meeting in meetings %}
+                {
+                    id: {{ meeting.id }},
+                    title: "{{ meeting.title|escapejs }}",
+                    date: "{{ meeting.date|date:'Y-m-d' }}",
+                    time: "{{ meeting.start_time|time:'H:i' }}",
+                    duration: {{ meeting.duration }},
+                    customer: "{{ meeting.customer.name|escapejs|default:'-' }}",
+                    location: "{{ meeting.location|escapejs|default:'' }}",
+                    is_online: {{ meeting.is_online|yesno:"true,false" }},
+                    online_url: "{{ meeting.online_url|escapejs|default:'' }}",
+                    description: "{{ meeting.description|escapejs|linebreaksbr }}",
+                    status: "{{ meeting.status }}",
+                    customer_id: "{{ meeting.customer.id|default:'' }}",
+                },
+                {% endfor %}
+            ],
+            detailsModelShow: false,
+            editModelShow: false,
+            selectedMeeting: {},
+
+            // Customer Dropdown State
+            customerDropdownOpen: false,
+            customerSearchQuery: '',
+            selectedCustomer: '',
+            selectedCustomerLabel: '',
+            customerHighlightedIndex: -1,
+            customerOptions: [
+                {% for customer in customers %}
+                { id: '{{ customer.id }}', name: '{{ customer.name|escapejs }}' },
+                {% endfor %}
+            ],
+
+            get filteredCustomerOptions() {
+                if (!this.customerSearchQuery || this.customerSearchQuery.trim() === '') return this.customerOptions;
+                const query = this.customerSearchQuery.toLowerCase();
+                return this.customerOptions.filter(opt => opt.name.toLowerCase().includes(query));
+            },
+
+            openCustomerDropdown() {
+                this.customerDropdownOpen = true;
+                this.customerHighlightedIndex = -1;
+            },
+
+            closeCustomerDropdown() {
+                this.customerDropdownOpen = false;
+                this.customerHighlightedIndex = -1;
+                this.customerSearchQuery = this.selectedCustomerLabel;
+            },
+
+            selectCustomer(option) {
+                this.selectedCustomer = option.id;
+                this.selectedCustomerLabel = option.name;
+                this.customerSearchQuery = option.name;
+                if (this.$refs.customerHiddenSelect) {
+                    this.$refs.customerHiddenSelect.value = option.id;
+                }
+                this.customerDropdownOpen = false;
+            },
+
+            navigateCustomerDown() {
+                if (this.customerHighlightedIndex < this.filteredCustomerOptions.length - 1) {
+                    this.customerHighlightedIndex++;
+                }
+            },
+
+            navigateCustomerUp() {
+                if (this.customerHighlightedIndex > 0) {
+                    this.customerHighlightedIndex--;
+                }
+            },
+
+            selectHighlightedCustomer() {
+                if (this.customerHighlightedIndex >= 0 && this.customerHighlightedIndex < this.filteredCustomerOptions.length) {
+                    this.selectCustomer(this.filteredCustomerOptions[this.customerHighlightedIndex]);
+                }
+            },
+
+            clearCustomerSelection() {
+                this.selectedCustomer = '';
+                this.selectedCustomerLabel = '';
+                this.customerSearchQuery = '';
+                if (this.$refs.customerHiddenSelect) {
+                    this.$refs.customerHiddenSelect.value = '';
+                }
+            },
+
+            initCalendar() {
+                this.generateCalendar();
+            },
+
+            generateCalendar() {
+                const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+                const startingDay = firstDay.getDay(); // 0 (Sunday) to 6 (Saturday)
+                const totalDays = lastDay.getDate();
+                
+                // Determine days from previous month to fill grid
+                const daysInPrevMonth = new Date(this.currentYear, this.currentMonth, 0).getDate();
+                
+                let days = [];
+
+                // Previous month days
+                for (let i = 0; i < startingDay; i++) {
+                    const day = daysInPrevMonth - startingDay + 1 + i;
+                    const date = new Date(this.currentYear, this.currentMonth - 1, day);
+                    days.push({
+                        day: day,
+                        dateString: this.formatDateString(date),
+                        isCurrentMonth: false
+                    });
+                }
+
+                // Current month days
+                for (let i = 1; i <= totalDays; i++) {
+                    const date = new Date(this.currentYear, this.currentMonth, i);
+                    days.push({
+                        day: i,
+                        dateString: this.formatDateString(date),
+                        isCurrentMonth: true
+                    });
+                }
+
+                // Next month days to fill grid (42 cells total for 6 rows)
+                const remainingCells = 42 - days.length;
+                for (let i = 1; i <= remainingCells; i++) {
+                    const date = new Date(this.currentYear, this.currentMonth + 1, i);
+                    days.push({
+                        day: i,
+                        dateString: this.formatDateString(date),
+                        isCurrentMonth: false
+                    });
+                }
+
+                this.calendarDays = days;
+            },
+
+            formatDateString(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            },
+
+            prevMonth() {
+                this.currentMonth--;
+                if (this.currentMonth < 0) {
+                    this.currentMonth = 11;
+                    this.currentYear--;
+                }
+                this.generateCalendar();
+            },
+
+            nextMonth() {
+                this.currentMonth++;
+                if (this.currentMonth > 11) {
+                    this.currentMonth = 0;
+                    this.currentYear++;
+                }
+                this.generateCalendar();
+            },
+            
+            today() {
+                const today = new Date();
+                this.currentMonth = today.getMonth();
+                this.currentYear = today.getFullYear();
+                this.generateCalendar();
+            },
+
+            isToday(dateString) {
+                const today = new Date();
+                return dateString === this.formatDateString(today);
+            },
+
+            getMeetingsForDate(dateString) {
+                return this.meetings.filter(m => m.date === dateString).sort((a, b) => a.time.localeCompare(b.time));
+            },
+            
+            showMeetingDetails(meeting) {
+                this.selectedMeeting = meeting;
+                this.detailsModelShow = true;
+            },
+            
+            getStatusDisplay(status) {
+                const map = {
+                    'pending': 'ממתין',
+                    'completed': 'הושלם',
+                    'canceled': 'בוטל'
+                };
+                return map[status] || status;
+            },
+            
+            formatDate(dateString) {
+                if (!dateString) return '';
+                const parts = dateString.split('-');
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            },
+            
+            openEditModal(meeting) {
+                this.detailsModelShow = false;
+                this.editModelShow = true;
+                this.selectedMeeting = { ...meeting };
+                
+                // Initialize customer dropdown
+                if (meeting.customer_id) {
+                    const option = this.customerOptions.find(opt => opt.id === String(meeting.customer_id));
+                    if (option) {
+                        this.selectCustomer(option);
+                    } else {
+                        this.clearCustomerSelection();
+                    }
+                } else {
+                    this.clearCustomerSelection();
+                }
+            }
+        }
+    }
+</script>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #d1d5db; 
+        border-radius: 2px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af; 
+    }
+</style>
+{% endblock content %}
