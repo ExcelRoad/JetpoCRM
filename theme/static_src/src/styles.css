@@ -67,8 +67,36 @@
     border-radius: 50%;
   }
 
+  .dashboard-card {
+    @apply border border-gray-200 rounded-lg overflow-y-auto;
+  }
+
+  .dashboard-card:hover {
+    @apply border-indigo-300;
+  }
+
+  .header-link {
+    @apply cursor-pointer font-semibold w-fit;
+  }
+
+  .header-link:hover {
+    @apply text-indigo-800;
+  }
+
+  .icon-link {
+    @apply text-gray-400;
+  }
+
+  .icon-link:hover {
+    @apply text-indigo-800;
+  }
+
   .nav-btn {
-    @apply w-full hover:bg-gray-100 px-3 py-1 rounded flex gap-2 items-center cursor-pointer;
+    @apply w-full px-3 py-1 rounded flex gap-2 items-center cursor-pointer;
+  }
+
+  .nav-btn:hover {
+    @apply bg-gray-100;
   }
 
   .nav-btn svg {
@@ -135,6 +163,18 @@
     @apply size-5;
   }
 
+  .btn-more {
+    @apply size-6 p-1 rounded cursor-pointer;
+  }
+
+  .btn-more:hover {
+    @apply bg-gray-100;
+  }
+
+  .btn-more svg {
+    @apply size-4;
+  }
+
   .btn-action.danger.high {
     @apply bg-rose-600 text-rose-50;
   }
@@ -192,12 +232,20 @@
     @apply size-4 rounded-lg;
   }
 
+  .input-checkbox:hover {
+    @apply cursor-pointer;
+  }
+
   .table-header-item {
     @apply text-start place-self-center-safe;
   }
 
   .table-body-item {
-    @apply hover:bg-gray-50 border-y border-gray-100;
+    @apply border-y border-gray-100;
+  }
+
+  .table-body-item:hover {
+    @apply bg-gray-50;
   }
 
   .table-body-item td {
@@ -279,6 +327,14 @@
 
   .drag-kanban {
     @apply cursor-grabbing;
+  }
+
+  .kanban-card {
+    @apply bg-white rounded-lg p-4 border border-gray-200 flex flex-col cursor-grab;
+  }
+
+  .kanban-card:hover {
+    @apply border-gray-300;
   }
 
   /* Progress Bar Styles  */

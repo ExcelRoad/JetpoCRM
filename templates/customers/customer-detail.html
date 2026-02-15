@@ -129,11 +129,6 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                             <button class="btn-tab" @click="showType = 'meetings'" :class="showType == 'meetings' ? 'active' : '' ">פגישות</button>
                         </div>
                     </div>
-                    <div>
-                        <button class="btn-main" @click="meetingModelShow = true, modelBackgroundShow = true, meetingModelTitle='יצירת פגישה חדשה'" x-show="showType == 'meetings'">
-                            פגישה חדשה
-                        </button>
-                    </div>
                 </div>
                 <div class="overflow-y-auto h-116 flex-col flex w-full">
                     {% if customer.meetings.all %}
@@ -258,7 +253,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                     {% for note in customer.notes.all %}
                     <div class="p-2 flex items-center w-5/6" x-data="{showNoteMore : false}">
                         <div class="flex items-start gap-2 w-full">
-                            <div class="[&>svg]:size-4 p-1 rounded hover:bg-gray-100 cursor-pointer relative" @click="showNoteMore = !showNoteMore" @click.outside="showNoteMore = false">
+                            <div class="[&>svg]:size-4 btn-more relative" @click="showNoteMore = !showNoteMore" @click.outside="showNoteMore = false">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -386,10 +381,10 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                     {% if customer.quotes.all %}
                     <div class="grid grid-cols-3 w-full gap-2">
                     {% for quote in customer.quotes.all %}
-                    <div class="bg-white rounded-lg p-4 border border-gray-200 flex flex-col hover:border-gray-300" x-data="{modeOptions : false}">
+                    <div class="kanban-card cursor-auto" x-data="{modeOptions : false}">
                         <div class="flex items-center justify-between">
                             <span class="status-pill {% if quote.status == 'won' %}success{% elif quote.status == 'lost' %}danger{% elif quote.status == 'sent' %}proccess{% else %}info{% endif %}">{{ quote.get_status_display }}</span>
-                            <div class="size-6 p-1 rounded hover:bg-gray-100 cursor-pointer relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
+                            <div class="btn-more relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -418,7 +413,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                         </div>
                         
                         <div class="flex gap-2 items-baseline my-1">
-                            <a class="font-semibold hover:text-gray-600 w-fit" href="{% url 'quote-detail' quote.id %}">{{ quote.name }}</a>
+                            <a class="header-link" href="{% url 'quote-detail' quote.id %}">{{ quote.name }}</a>
                             <p class="text-xs px-1 py-0.5 rounded-lg bg-gray-100">{{ quote.quote_number }}</p>
                         </div>
                         <div >
@@ -506,10 +501,10 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                     <div class="grid grid-cols-3 w-full gap-2">
                     {% for project in customer.projects.all %}
                     <div x-data="{modeOptions : false}">
-                        <div class="bg-white rounded-lg p-4 border border-gray-200 flex flex-col hover:border-gray-300" @contextmenu="$event.preventDefault(); modeOptions = !modeOptions">
+                        <div class="kanban-card cursor-auto" @contextmenu="$event.preventDefault(); modeOptions = !modeOptions">
                             <div class="flex items-center justify-between">
                                 <span class="status-pill {% if project.status == 'completed' %}success{% elif proejct.status == 'canceled' %}danger{% elif project.status == 'open' %}info{% else %}alert{% endif %}">{{ project.get_status_display }}</span>
-                                <div class="size-6 p-1 rounded hover:bg-gray-100 cursor-pointer relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
+                                <div class="btn-more relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
                                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
@@ -537,7 +532,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                                 </div> 
                             </div>
                             <div class="flex gap-2 items-baseline my-1">
-                                <a class="font-semibold hover:text-gray-600 w-fit" href="{% url 'project-detail' project.id %}">{{ project.name }}</a>
+                                <a class="header-link" href="{% url 'project-detail' project.id %}">{{ project.name }}</a>
                             </div>
                             <div >
                                 <p class=""><span class="text-gray-500 text-xs">סוג תקציב: </span>{{ project.service.get_budget_type_display }}</p>
@@ -579,7 +574,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                     <div class="grid grid-cols-4 w-full gap-2">
                     {% for contact in customer.contacts.all %}
                     <div x-data="{modeOptions : false}">
-                        <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-gray-300" @contextmenu="$event.preventDefault(); modeOptions = !modeOptions">
+                        <div class="kanban-card cursor-auto" @contextmenu="$event.preventDefault(); modeOptions = !modeOptions">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-1">
                                 <span class="status-pill ">{{ contact.get_contact_type_display }}</span>
@@ -594,7 +589,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                                     </div>
                                 {% endif %}
                             </div>
-                            <div class="size-6 p-1 rounded hover:bg-gray-100 cursor-pointer relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
+                            <div class="btn-more relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -658,7 +653,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                         </div>
                         
                         <div class="flex gap-2 items-baseline my-1">
-                            <a class="font-semibold hover:text-gray-600 w-fit" href="{% url 'contact-detail' contact.id %}">{{ contact.full_name }}</a>
+                            <a class="header-link" href="{% url 'contact-detail' contact.id %}">{{ contact.full_name }}</a>
                         </div>
                         <div >
                                 {% if contact.role %}
@@ -781,7 +776,8 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                                 <tr class="table-body-item">
                                     <td><p class="font-semibold">{{ payment.payment_number }}</p></td>
                                     <td>{{ payment.name }}</td>
-                                    <td>{{ payment.project.name}}
+                                    <td>
+                                        <a class="btn-ghost w-fit" href="{% url 'project-detail' payment.project.id %}">{{ payment.project.name}}</a>
                                     <td><span class="status-pill {% if payment.status == 'paid' %}success{% elif payment.status == 'billed' %}proccess{% endif %}">{{ payment.get_status_display }}</span></td>
                                     <td>{{ payment.qty|floatformat:"2"|intcomma:False }}</td>
                                     <td>₪{{ payment.price|floatformat:"0"|intcomma:False }}</td>
@@ -789,7 +785,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedCu
                                     <td>₪{{ payment.total_wvat_price|floatformat:"0"|intcomma:False }}</td>
                                     <td>{% if payment.sumit_invoice_number %}{{ payment.sumit_invoice_number }}{% else %}-{% endif %}</td>
                                     <td x-data="{ modeOptions : false}">
-                                        <div class="size-6 p-1 rounded hover:bg-gray-200 cursor-pointer relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
+                                        <div class="btn-more relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
                                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                             </svg>

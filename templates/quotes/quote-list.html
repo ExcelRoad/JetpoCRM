@@ -135,11 +135,11 @@
                         </td>
                         <td>
                             <div>
-                                <a class="font-semibold hover:text-gray-600 cursor-pointer" href="{% url 'quote-detail' quote.id %}">{{quote.name}}</a>
+                                <a class="header-link" href="{% url 'quote-detail' quote.id %}">{{quote.name}}</a>
                             </div>
                         </td>
                         <td>
-                            <a class="flex items-center gap-1 px-2 py-1 hover:bg-gray-100 w-fit rounded-lg" href="{% url 'customer-detail' quote.content_object.id %}">
+                            <a class="btn-ghost w-fit" href="{% url 'customer-detail' quote.content_object.id %}">
                                 <img src="{% if quote.content_object.logo %}{{ quote.content_object.logo.url }}{% else %}{% static 'images/default-avater.png' %}{% endif %}" alt="Customer Logo" class="w-6 h-6 squircle">
                                 {{ quote.related_to }}
                             </a>
@@ -156,7 +156,7 @@
                         <td>₪{{ quote.total_wvat_price|floatformat:"0"|intcomma:False }}</td>
                         
                         <td x-data="{ modeOptions : false}">
-                            <div class="size-6 p-1 rounded hover:bg-gray-200 cursor-pointer relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
+                            <div class="btn-more relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -311,8 +311,8 @@
             modelBackgroundShow: false,
             massDeleteModelShow: false,
             singleDeleteModelShow: false,
-            selectedLead: 0,
-            selectedLeadName: '',
+            selectedQuote: 0,
+            selectedQuoteName: '',
             searchQuery: '',
 
             // Check if a card matches the search query

@@ -14,7 +14,7 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
-<div class="flex h-[846px]" x-init="$store.selectMainTab.change('leads')"
+<div class="flex h-[846px]" x-init="$store.selectedMainTab.change('leads')"
 x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedLead : 0, selectedLeadName : '', quoteDeleteModelShow : false, selectedQuoteName : '', selectedQuote : 0, convertModelShow : false}">
     <!-- Main Section -->
     <div class="w-3/4 h-full" x-data="setSection()" x-init="init()">
@@ -160,7 +160,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedLe
                     {% for note in lead.notes.all %}
                     <div class="p-2 flex items-center w-5/6" x-data="{showNoteMore : false}">
                         <div class="flex items-start gap-2 w-full">
-                            <div class="[&>svg]:size-4 p-1 rounded hover:bg-gray-100 cursor-pointer relative" @click="showNoteMore = !showNoteMore" @click.outside="showNoteMore = false">
+                            <div class="[&>svg]:size-4 btn-more relative" @click="showNoteMore = !showNoteMore" @click.outside="showNoteMore = false">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -288,10 +288,10 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedLe
                     {% if lead.quotes.all %}
                     <div class="grid grid-cols-3 w-full gap-2">
                     {% for quote in lead.quotes.all %}
-                    <div class="bg-white rounded-lg p-4 border border-gray-200 flex flex-col hover:border-gray-300" x-data="{modeOptions : false}">
+                    <div class="kanban-card cursor-auto" x-data="{modeOptions : false}">
                         <div class="flex items-center justify-between">
                             <span class="status-pill {% if quote.status == 'won' %}success{% elif quote.status == 'lost' %}danger{% elif quote.status == 'sent' %}proccess{% else %}info{% endif %}">{{ quote.get_status_display }}</span>
-                            <div class="size-6 p-1 rounded hover:bg-gray-100 cursor-pointer relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
+                            <div class="btn-more relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -320,7 +320,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedLe
                         </div>
                         
                         <div class="flex gap-2 items-baseline my-1">
-                            <a class="font-semibold hover:text-gray-600 w-fit" href="{% url 'quote-detail' quote.id %}">{{ quote.name }}</a>
+                            <a class="header-link" href="{% url 'quote-detail' quote.id %}">{{ quote.name }}</a>
                             <p class="text-xs px-1 py-0.5 rounded-lg bg-gray-100">{{ quote.quote_number }}</p>
                         </div>
                         <div >
