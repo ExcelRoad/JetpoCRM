@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.utils import timezone
 from urllib.parse import urlencode
 from activities.models import Note, Task
 from .models import Project, ProjectBudget
@@ -84,6 +85,7 @@ def project_detail(request, pk):
     context = {
         'project': project,
         'tagged_note': tagged_note,
+        'today': timezone.now().date(),
     }
     return render(request, 'projects/project-detail.html', context)
 

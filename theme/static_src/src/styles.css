@@ -176,11 +176,11 @@
   }
 
   .btn-action.danger.high {
-    @apply bg-rose-600 text-rose-50;
+    @apply bg-rose-700 text-rose-50;
   }
 
   .btn-action.danger:hover {
-    @apply bg-rose-700 text-rose-50;
+    @apply bg-rose-800 text-rose-50;
   }
 
   .btn-ghost {

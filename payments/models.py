@@ -14,6 +14,7 @@ class Payment(models.Model):
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
     qty = models.DecimalField(max_digits=4, decimal_places=2)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    expected_date = models.DateField(null=True, blank=True)
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, related_name='payments')
 

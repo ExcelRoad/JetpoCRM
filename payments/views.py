@@ -14,12 +14,17 @@ def payment_edit(request, pk, main = False):
         payQty = request.POST['paymentQty']
         payPrice = request.POST['paymentPrice']
         payName = request.POST['paymentName']
-        projectId = request.POST['project']
+        payExpectedDate = request.POST.get('paymentExpectedDate')
+        if payExpectedDate == '':
+            payExpectedDate = None
+        projectId = request.POST.get('project', 0)
+        fallback = request.POST.get('fallback', 'payment-list')
         if pk != 0 and pk != '0':
             payment = Payment.objects.get(pk=pk)
             payment.qty = payQty
             payment.price = payPrice
             payment.name = payName
+            payment.expected_date = payExpectedDate
             payment.save()
             messages.success(request, 'תשלום נשמר בהצלחה', extra_tags=payment.name)
         else:
@@ -30,35 +35,59 @@ def payment_edit(request, pk, main = False):
                 project = project,
                 qty = payQty,
                 price = payPrice,
+                expected_date = payExpectedDate,
                 status = 'draft'
             )
             messages.success(request, 'תשלום נוצר בהצלחה', extra_tags=payment.name)
-        if main:
-            url = reverse('payment-list')
-        else:
+        
+        if fallback == 'payment-list':
+            return redirect('payment-list')
+        elif fallback == 'project-detail':
             base_url = reverse('project-detail', args=(payment.project.id,))
             query_string = urlencode({'section': 'payments'})
-            url = f'{base_url}?{query_string}'
-        return redirect(url)
+            return redirect(f'{base_url}?{query_string}')
+        elif fallback == 'customer-detail':
+            base_url = reverse('customer-detail', args=(payment.project.customer.id,))
+            query_string = urlencode({'section': 'payments'})
+            return redirect(f'{base_url}?{query_string}')
+        else:
+            # support direct reverse lookups or fallback to payment-list
+            try:
+                return redirect(fallback)
+            except:
+                return redirect('payment-list')
 
 @login_required
-def payment_delete(request, pk, main = False):
+def payment_delete(request, pk):
     payment = Payment.objects.get(pk=pk)
+    project_id = payment.project.id
+    customer_id = payment.project.customer.id
     payment.delete()
     messages.success(request, 'תשלום נמחק בהצלחה', extra_tags=payment.name)
-    if main:
-        url = reverse('payment-list')
-    else:
-        base_url = reverse('project-detail', args=(payment.project.id,))
+    
+    fallback = request.POST.get('fallback', 'payment-list')
+    if fallback == 'payment-list':
+        return redirect('payment-list')
+    elif fallback == 'project-detail':
+        base_url = reverse('project-detail', args=(project_id,))
         query_string = urlencode({'section': 'payments'})
-        url = f'{base_url}?{query_string}'
-    return redirect(url)
+        return redirect(f'{base_url}?{query_string}')
+    elif fallback == 'customer-detail':
+        base_url = reverse('customer-detail', args=(customer_id,))
+        query_string = urlencode({'section': 'payments'})
+        return redirect(f'{base_url}?{query_string}')
+    else:
+        try:
+            return redirect(fallback)
+        except:
+            return redirect('payment-list')
 
 @login_required
 def payment_list(request):
     payments = Payment.objects.all()
     context = {
         'payments': payments,
+        'today': timezone.now().date(),
     }
     return render(request, 'payments/payment-list.html', context)
 

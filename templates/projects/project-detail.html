@@ -15,7 +15,7 @@
 
 {% block content %}
 <div class="flex h-207.5" x-init="$store.selectedMainTab.change('projects')"
-x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedProject : 0, selectedProjectName : '', projectDeleteModelShow : false, selectedTaskName : '', taskDeleteModelShow : false ,selectedtesk : 0, taskModelShow : false, taskModelTitle : '', selectedTask : 0, selectedTaskTitle : '', selectedTaskDescription: '', selectedTaskUrgency : 'low', timesheetModelShow : false, selectedTimesheet: 0, selectedTimesheetDate: '', selectedTimesheetDescription: '', selectedTimesheetHours : 0, taskDeleteModelShow : false, timesheetDeleteModelShow: false, selectedTimesheetName: '', selectedBudget : 0, selectedBudgetName : '', budgetDeleteModelShow: false, budgetModelShow: false, budgetModelTitle: '', selectedBudgetQty : 0, selectedBudgetPrice: 0,selectedPayment : 0, selectedPaymentName : '', paymentDeleteModelShow: false, paymentModelShow: false, paymentModelTitle: '', selectedPaymentQty : 0, selectedPaymentPrice: 0, selectedMeeting : 0, selectedMeetingTitle : '', meetingDeleteModelShow: false, meetingModelShow: false, meetingModelTitle: '', selectedMeetingDate: '', selectedMeetingDescription: '', selectedMeetingDuration: 0, selectedMeetingIsOnline: false, selectedMeetingLocation : '', selectedMeetingStartTime: ''}">
+x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedProject : 0, selectedProjectName : '', projectDeleteModelShow : false, selectedTaskName : '', taskDeleteModelShow : false ,selectedtesk : 0, taskModelShow : false, taskModelTitle : '', selectedTask : 0, selectedTaskTitle : '', selectedTaskDescription: '', selectedTaskUrgency : 'low', timesheetModelShow : false, selectedTimesheet: 0, selectedTimesheetDate: '', selectedTimesheetDescription: '', selectedTimesheetHours : 0, taskDeleteModelShow : false, timesheetDeleteModelShow: false, selectedTimesheetName: '', selectedBudget : 0, selectedBudgetName : '', budgetDeleteModelShow: false, budgetModelShow: false, budgetModelTitle: '', selectedBudgetQty : 0, selectedBudgetPrice: 0,selectedPayment : 0, selectedPaymentName : '', selectedPaymentFallback: 'payment-list', paymentDeleteModelShow: false, paymentModelShow: false, paymentModelTitle: '', selectedPaymentQty : 0, selectedPaymentPrice: 0, selectedPaymentExpectedDate : '', selectedMeeting : 0, selectedMeetingTitle : '', meetingDeleteModelShow: false, meetingModelShow: false, meetingModelTitle: '', selectedMeetingDate: '', selectedMeetingDescription: '', selectedMeetingDuration: 0, selectedMeetingIsOnline: false, selectedMeetingLocation : '', selectedMeetingStartTime: ''}">
     <!-- Main Section -->
     <div class="w-3/4 h-full" x-data="setSection()" x-init="init()">
         <div class="border-b border-gray-200">
@@ -672,6 +672,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                                     <th class="table-header-item">סך מחיר</th>
                                     <th class="table-header-item">מחיר כולל מע"מ</th>
                                     <th class="table-header-item">מספר חשבונית</th>
+                                    <th class="table-header-item">תאריך צפוי</th>
                                 </tr>
                             </thead>
                             <tbody class="">
@@ -685,13 +686,22 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                                     <td>₪{{ payment.total_price|floatformat:"0"|intcomma:False }}</td>
                                     <td>₪{{ payment.total_wvat_price|floatformat:"0"|intcomma:False }}</td>
                                     <td>{% if payment.sumit_invoice_number %}{{ payment.sumit_invoice_number }}{% else %}-{% endif %}</td>
+                                    <td>
+                                        {% if payment.expected_date %}
+                                        <span class="{% if payment.status != 'paid' %}{% if payment.expected_date == today %}status-pill proccess{% elif payment.expected_date < today %}status-pill danger{% endif %}{% endif %}">
+                                            {{ payment.expected_date|date:"d/m/Y" }}
+                                        </span>
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
                                     <td x-data="{ modeOptions : false}">
                                         <div class="btn-more relative" @click="modeOptions = !modeOptions" @click.outside="modeOptions = false">
                                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M18 12H18.01M12 12H12.01M6 12H6.01M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM19 12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12C17 11.4477 17.4477 11 18 11C18.5523 11 19 11.4477 19 12ZM7 12C7 12.5523 6.55228 13 6 13C5.44772 13 5 12.5523 5 12C5 11.4477 5.44772 11 6 11C6.55228 11 7 11.4477 7 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                             </svg>
                                             <div class="p-2 flex flex-col z-100 absolute top-7 border border-gray-200 shadow rounded-lg -right-36 w-44 bg-white" x-show="modeOptions">
-                                                <button class="nav-btn" @click="modelBackgroundShow = true, paymentModelShow = true, selectedPayment = '{{payment.id}}', selectedPaymentPrice = '{{payment.price}}', selectedPaymentQty = '{{payment.qty}}', paymentModelTitle = 'עריכת תשלום', selectedPaymentName = '{{payment.name}}'">
+                                                <button class="nav-btn" @click="modelBackgroundShow = true, paymentModelShow = true, selectedPayment = '{{payment.id}}', selectedPaymentPrice = '{{payment.price}}', selectedPaymentQty = '{{payment.qty}}', paymentModelTitle = 'עריכת תשלום', selectedPaymentName = '{{payment.name}}', selectedPaymentExpectedDate = '{{ payment.expected_date|date:'Y-m-d' }}'">
                                                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <path d="M11 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40974 4.40973 4.7157 4.21799 5.09202C4 5.51985 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V12.5M15.5 5.5L18.3284 8.32843M10.7627 10.2373L17.411 3.58902C18.192 2.80797 19.4584 2.80797 20.2394 3.58902C21.0205 4.37007 21.0205 5.6364 20.2394 6.41745L13.3774 13.2794C12.6158 14.0411 12.235 14.4219 11.8012 14.7247C11.4162 14.9936 11.0009 15.2162 10.564 15.3882C10.0717 15.582 9.54378 15.6885 8.48793 15.9016L8 16L8.04745 15.6678C8.21536 14.4925 8.29932 13.9048 8.49029 13.3561C8.65975 12.8692 8.89125 12.4063 9.17906 11.9786C9.50341 11.4966 9.92319 11.0768 10.7627 10.2373Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                                     </svg>
@@ -721,7 +731,7 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                                                 </form>
                                                 {% endif %}
                                                 <hr class="text-gray-200 my-1">
-                                                <button class="nav-btn danger" @click="modelBackgroundShow = true, paymentDeleteModelShow = true, selectedPayment = '{{payment.id}}', selectedPaymentName = '{{ payment.name }}'">
+                                                <button class="nav-btn danger" @click="modelBackgroundShow = true, paymentDeleteModelShow = true, selectedPayment = '{{payment.id}}', selectedPaymentName = '{{ payment.name }}', selectedPaymentFallback = 'project-detail'">
                                                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <path d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                                     </svg>
@@ -1109,8 +1119,8 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
             <div class="flex items-center justify-end gap-2">
                 <form method="post" :action="'{% url 'payment-edit' pk=999999 %}'.replace('999999', selectedPayment)" class="w-full">
                     {% csrf_token %}
-                    <input type="text" name="fallback" value="project-detail" class="hidden">
-                    <input type="text" name="project" value="{{project.id}}" class="hidden">
+                    <input type="hidden" name="fallback" value="project-detail">
+                    <input type="hidden" name="project" value="{{project.id}}">
                     <div class="flex flex-col gap-1">
                         <label for="paymentName" class="text-gray-600" >שם תשלום</label>
                         <input type="text" id="paymentName" name="paymentName" :value="selectedPaymentName" class="input-field">
@@ -1118,6 +1128,8 @@ x-data="{modelBackgroundShow : false , singleDeleteModelShow : false, selectedPr
                         <input type="decimal" id="paymentQty" name="paymentQty" :value="selectedPaymentQty" class="input-field">
                         <label for="paymentPrice" class="text-gray-600">מחיר</label>
                         <input type="decimal" id="paymentPrice" name="paymentPrice" :value="selectedPaymentPrice" class="input-field">
+                        <label for="paymentExpectedDate" class="text-gray-600">תאריך צפוי</label>
+                        {% include 'components/datepicker.html' with name='paymentExpectedDate' model='selectedPaymentExpectedDate' %}
                     </div>
                     <div class="flex items-center gap-2 justify-end mt-2">
                         <button class="btn-main" type="submit">

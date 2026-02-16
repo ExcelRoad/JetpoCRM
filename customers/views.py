@@ -5,6 +5,7 @@ from .models import Customer
 from .forms import CustomerForm
 from activities.models import Note
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 from core.utils import export_to_excel
 
 @login_required
@@ -190,6 +191,7 @@ def customer_detail(request, pk):
         'quoteInfo': quoteInfo,
         'projectInfo': projectInfo,
         'paymentInfo': paymentInfo,
+        'today': timezone.now().date(),
     }
     return render(request, 'customers/customer-detail.html', context)
 
