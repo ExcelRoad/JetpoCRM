@@ -14,12 +14,13 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
+<div x-data="leadKanbanHandler()">
     <div class="px-4 py-6 w-full flex items-center justify-between border-b border-gray-200" x-init="$store.selectedMainTab.change('contacts')">
         <div>
             <h1 class="font-semibold text-3xl mb-1">אנשי קשר</h1>
             <p class="text-gray-400">זוהי רשימה של כל אנשי הקשר שלך. מכן תוכלו לארגן, לנהל ולערוך את אנשי הקשר שלכם</p>
         </div>
-        <div class="">
+        <div class="flex items-center gap-2">
             <a class="btn-main" href="{% url 'contact-create' %}">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M4 12H20M12 4V20" stroke="currentColor" stroke-width="3" stroke-linecap="round"
@@ -27,9 +28,24 @@
                 </svg>
                 <p>איש קשר חדש</p>
             </a>
+            <button class="btn-action" @click="importModalShow = true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 11L12 15M12 15L16 11M12 15V3M21 11V17.7992C21 18.9193 21 19.4794 20.782 19.9072C20.5903 20.2835 20.2843 20.5895 19.908 20.7812C19.4802 20.9992 18.9201 20.9992 17.8 20.9992H6.2C5.0799 20.9992 4.51984 20.9992 4.09202 20.7812C3.71569 20.5895 3.40973 20.2835 3.21799 19.9072C3 19.4794 3 18.9193 3 17.7992V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                ייבוא
+            </button>
         </div>
     </div>
-    <div x-data="leadKanbanHandler()">
+    <div>
+        <script>
+            // URLs for Import Modal
+            var importTitle = 'אנשי קשר';
+            var templateUrl = "{% url 'contact-import-template' %}";
+            var previewUrl = "{% url 'contact-import-preview' %}";
+            var confirmUrl = "{% url 'contact-import-confirm' %}";
+        </script>
+        
+        {% include 'base/import_modal.html' %}
         <div class="p-8" >
         <!-- Action Section -->
          <div class="flex items-center justify-between">
@@ -330,6 +346,7 @@
             return {
                 // State properties
                 selectedIds: [],
+                importModalShow: false,
                 modelBackgroundShow: false,
                 massDeleteModelShow: false,
                 singleDeleteModelShow: false,

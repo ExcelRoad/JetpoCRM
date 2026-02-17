@@ -15,6 +15,83 @@ from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from core.utils import export_to_excel
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from core.import_utils import generate_csv_template, parse_csv_row_count, get_csv_data
+from customers.models import Customer
+from django.contrib.contenttypes.models import ContentType
+
+@login_required
+def quote_import_template(request):
+    return generate_csv_template(Quote)
+
+@csrf_exempt
+@login_required
+def quote_import_preview(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        row_count = parse_csv_row_count(file.read())
+        return JsonResponse({'success': True, 'row_count': row_count})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+@csrf_exempt
+@login_required
+def quote_import_confirm(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        data = get_csv_data(file.read())
+        
+        created_count = 0
+        updated_count = 0
+        failed_count = 0
+        customer_ct = ContentType.objects.get_for_model(Customer)
+        
+        for row in data:
+            try:
+                def get_val(aliases):
+                    for alias in aliases:
+                        if alias.lower() in row_lower:
+                            return row_lower[alias.lower()]
+                    return None
+
+                def map_choice(val, choices):
+                    if not val: return None
+                    val = str(val).strip().lower()
+                    for key, label in choices:
+                        if val == key.lower() or val == label.lower():
+                            return key
+                    return val
+
+                # Handle Customer relationship with aliases
+                customer = None
+                customer_name = get_val(['customer', 'company', 'חברה', 'לקוח'])
+                if customer_name:
+                    customer = Customer.objects.filter(name__icontains=customer_name.strip()).first()
+                
+                status_val = get_val(['status', 'סטטוס'])
+                mapped_status = map_choice(status_val, Quote.STATUSES) or 'draft'
+
+                if customer:
+                    Quote.objects.create(
+                        name=get_val(['name', 'שם', 'נושא']) or 'Imported Quote',
+                        status=mapped_status,
+                        content_type=customer_ct,
+                        object_id=customer.id
+                    )
+                    created_count += 1
+                else:
+                    failed_count += 1
+            except Exception as e:
+                print(f"Error importing quote row: {e}")
+                failed_count += 1
+                
+        return JsonResponse({
+            'success': True,
+            'created': created_count,
+            'updated': updated_count,
+            'failed': failed_count
+        })
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
 MONTH_HEBREW = {

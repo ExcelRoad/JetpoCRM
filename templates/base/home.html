@@ -288,7 +288,7 @@
                                 <span class="status-pill {% if project.status == 'open' %}proccess{% elif project.status == 'onHold' %}alert{% endif %}">{{ project.get_status_display }}</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <a class="btn-action w-fit" href="{% url 'customer-detail' project.customer.id %}">
+                                <a class="btn-ghost w-fit" href="{% url 'customer-detail' project.customer.id %}">
                                     <img src="{{ project.customer.logo.url }}" alt="" class="size-6 squircle">
                                     {{project.customer.name}}
                                 </a>

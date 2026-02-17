@@ -7,6 +7,116 @@ from activities.models import Note
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from core.utils import export_to_excel
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from core.import_utils import generate_csv_template, parse_csv_row_count, get_csv_data
+from customers.models import Customer
+
+@login_required
+def contact_import_template(request):
+    return generate_csv_template(Contact)
+
+@csrf_exempt
+@login_required
+def contact_import_preview(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        row_count = parse_csv_row_count(file.read())
+        return JsonResponse({'success': True, 'row_count': row_count})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+@csrf_exempt
+@login_required
+def contact_import_confirm(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        data = get_csv_data(file.read())
+        
+        created_count = 0
+        updated_count = 0
+        failed_count = 0
+        
+        for row in data:
+            try:
+                # Normalize keys to lowercase for flexible matching
+                row_lower = {str(k).lower().strip(): v for k, v in row.items()}
+                
+                def get_val(aliases):
+                    for alias in aliases:
+                        if alias.lower() in row_lower:
+                            return row_lower[alias.lower()]
+                    return None
+
+                def map_choice(val, choices):
+                    if not val: return None
+                    val = str(val).strip().lower()
+                    for key, label in choices:
+                        if val == key.lower() or val == label.lower():
+                            return key
+                    return val
+
+                # Handle Customer foreign key with aliases
+                customer = None
+                customer_name = get_val(['customer', 'company', 'חברה', 'לקוח', 'שם לקוח', 'שם חברה'])
+                if customer_name:
+                    customer = Customer.objects.filter(name__icontains=customer_name.strip()).first()
+                
+                email = get_val(['email', 'אימייל', 'דואל', 'דואר אלקטרוני']) or ''
+                email = str(email).strip()
+                
+                phone = get_val(['phone', 'טלפון', 'נייד', 'סלולרי']) or ''
+                phone = str(phone).strip()
+                
+                first_name = get_val(['first_name', 'שם פרטי', 'שם']) or ''
+                first_name = str(first_name).strip()
+                
+                last_name = get_val(['last_name', 'שם משפחה']) or ''
+                last_name = str(last_name).strip()
+
+                if not first_name:
+                    failed_count += 1
+                    continue
+
+                # Try matching existing contact for upsert
+                contact = None
+                if email:
+                    contact = Contact.objects.filter(email=email).first()
+                if not contact and phone:
+                    contact = Contact.objects.filter(phone=phone).first()
+                
+                contact_type_val = get_val(['contact_type', 'סוג איש קשר', 'סוג'])
+                mapped_type = map_choice(contact_type_val, Contact.CONTACT_TYPES) or 'normal'
+
+                defaults = {
+                    'first_name': first_name,
+                    'last_name': last_name,
+                    'email': email,
+                    'phone': phone,
+                    'role': get_val(['role', 'תפקיד']) or '',
+                    'contact_type': mapped_type,
+                    'customer': customer
+                }
+
+                if contact:
+                    for key, value in defaults.items():
+                        setattr(contact, key, value)
+                    contact.save()
+                    updated_count += 1
+                else:
+                    Contact.objects.create(**defaults)
+                    created_count += 1
+                    
+            except Exception as e:
+                print(f"Error importing contact row: {e}")
+                failed_count += 1
+                
+        return JsonResponse({
+            'success': True, 
+            'created': created_count, 
+            'updated': updated_count, 
+            'failed': failed_count
+        })
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 @login_required
 def contact_list(request):

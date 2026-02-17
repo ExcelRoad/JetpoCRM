@@ -145,3 +145,6 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_URL = 'login'
+
+# Webhook Security
+WEBHOOK_TOKEN = "jetpo_wp_678234901" # In production, this should be in .env

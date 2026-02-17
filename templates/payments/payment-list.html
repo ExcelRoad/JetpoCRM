@@ -111,6 +111,7 @@
                         <th class="table-header-item">פרויקט</th>
                         <th class="table-header-item">תאריך צפוי</th>
                         <th class="table-header-item">סטטוס</th>
+                        <th class="table-header-item">תאריך תשלום</th>
                         <th class="table-header-item">סכום</th>
                         <th class="table-header-item"></th>
                     </tr>
@@ -154,6 +155,13 @@
                             {% endif %}
                         </td>
                         <td><span class="status-pill {% if payment.status == 'paid' %}success{% elif payment.status == 'billed' %}proccess{% endif %}">{{ payment.get_status_display }}</span></td>
+                        <td>
+                            {% if payment.recipt_date %}
+                            {{ payment.recipt_date|date:"d/m/Y" }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
                         <td>₪{{ payment.total_price|floatformat:"0"|intcomma:False }}</td>
                         <td></td>
                         
@@ -399,7 +407,7 @@
 <script>
     function setSection() {
         return {
-            selectTab : "all",
+            selectTab : "billed",
 
             init() {
                 const urlParams = new URLSearchParams(window.location.search);

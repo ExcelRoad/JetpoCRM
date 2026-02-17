@@ -2,13 +2,116 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from urllib.parse import urlencode
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from .models import Lead, LeadSource, LostReason
 from .forms import LeadForm, LeadSourceForm
 from activities.models import Note
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from core.utils import export_to_excel
+from core.import_utils import generate_csv_template, parse_csv_row_count, get_csv_data
+
+@login_required
+def lead_import_template(request):
+    return generate_csv_template(Lead)
+
+@csrf_exempt
+@login_required
+def lead_import_preview(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        row_count = parse_csv_row_count(file.read())
+        return JsonResponse({'success': True, 'row_count': row_count})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+@csrf_exempt
+@login_required
+def lead_import_confirm(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        data = get_csv_data(file.read())
+        
+        created_count = 0
+        updated_count = 0
+        failed_count = 0
+        
+        for row in data:
+            try:
+                # Normalize keys to lowercase for flexible matching
+                row_lower = {str(k).lower().strip(): v for k, v in row.items()}
+                
+                def get_val(aliases):
+                    for alias in aliases:
+                        if alias.lower() in row_lower:
+                            return row_lower[alias.lower()]
+                    return None
+
+                def map_choice(val, choices):
+                    if not val: return None
+                    val = str(val).strip().lower()
+                    for key, label in choices:
+                        if val == key.lower() or val == label.lower():
+                            return key
+                    return val # Fallback to original value if no match
+
+                # Handle LeadSource foreign key with aliases
+                source = None
+                source_name = get_val(['lead_source', 'מקור', 'מקור ליד', 'source'])
+                if source_name:
+                    source, _ = LeadSource.objects.get_or_create(name=source_name.strip())
+                
+                first_name = get_val(['first_name', 'שם פרטי', 'שם']) or 'Imported'
+                first_name = str(first_name).strip()
+                
+                last_name = get_val(['last_name', 'שם משפחה']) or 'Lead'
+                last_name = str(last_name).strip()
+
+                status_val = get_val(['status', 'סטטוס'])
+                mapped_status = map_choice(status_val, Lead.LEAD_STATUSES) or 'new'
+
+                defaults = {
+                    'first_name': first_name,
+                    'last_name': last_name,
+                    'phone': get_val(['phone', 'טלפון', 'נייד']) or '',
+                    'email': get_val(['email', 'אימייל', 'דואל']) or '',
+                    'company_name': get_val(['company_name', 'company', 'חברה']) or '',
+                    'role': get_val(['role', 'תפקיד']) or '',
+                    'description': get_val(['description', 'תיאור', 'הערות']) or '',
+                    'status': mapped_status,
+                    'lead_source': source
+                }
+
+                # Try matching existing lead for upsert
+                lead = None
+                email = defaults['email']
+                phone = defaults['phone']
+                if email:
+                    lead = Lead.objects.filter(email=email).first()
+                if not lead and phone:
+                    lead = Lead.objects.filter(phone=phone).first()
+
+                if lead:
+                    for key, value in defaults.items():
+                        setattr(lead, key, value)
+                    lead.save()
+                    updated_count += 1
+                else:
+                    Lead.objects.create(**defaults)
+                    created_count += 1
+
+            except Exception as e:
+                print(f"Error importing lead row: {e}")
+                failed_count += 1
+                
+        return JsonResponse({
+            'success': True, 
+            'created': created_count, 
+            'updated': updated_count, 
+            'failed': failed_count
+        })
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 @login_required
 def lead_export(request):
@@ -163,7 +266,7 @@ def lead_mass_delete(request):
             l = int(l)
             lead = Lead.objects.get(pk=l)
             lead.delete()
-        messages.success(request, f'{leadList.count()} לידים נמחקו בהצלחה')
+        messages.success(request, f'{len(leadList)} לידים נמחקו בהצלחה')
         return redirect(fallback)
 
 @login_required
@@ -359,3 +462,92 @@ def lead_update_status(request):
         })
 
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=405)
+
+
+@csrf_exempt
+def elementor_webhook(request):
+    """
+    Webhook endpoint for Elementor forms.
+    Expected Fields: name, phone, email, company, description
+    Expected Auth: 'token' query parameter or header matches settings.WEBHOOK_TOKEN
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST allowed'}, status=405)
+
+    # Simple Token Authentication
+    token = request.GET.get('token') or request.headers.get('Authorization')
+    if token and token.startswith('Bearer '):
+        token = token.split('Bearer ')[1]
+    
+    if token != settings.WEBHOOK_TOKEN:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+    try:
+        # Elementor sends data as either JSON or Form Data
+        # We handle both application/json and application/x-www-form-urlencoded
+        if 'application/json' in request.content_type:
+            data = json.loads(request.body)
+            fields_data = data.get('fields', data)
+            form_name = data.get('form_name', 'Elementor Webhook')
+        else:
+            fields_data = request.POST
+            form_name = request.POST.get('form_name', 'Elementor Webhook')
+
+        # Map fields
+        # Elementor can send fields in multiple formats:
+        # 1. name: "Value"
+        # 2. fields[name][value]: "Value"
+        # 3. form_fields[name]: "Value"
+        
+        def get_val(key):
+            # Check direct
+            val = fields_data.get(key)
+            if val:
+                if isinstance(val, dict) and 'value' in val:
+                    return val['value']
+                return val
+            
+            # Check in form_fields prefix (common in some Elementor setups)
+            val = fields_data.get(f'form_fields[{key}]')
+            if val: return val
+            
+            # Check nested structure if it was parsed as a complex dict from POST
+            # (Django doesn't do this by default, but let's be safe)
+            return None
+
+        full_name = get_val('name') or get_val('first_name') or ''
+        parts = full_name.split(' ', 1)
+        first_name = parts[0] if parts else 'Webhook Lead'
+        last_name = parts[1] if len(parts) > 1 else (get_val('last_name') or '')
+
+        email = get_val('email')
+        phone = get_val('phone')
+        company = get_val('company')
+        description = get_val('description')
+
+        # Ensure LeadSource exists
+        source_name = f"אתר - טופס פוטר"
+        lead_source, _ = LeadSource.objects.get_or_create(name=source_name)
+
+        # Create the lead
+        lead = Lead.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            company_name=company,
+            description=description,
+            lead_source=lead_source
+        )
+
+        return JsonResponse({
+            'success': True,
+            'lead_id': lead.id,
+            'message': 'Lead created successfully'
+        }, status=201)
+
+    except Exception as e:
+        # Log to console so the user can see what happened in the terminal
+        print(f"WEBHOOK ERROR: {str(e)}")
+        print(f"REQUEST BODY: {request.body}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)

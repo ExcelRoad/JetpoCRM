@@ -1,12 +1,101 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from urllib.parse import urlencode
 from .models import Customer
 from .forms import CustomerForm
-from activities.models import Note
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.utils import timezone
 from core.utils import export_to_excel
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from core.import_utils import generate_csv_template, parse_csv_row_count, get_csv_data
+from activities.models import Note
+from django.utils import timezone
+from urllib.parse import urlencode
+
+@login_required
+def customer_import_template(request):
+    return generate_csv_template(Customer)
+
+@csrf_exempt
+@login_required
+def customer_import_preview(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        row_count = parse_csv_row_count(file.read())
+        return JsonResponse({'success': True, 'row_count': row_count})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+@csrf_exempt
+@login_required
+def customer_import_confirm(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        data = get_csv_data(file.read())
+        
+        created_count = 0
+        updated_count = 0
+        failed_count = 0
+        
+        for row in data:
+            try:
+                # Normalize keys to lowercase for flexible matching
+                row_lower = {str(k).lower().strip(): v for k, v in row.items()}
+                
+                def get_val(aliases):
+                    for alias in aliases:
+                        if alias.lower() in row_lower:
+                            return row_lower[alias.lower()]
+                    return None
+
+                name = get_val(['name', 'שם לקוח', 'שם', 'לקוח', 'company', 'חברה'])
+                if name:
+                    name = str(name).strip()
+                
+                legal_id = get_val(['legal_id', 'ח.פ', 'ת.ז', 'מזהה'])
+                if legal_id:
+                    legal_id = str(legal_id).strip()
+                
+                if not name:
+                    failed_count += 1
+                    continue
+
+                # Try matching existing customer for upsert
+                customer = None
+                if legal_id:
+                    customer = Customer.objects.filter(legal_id=legal_id).first()
+                if not customer:
+                    customer = Customer.objects.filter(name=name).first()
+
+                defaults = {
+                    'name': name,
+                    'legal_id': legal_id or '',
+                    'sumit_id': get_val(['sumit_id', 'מזהה סומיט']) or '',
+                    'folder_id': get_val(['folder_id', 'מזהה תיקייה']) or '',
+                    'folder_link': get_val(['folder_link', 'קישור לתיקייה']) or '',
+                    'description': get_val(['description', 'תיאור', 'הערות']) or '',
+                    'website': get_val(['website', 'אתר']) or '',
+                }
+
+                if customer:
+                    for key, value in defaults.items():
+                        setattr(customer, key, value)
+                    customer.save()
+                    updated_count += 1
+                else:
+                    Customer.objects.create(**defaults)
+                    created_count += 1
+
+            except Exception as e:
+                print(f"Error importing customer row: {e}")
+                failed_count += 1
+                
+        return JsonResponse({
+            'success': True, 
+            'created': created_count, 
+            'updated': updated_count, 
+            'failed': failed_count
+        })
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 @login_required
 def customer_list(request):

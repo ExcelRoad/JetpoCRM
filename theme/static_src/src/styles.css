@@ -394,3 +394,15 @@
     }
   }
 }
+
+.kanban-card {
+  @apply bg-white p-3 rounded-lg border border-gray-200 shadow-sm transition-all duration-200 hover:border-violet-300;
+}
+
+.ghost-grab {
+  @apply !opacity-40 !bg-violet-50 !border-dashed !border-violet-400;
+}
+
+.drag-kanban {
+  @apply !shadow-xl !rotate-2 !scale-105 !bg-white !z-[1000];
+}

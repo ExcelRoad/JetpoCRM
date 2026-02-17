@@ -1,0 +1,167 @@
+<!-- Reusable Import Modal -->
+<div x-show="importModalShow" 
+     class="fixed top-0 right-0 h-screen w-screen bg-black/30 flex items-start justify-center pt-40 z-[100]"
+     x-cloak>
+    <div class="relative bg-white border border-gray-200 shadow rounded-lg px-8 py-6 w-1/3 flex flex-col gap-4"
+         @click.outside="if (!uploading && !summaryModalShow) importModalShow = false"
+         x-data="{ 
+            isDragging: false, 
+            fileName: '', 
+            rowCount: null, 
+            uploading: false,
+            summaryModalShow: false,
+            summaryData: { created: 0, updated: 0, failed: 0 },
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file) { this.processFile(file); }
+            },
+            handleDrop(event) {
+                this.isDragging = false;
+                const file = event.dataTransfer.files[0];
+                if (file) {
+                    this.$refs.importFileInput.files = event.dataTransfer.files;
+                    this.processFile(file);
+                }
+            },
+            processFile(file) {
+                this.fileName = file.name;
+                this.rowCount = null;
+                // Preview row count via API
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                fetch(previewUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.rowCount = data.row_count;
+                    } else {
+                        alert(data.error || 'קובץ לא תקין');
+                        this.fileName = '';
+                    }
+                });
+            },
+            submitImport() {
+                this.uploading = true;
+                const file = this.$refs.importFileInput.files[0];
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch(confirmUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    this.uploading = false;
+                    if (data.success) {
+                        this.summaryData = data;
+                        this.summaryModalShow = true;
+                    } else {
+                        alert(data.error || 'שגיאה בביצוע הייבוא');
+                    }
+                })
+                .catch(error => {
+                    this.uploading = false;
+                    console.error('Import error:', error);
+                    alert('שגיאה בתקשורת עם השרת');
+                });
+            }
+         }">
+        
+        <!-- Import Stage -->
+        <div x-show="!summaryModalShow">
+            <button class="absolute top-4 left-4 [&>svg]:size-6 p-0.5 rounded hover:bg-gray-50 cursor-pointer text-gray-400" 
+                    @click="importModalShow = false" x-show="!uploading">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+
+            <div class="text-center">
+                <h2 class="text-2xl font-semibold mb-2" x-text="'ייבוא ' + importTitle"></h2>
+                <p class="text-gray-500">בחר קובץ CSV או גרור אותו לכאן כדי לייבא נתונים למערכת</p>
+            </div>
+
+            <!-- Drop Zone -->
+            <div
+                @click="if (!uploading) $refs.importFileInput.click()"
+                @dragover.prevent="if (!uploading) isDragging = true"
+                @dragleave.prevent="isDragging = false"
+                @drop.prevent="if (!uploading) handleDrop($event)"
+                :class="isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'"
+                class="relative border-2 border-dashed rounded-xl p-10 cursor-pointer transition-all duration-200 flex flex-col items-center gap-4 bg-gray-50 mt-4"
+            >
+                <input type="file" x-ref="importFileInput" class="hidden" accept=".csv" @change="handleFileSelect($event)">
+                
+                <svg class="size-12 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 11L12 15M12 15L16 11M12 15V3M21 11V17.7992C21 18.9193 21 19.4794 20.782 19.9072C20.5903 20.2835 20.2843 20.5895 19.908 20.7812C19.4802 20.9992 18.9201 20.9992 17.8 20.9992H6.2C5.0799 20.9992 4.51984 20.9992 4.09202 20.7812C3.71569 20.5895 3.40973 20.2835 3.21799 19.9072C3 19.4794 3 18.9193 3 17.7992V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+
+                <div class="text-center" x-show="!fileName">
+                    <p class="text-blue-600 font-medium">לחץ להעלאה</p>
+                    <p class="text-sm text-gray-500">או גרור ושחרר קובץ CSV</p>
+                </div>
+
+                <div class="text-center" x-show="fileName" x-cloak>
+                    <p class="font-semibold text-gray-900" x-text="fileName"></p>
+                    <p class="text-violet-600 text-sm mt-1" x-show="rowCount > 0" x-text="'נמצאו ' + rowCount + ' שורות לייבוא'"></p>
+                    <p class="text-red-500 text-sm mt-1" x-show="rowCount === 0" x-cloak>הקובץ ריק או שאינו מכיל נתונים לייבוא (מלבד כותרות)</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-4">
+                <button class="btn-main w-full py-3 h-12 justify-center" 
+                        :disabled="!fileName || rowCount === null || rowCount === 0 || uploading"
+                        @click="submitImport()">
+                    <span x-show="!uploading">אישור וייבוא נתונים</span>
+                    <span x-show="uploading" class="flex items-center gap-2">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        מייבא נתונים...
+                    </span>
+                </button>
+                <a :href="templateUrl" class="text-gray-400 text-xs text-center hover:underline">הורד קובץ דוגמה (Template)</a>
+            </div>
+        </div>
+
+        <!-- Summary Stage -->
+        <div x-show="summaryModalShow" x-cloak class="flex flex-col gap-6 py-4">
+            <div class="text-center">
+                <div class="size-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="size-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 12.3333L10.4615 15L16 9M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">הייבוא הושלם בהצלחה!</h3>
+                <p class="text-gray-500 mt-1" x-text="'סיכום תהליך הייבוא עבור ' + importTitle"></p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 border-y border-gray-100 py-6">
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-emerald-600" x-text="summaryData.created"></p>
+                    <p class="text-xs text-gray-500 font-medium">רשומות חדשות</p>
+                </div>
+                <div class="text-center border-x border-gray-100">
+                    <p class="text-2xl font-bold text-blue-600" x-text="summaryData.updated"></p>
+                    <p class="text-xs text-gray-500 font-medium">רשומות שעודכנו</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-rose-500" x-text="summaryData.failed"></p>
+                    <p class="text-xs text-gray-500 font-medium">נכשלו/שגויים</p>
+                </div>
+            </div>
+
+            <button class="btn-main w-full py-3 h-12 justify-center" @click="window.location.reload()">
+                סגור ורענן עמוד
+            </button>
+        </div>
+    </div>
+</div>

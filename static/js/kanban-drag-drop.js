@@ -1,5 +1,5 @@
 // Initialize Sortable on each column
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const columns = document.querySelectorAll('.status-column');
     let isUpdating = false;
 
@@ -7,23 +7,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const currentPath = window.location.pathname;
     let kanbanConfig = detectKanbanType(currentPath);
 
-    columns.forEach(function(column) {
+    columns.forEach(function (column) {
         new Sortable(column, {
             group: 'kanban-cards',
             animation: 150,
-            handle: '.cursor-grab',
             ghostClass: 'ghost-grab',
             dragClass: 'drag-kanban',
+            forceFallback: true,
 
-            onStart: function(event) {
+            onStart: function (event) {
                 if (isUpdating) return false;
             },
 
-            onEnd: function(event) {
+            onEnd: function (event) {
                 isUpdating = true;
 
                 const card = event.item;
-                const itemId = card.dataset.leadId; // Note: uses data-lead-id for both leads and quotes
+                // Try to get lead_id first, then quote_id
+                const itemId = card.dataset.leadId || card.dataset.quoteId;
 
                 // Get new status from column ID
                 const newColumn = event.to;
@@ -61,33 +62,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify(requestBody)
                 })
-                .then(function(response) {
-                    if (!response.ok) {
-                        throw new Error('Server responded with error: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(function(data) {
-                    console.log(kanbanConfig.itemName + ' status updated successfully:', data);
-                    updateStatusCounts(data.status_counts);
-                    isUpdating = false;
-                })
-                .catch(function(error) {
-                    console.error('Error updating ' + kanbanConfig.itemName + ' status:', error);
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Server responded with error: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        console.log(kanbanConfig.itemName + ' status updated successfully:', data);
+                        updateStatusCounts(data.status_counts);
+                        isUpdating = false;
+                    })
+                    .catch(function (error) {
+                        console.error('Error updating ' + kanbanConfig.itemName + ' status:', error);
 
-                    let errorMessage = kanbanConfig.errorMessages.updateFailed;
-                    if (!navigator.onLine) {
-                        errorMessage = 'אין חיבור לאינטרנט. בדוק את החיבור שלך ונסה שוב.';
-                    } else if (error.message.includes('500')) {
-                        errorMessage = 'שגיאת שרת. פנה לתמיכה הטכנית.';
-                    } else if (error.message.includes('404')) {
-                        errorMessage = kanbanConfig.errorMessages.notFound;
-                    }
+                        let errorMessage = kanbanConfig.errorMessages.updateFailed;
+                        if (!navigator.onLine) {
+                            errorMessage = 'אין חיבור לאינטרנט. בדוק את החיבור שלך ונסה שוב.';
+                        } else if (error.message.includes('500')) {
+                            errorMessage = 'שגיאת שרת. פנה לתמיכה הטכנית.';
+                        } else if (error.message.includes('404')) {
+                            errorMessage = kanbanConfig.errorMessages.notFound;
+                        }
 
-                    alert(errorMessage + '\n\n' + kanbanConfig.errorMessages.revert);
-                    originalColumn.insertBefore(card, originalColumn.children[originalIndex]);
-                    isUpdating = false;
-                });
+                        alert(errorMessage + '\n\n' + kanbanConfig.errorMessages.revert);
+                        originalColumn.insertBefore(card, originalColumn.children[originalIndex]);
+                        isUpdating = false;
+                    });
             }
         });
     });
@@ -117,7 +118,7 @@ function detectKanbanType(pathname) {
                 revert: 'הצעת המחיר תוחזר למיקום המקורי.'
             }
         };
-    } 
+    }
 
     // Default fallback (can be extended for future kanban boards)
     return {
@@ -153,7 +154,7 @@ function updateStatusCounts(statusCounts) {
     const statusPills = document.querySelectorAll('span[name="status-count"]');
 
     // Update each pill by finding the corresponding column
-    statusPills.forEach(function(pill) {
+    statusPills.forEach(function (pill) {
         // Find the parent column to get the status from its ID
         const column = pill.closest('.bg-gray-50').querySelector('.status-column');
         if (column && column.id) {
