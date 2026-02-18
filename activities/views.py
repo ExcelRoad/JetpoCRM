@@ -195,7 +195,7 @@ def timesheet_create_update(request, pk):
         else:
             timesheet = Timesheet.objects.get(pk=timesheetId)
             timesheet.date = ts_date
-            timesheet.descriptiokn = ts_description
+            timesheet.description = ts_description
             timesheet.hours = ts_hours
             timesheet.save()
             messages.success(request, 'דיווח שעות עודכן בהצלחה', extra_tags=timesheet)

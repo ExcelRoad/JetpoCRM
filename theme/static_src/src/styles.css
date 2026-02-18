@@ -396,7 +396,7 @@
 }
 
 .kanban-card {
-  @apply bg-white p-3 rounded-lg border border-gray-200 shadow-sm transition-all duration-200 hover:border-violet-300;
+  @apply bg-white p-3 rounded-lg border border-gray-200 transition-all duration-200 hover:border-violet-300 h-full;
 }
 
 .ghost-grab {
